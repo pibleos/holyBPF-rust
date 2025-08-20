@@ -30,21 +30,26 @@ Pible transforms HolyC programs into BPF (Berkeley Packet Filter) bytecode that 
     sudo snap install zig --classic
     ```
   - **Verify installation**: `zig version` (should show 0.13.0 or later)
-  - **NOTE**: If network access is restricted, Zig installation may fail. Document this limitation.
+  - **CRITICAL NOTE**: If network access is restricted, Zig installation may fail. 
+    In such cases, the build commands documented below cannot be validated but represent 
+    the expected workflow once Zig is properly installed.
 
 ### Build and Test Commands
-- **CRITICAL**: Set timeouts of 120+ seconds for all build commands. Zig builds can take 2-5 minutes.
-- **CRITICAL**: Set timeouts of 300+ seconds for test commands. Full test suite can take 5-10 minutes.
+- **CRITICAL**: Set timeouts of 180+ seconds for all build commands. Zig builds with dependency fetching can take 2-5 minutes.
+- **CRITICAL**: Set timeouts of 600+ seconds for test commands. Full test suite can take 5-15 minutes.
+- **NOTE**: These timing estimates are based on typical Zig project builds and may vary by system.
 
 **Bootstrap and build the repository:**
 ```bash
 cd /path/to/holyBPF-zig
-zig build                    # NEVER CANCEL: Takes 2-5 minutes. Set timeout to 120+ seconds.
+zig build                    # NEVER CANCEL: Takes 2-5 minutes. Set timeout to 180+ seconds.
+                            # First build fetches zbpf dependency from network
 ```
 
 **Run the test suite:**
 ```bash
-zig build test              # NEVER CANCEL: Takes 5-10 minutes. Set timeout to 300+ seconds.
+zig build test              # NEVER CANCEL: Takes 5-15 minutes. Set timeout to 600+ seconds.
+                           # Runs all tests in tests/ directory including integration tests
 ```
 
 **Build specific examples:**
@@ -235,3 +240,33 @@ export U0 entrypoint(U8* input, U64 input_len) {  // BPF program entry
 - The project honors Terry A. Davis's memory and HolyC legacy
 - Build system uses Zig's native build system (build.zig)
 - No external package managers or additional tools required beyond Zig
+
+## Troubleshooting
+
+### When These Instructions Don't Work
+If you encounter issues with these instructions:
+
+1. **"zig: command not found"**
+   - Zig is not installed or not in PATH
+   - Follow the Prerequisites section above
+   - Verify with `zig version`
+
+2. **"fetch failed" or network errors**
+   - Network restrictions prevent downloading Zig or zbpf dependency
+   - Try alternative Zig installation methods
+   - Check firewall/proxy settings
+
+3. **Build timeouts or hangs**
+   - First-time builds need to fetch dependencies and may take longer
+   - Increase timeout to 300+ seconds for initial builds
+   - Use `zig build --verbose` to see progress
+
+4. **Hash mismatch errors**
+   - Corrupted dependency download
+   - Clear cache: `rm -rf zig-cache` and retry
+   - Check build.zig.zon for correct dependency URLs
+
+5. **Missing BPF output files**
+   - Build may have failed silently
+   - Check for error messages in build output
+   - Verify input .hc files have correct HolyC syntax
