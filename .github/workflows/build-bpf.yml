@@ -56,7 +56,7 @@ jobs:
         file zig-out/bin/* || true
         
     - name: Upload BPF Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: holyc-bpf-programs
         path: |
@@ -78,7 +78,7 @@ jobs:
         version: 0.13.0
         
     - name: Download BPF Artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: holyc-bpf-programs
         path: ./artifacts
