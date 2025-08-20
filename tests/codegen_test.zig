@@ -23,7 +23,7 @@ test "codegen simple function" {
     defer codegen.deinit();
 
     try codegen.generate(ast);
-    try testing.expect(codegen.program.instructions.items.len > 0);
+    try testing.expect(codegen.instructions.items.len > 0);
 }
 
 test "codegen arithmetic" {
@@ -45,7 +45,7 @@ test "codegen arithmetic" {
     defer codegen.deinit();
 
     try codegen.generate(ast);
-    try testing.expect(codegen.program.instructions.items.len > 0);
+    try testing.expect(codegen.instructions.items.len > 0);
 }
 
 test "codegen function call" {
@@ -72,5 +72,5 @@ test "codegen function call" {
     defer codegen.deinit();
 
     try codegen.generate(ast);
-    try testing.expect(codegen.program.instructions.items.len > 0);
+    try testing.expect(codegen.instructions.items.len > 0);
 }

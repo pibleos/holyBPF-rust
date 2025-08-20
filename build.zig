@@ -4,20 +4,13 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    // Add zbpf dependency
-    const zbpf_dep = b.dependency("zbpf", .{
-        .target = target,
-        .optimize = optimize,
-    });
-
     // Build the HolyC compiler
     const holyc_compiler = b.addExecutable(.{
         .name = "pible",
-        .root_source_file = .{ .path = "src/Pible/Main.zig" },
+        .root_source_file = b.path("src/Pible/Main.zig"),
         .target = target,
         .optimize = optimize,
     });
-    holyc_compiler.root_module.addImport("zbpf", zbpf_dep.module("zbpf"));
     b.installArtifact(holyc_compiler);
 
     // Add custom step for compiling HolyC files
@@ -30,11 +23,11 @@ pub fn build(b: *std.Build) void {
         ) *std.Build.Step.Compile {
             const compile_step = b2.addExecutable(.{
                 .name = name,
-                .target = .{
+                .target = b2.resolveTargetQuery(.{
                     .cpu_arch = .bpfel,
                     .os_tag = .freestanding,
                     .abi = .eabi,
-                },
+                }),
                 .optimize = .ReleaseSmall,
             });
 
@@ -67,10 +60,17 @@ pub fn build(b: *std.Build) void {
     // Add test step
     const test_step = b.step("test", "Run HolyC compiler tests");
     const tests = b.addTest(.{
-        .root_source_file = .{ .path = "src/Pible/Tests.zig" },
+        .root_source_file = b.path("src/Pible/Tests.zig"),
         .target = target,
         .optimize = optimize,
     });
-    tests.root_module.addImport("zbpf", zbpf_dep.module("zbpf"));
     test_step.dependOn(&b.addRunArtifact(tests).step);
+    
+    // Add integration tests
+    const integration_tests = b.addTest(.{
+        .root_source_file = b.path("tests/main.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    test_step.dependOn(&b.addRunArtifact(integration_tests).step);
 }

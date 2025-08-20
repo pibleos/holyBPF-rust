@@ -40,7 +40,7 @@ pub const Compiler = struct {
         var output = std.ArrayList(u8).init(self.allocator);
         errdefer output.deinit();
 
-        for (codegen.program.instructions.items) |instruction| {
+        for (codegen.instructions.items) |instruction| {
             const bytes = std.mem.asBytes(&instruction);
             try output.appendSlice(bytes);
         }
