@@ -431,7 +431,7 @@ pub const Parser = struct {
             return Node.init(self.allocator, .Literal, self.previous());
         }
         
-        if (self.match(.Identifier)) {
+        if (self.match(.Identifier) or self.match(.PrintF)) {
             return Node.init(self.allocator, .Identifier, self.previous());
         }
         

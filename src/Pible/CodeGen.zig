@@ -3,13 +3,19 @@ const parser = @import("Parser.zig");
 const Node = parser.Node;
 const NodeType = parser.NodeType;
 
-// BPF instruction structure
+// BPF instruction structure (64-bit BPF instruction format)
 pub const BpfInstruction = packed struct {
-    opcode: u8,
-    dst_reg: u4,
-    src_reg: u4,
-    offset: i16,
-    imm: i32,
+    opcode: u8,      // Operation code
+    dst_reg: u4,     // Destination register (0-15)
+    src_reg: u4,     // Source register (0-15)  
+    offset: i16,     // Signed offset (used in jumps and memory operations)
+    imm: i32,        // Immediate value (32-bit signed)
+    
+    /// Verify instruction is valid BPF format
+    pub fn validate(self: BpfInstruction) bool {
+        // Basic validation - registers should be 0-10 for BPF
+        return self.dst_reg <= 10 and self.src_reg <= 10;
+    }
 };
 
 // BPF opcodes
@@ -61,11 +67,17 @@ pub const CodeGen = struct {
         self.variables.deinit();
     }
 
+    /// Generate BPF bytecode from AST
     pub fn generate(self: *Self, ast: *Node) !void {
         try self.generateNode(ast);
-        try self.emitExit();
+        // Ensure program ends with exit instruction
+        if (self.instructions.items.len == 0 or 
+            self.instructions.items[self.instructions.items.len - 1].opcode != (BPF_JMP | BPF_EXIT)) {
+            try self.emitExit();
+        }
     }
 
+    /// Generate code for a specific AST node
     fn generateNode(self: *Self, node: *Node) !void {
         switch (node.type) {
             .Program => {
@@ -139,17 +151,59 @@ pub const CodeGen = struct {
         try self.generateNode(node.children.items[0]);
         try self.emitMov(1, 0); // Move result to r1
         
-        // Generate right operand
+        // Generate right operand  
         try self.generateNode(node.children.items[1]);
         // Result is in r0, left operand is in r1
         
         switch (node.token.type) {
             .Plus => try self.emitAlu64(BPF_ADD, 0, 1),
-            .Minus => try self.emitAlu64(BPF_SUB, 0, 1),
+            .Minus => {
+                // For subtraction: r0 = r1 - r0 (left - right)
+                try self.emitMov(2, 0); // Save right operand in r2
+                try self.emitMov(0, 1); // Move left to r0
+                try self.emitAlu64(BPF_SUB, 0, 2); // r0 = r0 - r2
+            },
             .Star => try self.emitAlu64(BPF_MUL, 0, 1),
-            .Slash => try self.emitAlu64(BPF_DIV, 0, 1),
+            .Slash => {
+                // Division: r0 = r1 / r0 (left / right)
+                try self.emitMov(2, 0); // Save right operand in r2
+                try self.emitMov(0, 1); // Move left to r0
+                try self.emitAlu64(BPF_DIV, 0, 2); // r0 = r0 / r2
+            },
+            .Percent => {
+                // Modulo operation
+                try self.emitMov(2, 0);
+                try self.emitMov(0, 1);
+                try self.emitAlu64(0x90, 0, 2); // BPF_MOD
+            },
+            .EqualEqual, .BangEqual, .Less, .LessEqual, .Greater, .GreaterEqual => {
+                // Comparison operations - result is 0 or 1
+                try self.generateComparison(node.token.type, 1, 0);
+            },
             else => return error.UnsupportedBinaryOp,
         }
+    }
+
+    /// Generate comparison operation
+    fn generateComparison(self: *Self, op: parser.TokenType, left_reg: u4, right_reg: u4) !void {
+        // Set r0 to 1 (true)
+        try self.emitMov(0, 1);
+        
+        // Jump forward if condition is true, otherwise set r0 to 0
+        const jump_if_true = self.instructions.items.len;
+        
+        switch (op) {
+            .EqualEqual => try self.emitJumpCond(0x10, left_reg, right_reg, 2), // JEQ
+            .BangEqual => try self.emitJumpCond(0x50, left_reg, right_reg, 2),  // JNE 
+            .Less => try self.emitJumpCond(0x20, left_reg, right_reg, 2),       // JLT
+            .LessEqual => try self.emitJumpCond(0x30, left_reg, right_reg, 2),  // JLE
+            .Greater => try self.emitJumpCond(0x20, right_reg, left_reg, 2),    // JLT reversed
+            .GreaterEqual => try self.emitJumpCond(0x30, right_reg, left_reg, 2), // JLE reversed
+            else => return error.UnsupportedComparison,
+        }
+        
+        // If condition is false, set r0 to 0
+        try self.emitMov(0, 0);
     }
 
     fn generateUnaryExpr(self: *Self, node: *Node) !void {
@@ -170,10 +224,21 @@ pub const CodeGen = struct {
         const callee = node.children.items[0];
         
         if (std.mem.eql(u8, callee.token.lexeme, "PrintF")) {
-            // Generate arguments (skip for now, just emit trace call)
+            // Generate arguments in reverse order for BPF calling convention
+            var arg_count: u32 = 0;
+            for (node.children.items[1..]) |arg| {
+                try self.generateNode(arg);
+                // Store argument in appropriate register (r1, r2, r3, r4, r5)
+                if (arg_count < 5) {
+                    try self.emitMov(@intCast(arg_count + 1), 0);
+                }
+                arg_count += 1;
+            }
+            
+            // Call BPF helper function for trace_printk
             try self.emitCall(6); // BPF_FUNC_trace_printk
         } else {
-            // User-defined function call
+            // User-defined function call - TODO: implement function table
             return error.UnsupportedFunctionCall;
         }
     }
@@ -313,6 +378,17 @@ pub const CodeGen = struct {
         });
     }
 
+    /// Emit conditional jump instruction
+    fn emitJumpCond(self: *Self, condition: u8, dst_reg: u4, src_reg: u4, offset: i16) !void {
+        try self.instructions.append(BpfInstruction{
+            .opcode = BPF_JMP | condition,
+            .dst_reg = dst_reg,
+            .src_reg = src_reg,
+            .offset = offset,
+            .imm = 0,
+        });
+    }
+
     fn emitExit(self: *Self) !void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_JMP | BPF_EXIT,
@@ -321,5 +397,18 @@ pub const CodeGen = struct {
             .offset = 0,
             .imm = 0,
         });
+    }
+
+    /// Get the size of generated bytecode in bytes
+    pub fn getBytecodeSize(self: *Self) usize {
+        return self.instructions.items.len * @sizeOf(BpfInstruction);
+    }
+
+    /// Validate all generated instructions
+    pub fn validateInstructions(self: *Self) bool {
+        for (self.instructions.items) |instr| {
+            if (!instr.validate()) return false;
+        }
+        return true;
     }
 };

@@ -58,6 +58,7 @@ test "compiler end-to-end" {
     ;
     
     var compiler = Compiler.Compiler.init(testing.allocator, source);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
     
@@ -73,6 +74,7 @@ test "arithmetic expression compilation" {
     ;
     
     var compiler = Compiler.Compiler.init(testing.allocator, source);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
     
@@ -90,6 +92,7 @@ test "function with variables" {
     ;
     
     var compiler = Compiler.Compiler.init(testing.allocator, source);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
     

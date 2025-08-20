@@ -24,11 +24,16 @@ pub const TokenType = enum {
     Public,
     Private,
 
+    // Built-in functions
+    PrintF,
+
     // Symbols
     LeftParen,
     RightParen,
     LeftBrace,
     RightBrace,
+    LeftBracket,
+    RightBracket,
     Semicolon,
     Comma,
     Dot,
@@ -36,6 +41,7 @@ pub const TokenType = enum {
     Minus,
     Star,
     Slash,
+    Percent,
     Equal,
     EqualEqual,
     Bang,
@@ -110,12 +116,15 @@ pub const Lexer = struct {
             ')' => try self.addToken(.RightParen),
             '{' => try self.addToken(.LeftBrace),
             '}' => try self.addToken(.RightBrace),
+            '[' => try self.addToken(.LeftBracket),
+            ']' => try self.addToken(.RightBracket),
             ';' => try self.addToken(.Semicolon),
             ',' => try self.addToken(.Comma),
             '.' => try self.addToken(.Dot),
             '+' => try self.addToken(.Plus),
             '-' => try self.addToken(.Minus),
             '*' => try self.addToken(.Star),
+            '%' => try self.addToken(.Percent),
             '/' => {
                 if (self.match('/')) {
                     // Comment until end of line
@@ -207,6 +216,7 @@ pub const Lexer = struct {
             .{ "private", .Private },
             .{ "true", .True },
             .{ "false", .False },
+            .{ "PrintF", .PrintF },
         });
 
         return keywords.get(text) orelse .Identifier;
