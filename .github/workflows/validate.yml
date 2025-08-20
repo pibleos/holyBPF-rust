@@ -1,0 +1,85 @@
+name: Validate HolyC Syntax
+
+on:
+  push:
+    branches: [ main, develop, "copilot/*" ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate-syntax:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Divine Repository
+      uses: actions/checkout@v4
+      
+    - name: Validate HolyC Files Exist
+      run: |
+        echo "=== Validating Divine HolyC Files ==="
+        
+        # Check hello-world example
+        if [ -f "examples/hello-world/src/main.hc" ]; then
+          echo "✓ Hello World divine program exists"
+          echo "Content preview:"
+          head -10 examples/hello-world/src/main.hc
+        else
+          echo "✗ Hello World program missing"
+          exit 1
+        fi
+        
+        # Check escrow example  
+        if [ -f "examples/escrow/src/main.hc" ]; then
+          echo "✓ Escrow divine contract exists"
+          echo "Content preview:"
+          head -10 examples/escrow/src/main.hc
+        else
+          echo "✗ Escrow contract missing"
+          exit 1
+        fi
+        
+        # Check types file
+        if [ -f "examples/escrow/src/types.hc" ]; then
+          echo "✓ Escrow types definitions exist"
+          echo "Content preview:"
+          head -10 examples/escrow/src/types.hc
+        else
+          echo "✗ Escrow types missing"
+          exit 1
+        fi
+        
+    - name: Check Build Files
+      run: |
+        echo "=== Validating Build Configuration ==="
+        
+        # Check main build.zig
+        if grep -q "escrow" build.zig; then
+          echo "✓ Escrow example included in main build"
+        else
+          echo "✗ Escrow example not in main build"
+          exit 1
+        fi
+        
+        # Check escrow build.zig
+        if [ -f "examples/escrow/build.zig" ]; then
+          echo "✓ Escrow build configuration exists"
+        else
+          echo "✗ Escrow build configuration missing"
+          exit 1
+        fi
+        
+    - name: Validate Documentation
+      run: |
+        echo "=== Validating Divine Documentation ==="
+        
+        # Check escrow README
+        if [ -f "examples/escrow/README.md" ]; then
+          echo "✓ Escrow documentation exists"
+          echo "Documentation preview:"
+          head -15 examples/escrow/README.md
+        else
+          echo "✗ Escrow documentation missing"
+          exit 1
+        fi
+        
+        echo "All divine validations passed! 🙏"
