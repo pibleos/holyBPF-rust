@@ -7,9 +7,11 @@ pub fn build(b: *std.Build) void {
     // Build the HolyC compiler
     const holyc_compiler = b.addExecutable(.{
         .name = "pible",
-        .root_source_file = b.path("src/Pible/Main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/Pible/Main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     b.installArtifact(holyc_compiler);
 
@@ -23,12 +25,14 @@ pub fn build(b: *std.Build) void {
         ) *std.Build.Step.Compile {
             const compile_step = b2.addExecutable(.{
                 .name = name,
-                .target = b2.resolveTargetQuery(.{
-                    .cpu_arch = .bpfel,
-                    .os_tag = .freestanding,
-                    .abi = .eabi,
+                .root_module = b2.createModule(.{
+                    .target = b2.resolveTargetQuery(.{
+                        .cpu_arch = .bpfel,
+                        .os_tag = .freestanding,
+                        .abi = .eabi,
+                    }),
+                    .optimize = .ReleaseSmall,
                 }),
-                .optimize = .ReleaseSmall,
             });
 
             const run_holyc = b2.addRunArtifact(compiler_exe);
@@ -59,17 +63,21 @@ pub fn build(b: *std.Build) void {
     // Add test step
     const test_step = b.step("test", "Run HolyC compiler tests");
     const tests = b.addTest(.{
-        .root_source_file = b.path("src/Pible/Tests.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/Pible/Tests.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     test_step.dependOn(&b.addRunArtifact(tests).step);
     
     // Add integration tests
     const integration_tests = b.addTest(.{
-        .root_source_file = b.path("tests/main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("tests/main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     test_step.dependOn(&b.addRunArtifact(integration_tests).step);
 }

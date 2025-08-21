@@ -1,6 +1,7 @@
 .{
-    .name = "holyc-bpf",
+    .name = .holyc_bpf,
     .version = "0.1.0",
+    .fingerprint = 0xe5034f211ea55e92,
     .dependencies = .{},
     .paths = .{
         "src",
