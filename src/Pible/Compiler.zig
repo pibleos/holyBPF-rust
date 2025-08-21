@@ -25,7 +25,7 @@ pub const Compiler = struct {
         return .{
             .allocator = allocator,
             .source = source,
-            .error_messages = std.ArrayList([]const u8){},
+            .error_messages = std.ArrayList([]const u8).init(allocator),
         };
     }
 
@@ -33,7 +33,7 @@ pub const Compiler = struct {
         for (self.error_messages.items) |msg| {
             self.allocator.free(msg);
         }
-        self.error_messages.deinit(self.allocator);
+        self.error_messages.deinit();
     }
 
     /// Compile HolyC source code to BPF bytecode
@@ -71,20 +71,20 @@ pub const Compiler = struct {
         }
 
         // Convert instructions to bytecode
-        var output = std.ArrayList(u8){};
-        errdefer output.deinit(self.allocator);
+        var output = std.ArrayList(u8).init(self.allocator);
+        errdefer output.deinit();
 
         for (codegen.instructions.items) |instruction| {
             const bytes = std.mem.asBytes(&instruction);
-            try output.appendSlice(self.allocator, bytes);
+            try output.appendSlice(bytes);
         }
 
-        return output.toOwnedSlice(self.allocator);
+        return output.toOwnedSlice();
     }
 
     fn addError(self: *Self, message: []const u8) !void {
         const owned_msg = try self.allocator.dupe(u8, message);
-        try self.error_messages.append(self.allocator, owned_msg);
+        try self.error_messages.append(owned_msg);
     }
 
     /// Get compilation error messages
