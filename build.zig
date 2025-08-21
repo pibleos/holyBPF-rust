@@ -22,27 +22,19 @@ pub fn build(b: *std.Build) void {
             compiler_exe: *std.Build.Step.Compile,
             source_file: []const u8,
             name: []const u8,
-        ) *std.Build.Step.Compile {
-            const target_query = b2.resolveTargetQuery(.{
-                .cpu_arch = .bpfel,
-                .os_tag = .freestanding,
-                .abi = .eabi,
-            });
-            const compile_step = b2.addExecutable(.{
-                .name = name,
-                .root_module = b2.createModule(.{
-                    .target = target_query,
-                    .optimize = .ReleaseSmall,
-                }),
-            });
-
+        ) *std.Build.Step.InstallFile {
+            // Run HolyC compiler to generate BPF bytecode
             const run_holyc = b2.addRunArtifact(compiler_exe);
             run_holyc.addArg(source_file);
-            compile_step.step.dependOn(&run_holyc.step);
 
-            // BPF target doesn't need libC or C flags
+            // The HolyC compiler generates a .bpf file next to the source
+            const bpf_file = b2.fmt("{s}.bpf", .{source_file});
+            
+            // Install the generated BPF file as an artifact
+            const install_bpf = b2.addInstallFile(b2.path(bpf_file), b2.fmt("bin/{s}.bpf", .{name}));
+            install_bpf.step.dependOn(&run_holyc.step);
 
-            return compile_step;
+            return install_bpf;
         }
     }.compile;
 
@@ -54,11 +46,10 @@ pub fn build(b: *std.Build) void {
         const name = example[0];
         const source = example[1];
 
-        const example_exe = compile_holyc(b, holyc_compiler, source, name);
-        const install_example = b.addInstallArtifact(example_exe, .{});
+        const install_bpf = compile_holyc(b, holyc_compiler, source, name);
 
         const example_step = b.step(name, "Build " ++ name ++ " example");
-        example_step.dependOn(&install_example.step);
+        example_step.dependOn(&install_bpf.step);
     }
 
     // Add test step
