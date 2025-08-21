@@ -23,6 +23,7 @@ pub const TokenType = enum {
     Class,
     Public,
     Private,
+    Export,
 
     // Built-in functions
     PrintF,
@@ -192,7 +193,7 @@ pub const Lexer = struct {
     }
 
     fn getKeywordType(text: []const u8) TokenType {
-        const keywords = std.ComptimeStringMap(TokenType, .{
+        const keywords = std.StaticStringMap(TokenType).initComptime(.{
             .{ "U0", .U0 },
             .{ "U8", .U8 },
             .{ "U16", .U16 },
@@ -214,6 +215,7 @@ pub const Lexer = struct {
             .{ "class", .Class },
             .{ "public", .Public },
             .{ "private", .Private },
+            .{ "export", .Export },
             .{ "true", .True },
             .{ "false", .False },
             .{ "PrintF", .PrintF },

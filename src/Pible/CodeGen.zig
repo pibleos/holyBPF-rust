@@ -3,6 +3,17 @@ const parser = @import("Parser.zig");
 const Node = parser.Node;
 const NodeType = parser.NodeType;
 
+pub const CodeGenError = error{
+    OutOfMemory,
+    UnsupportedBinaryOp,
+    UnsupportedComparison,
+    UnsupportedUnaryOp,
+    UnsupportedFunctionCall,
+    UndefinedVariable,
+    RegisterSpillover,
+    InvalidInstruction,
+};
+
 // BPF instruction structure (64-bit BPF instruction format)
 pub const BpfInstruction = packed struct {
     opcode: u8,      // Operation code
@@ -68,7 +79,7 @@ pub const CodeGen = struct {
     }
 
     /// Generate BPF bytecode from AST
-    pub fn generate(self: *Self, ast: *Node) !void {
+    pub fn generate(self: *Self, ast: *Node) CodeGenError!void {
         try self.generateNode(ast);
         // Ensure program ends with exit instruction
         if (self.instructions.items.len == 0 or 
@@ -78,7 +89,7 @@ pub const CodeGen = struct {
     }
 
     /// Generate code for a specific AST node
-    fn generateNode(self: *Self, node: *Node) !void {
+    fn generateNode(self: *Self, node: *Node) CodeGenError!void {
         switch (node.type) {
             .Program => {
                 for (node.children.items) |child| {
@@ -146,7 +157,7 @@ pub const CodeGen = struct {
         }
     }
 
-    fn generateBinaryExpr(self: *Self, node: *Node) !void {
+    fn generateBinaryExpr(self: *Self, node: *Node) CodeGenError!void {
         // Generate left operand
         try self.generateNode(node.children.items[0]);
         try self.emitMov(1, 0); // Move result to r1
@@ -185,12 +196,11 @@ pub const CodeGen = struct {
     }
 
     /// Generate comparison operation
-    fn generateComparison(self: *Self, op: parser.TokenType, left_reg: u4, right_reg: u4) !void {
+    fn generateComparison(self: *Self, op: parser.TokenType, left_reg: u4, right_reg: u4) CodeGenError!void {
         // Set r0 to 1 (true)
         try self.emitMov(0, 1);
         
         // Jump forward if condition is true, otherwise set r0 to 0
-        const jump_if_true = self.instructions.items.len;
         
         switch (op) {
             .EqualEqual => try self.emitJumpCond(0x10, left_reg, right_reg, 2), // JEQ
@@ -206,7 +216,7 @@ pub const CodeGen = struct {
         try self.emitMov(0, 0);
     }
 
-    fn generateUnaryExpr(self: *Self, node: *Node) !void {
+    fn generateUnaryExpr(self: *Self, node: *Node) CodeGenError!void {
         try self.generateNode(node.children.items[0]);
         
         switch (node.token.type) {
@@ -220,7 +230,7 @@ pub const CodeGen = struct {
         }
     }
 
-    fn generateCallExpr(self: *Self, node: *Node) !void {
+    fn generateCallExpr(self: *Self, node: *Node) CodeGenError!void {
         const callee = node.children.items[0];
         
         if (std.mem.eql(u8, callee.token.lexeme, "PrintF")) {
@@ -243,7 +253,7 @@ pub const CodeGen = struct {
         }
     }
 
-    fn generateLiteral(self: *Self, node: *Node) !void {
+    fn generateLiteral(self: *Self, node: *Node) CodeGenError!void {
         switch (node.token.type) {
             .NumberLiteral => {
                 const value = std.fmt.parseInt(i32, node.token.lexeme, 10) catch 0;
@@ -257,7 +267,7 @@ pub const CodeGen = struct {
         }
     }
 
-    fn generateIdentifier(self: *Self, node: *Node) !void {
+    fn generateIdentifier(self: *Self, node: *Node) CodeGenError!void {
         const name = node.token.lexeme;
         if (self.variables.get(name)) |offset| {
             try self.emitLoad(offset);
@@ -266,7 +276,7 @@ pub const CodeGen = struct {
         }
     }
 
-    fn generateIfStmt(self: *Self, node: *Node) !void {
+    fn generateIfStmt(self: *Self, node: *Node) CodeGenError!void {
         // Generate condition
         try self.generateNode(node.children.items[0]);
         
@@ -286,7 +296,7 @@ pub const CodeGen = struct {
         }
     }
 
-    fn generateWhileStmt(self: *Self, node: *Node) !void {
+    fn generateWhileStmt(self: *Self, node: *Node) CodeGenError!void {
         const loop_start = self.instructions.items.len;
         
         // Generate condition
@@ -308,7 +318,7 @@ pub const CodeGen = struct {
     }
 
     // BPF instruction emission helpers
-    fn emitMov(self: *Self, dst_reg: u4, imm: i32) !void {
+    fn emitMov(self: *Self, dst_reg: u4, imm: i32) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_ALU64 | BPF_MOV,
             .dst_reg = dst_reg,
@@ -318,7 +328,7 @@ pub const CodeGen = struct {
         });
     }
 
-    fn emitAlu64(self: *Self, op: u8, dst_reg: u4, src_reg: u4) !void {
+    fn emitAlu64(self: *Self, op: u8, dst_reg: u4, src_reg: u4) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_ALU64 | op,
             .dst_reg = dst_reg,
@@ -328,7 +338,7 @@ pub const CodeGen = struct {
         });
     }
 
-    fn emitLoad(self: *Self, offset: i16) !void {
+    fn emitLoad(self: *Self, offset: i16) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_LDX | 0x08, // LDXDW
             .dst_reg = 0,
@@ -338,7 +348,7 @@ pub const CodeGen = struct {
         });
     }
 
-    fn emitStore(self: *Self, offset: i16) !void {
+    fn emitStore(self: *Self, offset: i16) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_STX | 0x08, // STXDW
             .dst_reg = 10, // Frame pointer
@@ -348,7 +358,7 @@ pub const CodeGen = struct {
         });
     }
 
-    fn emitCall(self: *Self, func_id: i32) !void {
+    fn emitCall(self: *Self, func_id: i32) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_JMP | BPF_CALL,
             .dst_reg = 0,
@@ -358,7 +368,7 @@ pub const CodeGen = struct {
         });
     }
 
-    fn emitJump(self: *Self, offset: i16) !void {
+    fn emitJump(self: *Self, offset: i16) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_JMP | 0x00, // JA
             .dst_reg = 0,
@@ -368,7 +378,7 @@ pub const CodeGen = struct {
         });
     }
 
-    fn emitJumpIf(self: *Self, dst_reg: u4, offset: i16) !void {
+    fn emitJumpIf(self: *Self, dst_reg: u4, offset: i16) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_JMP | 0x10, // JEQ
             .dst_reg = dst_reg,
@@ -379,7 +389,7 @@ pub const CodeGen = struct {
     }
 
     /// Emit conditional jump instruction
-    fn emitJumpCond(self: *Self, condition: u8, dst_reg: u4, src_reg: u4, offset: i16) !void {
+    fn emitJumpCond(self: *Self, condition: u8, dst_reg: u4, src_reg: u4, offset: i16) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_JMP | condition,
             .dst_reg = dst_reg,
@@ -389,7 +399,7 @@ pub const CodeGen = struct {
         });
     }
 
-    fn emitExit(self: *Self) !void {
+    fn emitExit(self: *Self) CodeGenError!void {
         try self.instructions.append(BpfInstruction{
             .opcode = BPF_JMP | BPF_EXIT,
             .dst_reg = 0,

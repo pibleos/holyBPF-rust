@@ -35,9 +35,7 @@ pub fn build(b: *std.Build) void {
             run_holyc.addArg(source_file);
             compile_step.step.dependOn(&run_holyc.step);
 
-            compile_step.linkLibC();
-            compile_step.addCFlag("-target");
-            compile_step.addCFlag("bpf");
+            // BPF target doesn't need libC or C flags
 
             return compile_step;
         }

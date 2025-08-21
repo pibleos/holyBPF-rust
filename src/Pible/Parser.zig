@@ -1,7 +1,12 @@
 const std = @import("std");
 const Lexer = @import("Lexer.zig");
 const Token = Lexer.Token;
-const TokenType = Lexer.TokenType;
+pub const TokenType = Lexer.TokenType;
+
+pub const ParseError = error{
+    ParseError,
+    OutOfMemory,
+};
 
 pub const NodeType = enum {
     Program,
@@ -25,7 +30,7 @@ pub const Node = struct {
     children: std.ArrayList(*Node),
     allocator: std.mem.Allocator,
 
-    pub fn init(allocator: std.mem.Allocator, node_type: NodeType, token: Token) !*Node {
+    pub fn init(allocator: std.mem.Allocator, node_type: NodeType, token: Token) ParseError!*Node {
         const node = try allocator.create(Node);
         node.* = .{
             .type = node_type,
@@ -44,7 +49,7 @@ pub const Node = struct {
         self.allocator.destroy(self);
     }
 
-    pub fn addChild(self: *Node, child: *Node) !void {
+    pub fn addChild(self: *Node, child: *Node) ParseError!void {
         try self.children.append(child);
     }
 };
@@ -63,7 +68,7 @@ pub const Parser = struct {
         };
     }
 
-    pub fn parse(self: *Self) !*Node {
+    pub fn parse(self: *Self) ParseError!*Node {
         const program = try Node.init(self.allocator, .Program, Token{
             .type = .Eof,
             .lexeme = "",
@@ -80,26 +85,53 @@ pub const Parser = struct {
         return program;
     }
 
-    fn declaration(self: *Self) !*Node {
+    fn declaration(self: *Self) ParseError!*Node {
+        // Handle export keyword
+        if (self.match(.Export)) {
+            return self.declaration(); // Skip export for now, just parse the following declaration
+        }
+        
         if (self.match(.U0) or self.match(.U8) or self.match(.U16) or 
             self.match(.U32) or self.match(.U64) or self.match(.I8) or 
             self.match(.I16) or self.match(.I32) or self.match(.I64) or self.match(.F64)) {
-            return self.functionDeclaration();
+            
+            // Look ahead to determine if this is a function or variable declaration
+            if (self.check(.Identifier)) {
+                const saved_current = self.current;
+                _ = self.advance(); // consume identifier
+                
+                if (self.check(.LeftParen)) {
+                    // It's a function declaration, reset and parse as function
+                    self.current = saved_current;
+                    return self.functionDeclaration();
+                } else {
+                    // It's a variable declaration, reset and parse as variable
+                    self.current = saved_current;
+                    return self.varDeclaration();
+                }
+            } else {
+                return error.ParseError;
+            }
         }
         return self.statement();
     }
 
     /// Parse function parameter list and add parameter nodes to function
-    fn parseParameters(self: *Self, func: *Node) !void {
+    fn parseParameters(self: *Self, func: *Node) ParseError!void {
         if (!self.check(.RightParen)) {
             while (true) {
-                // Parameter type
+                // Parameter type must be specified
                 if (!self.match(.U0) and !self.match(.U8) and !self.match(.U16) and 
                     !self.match(.U32) and !self.match(.U64) and !self.match(.I8) and 
                     !self.match(.I16) and !self.match(.I32) and !self.match(.I64) and !self.match(.F64)) {
                     return error.ParseError;
                 }
-                const paramType = self.previous();
+                _ = self.previous(); // paramType - consume but not use for now
+                
+                // Handle pointer types (optional *)
+                if (self.match(.Star)) {
+                    // This is a pointer type, continue
+                }
                 
                 // Parameter name
                 const paramName = try self.consume(.Identifier, "Expected parameter name");
@@ -113,8 +145,8 @@ pub const Parser = struct {
         }
     }
 
-    fn functionDeclaration(self: *Self) !*Node {
-        const returnType = self.previous();
+    fn functionDeclaration(self: *Self) ParseError!*Node {
+        _ = self.previous(); // returnType - consume but not use for now
         const name = try self.consume(.Identifier, "Expected function name");
         
         const func = try Node.init(self.allocator, .FunctionDecl, name);
@@ -133,7 +165,7 @@ pub const Parser = struct {
         return func;
     }
 
-    fn statement(self: *Self) !*Node {
+    fn statement(self: *Self) ParseError!*Node {
         if (self.match(.If)) return self.ifStatement();
         if (self.match(.While)) return self.whileStatement();
         if (self.match(.For)) return self.forStatement();
@@ -150,7 +182,7 @@ pub const Parser = struct {
         return self.expressionStatement();
     }
 
-    fn ifStatement(self: *Self) !*Node {
+    fn ifStatement(self: *Self) ParseError!*Node {
         const ifToken = self.previous();
         const stmt = try Node.init(self.allocator, .IfStmt, ifToken);
         
@@ -170,7 +202,7 @@ pub const Parser = struct {
         return stmt;
     }
 
-    fn whileStatement(self: *Self) !*Node {
+    fn whileStatement(self: *Self) ParseError!*Node {
         const whileToken = self.previous();
         const stmt = try Node.init(self.allocator, .WhileStmt, whileToken);
         
@@ -185,7 +217,7 @@ pub const Parser = struct {
         return stmt;
     }
 
-    fn forStatement(self: *Self) !*Node {
+    fn forStatement(self: *Self) ParseError!*Node {
         const forToken = self.previous();
         const stmt = try Node.init(self.allocator, .WhileStmt, forToken); // Use WhileStmt for now
         
@@ -199,7 +231,7 @@ pub const Parser = struct {
             try self.varDeclaration()
         else try self.expressionStatement();
         
-        if (initializer) |init| try stmt.addChild(init);
+        if (initializer) |init_expr| try stmt.addChild(init_expr);
         
         // Condition
         const condition = if (!self.check(.Semicolon)) try self.expression() else null;
@@ -217,7 +249,7 @@ pub const Parser = struct {
         return stmt;
     }
 
-    fn returnStatement(self: *Self) !*Node {
+    fn returnStatement(self: *Self) ParseError!*Node {
         const returnToken = self.previous();
         const stmt = try Node.init(self.allocator, .ReturnStmt, returnToken);
         
@@ -230,8 +262,8 @@ pub const Parser = struct {
         return stmt;
     }
 
-    fn varDeclaration(self: *Self) !*Node {
-        const typeToken = self.previous();
+    fn varDeclaration(self: *Self) ParseError!*Node {
+        _ = self.previous(); // typeToken - consume but not use for now
         const name = try self.consume(.Identifier, "Expected variable name");
         
         const varDecl = try Node.init(self.allocator, .VarDecl, name);
@@ -245,7 +277,7 @@ pub const Parser = struct {
         return varDecl;
     }
 
-    fn block(self: *Self) !*Node {
+    fn block(self: *Self) ParseError!*Node {
         const blockNode = try Node.init(self.allocator, .Block, Token{
             .type = .LeftBrace,
             .lexeme = "{",
@@ -262,7 +294,7 @@ pub const Parser = struct {
         return blockNode;
     }
 
-    fn expressionStatement(self: *Self) !*Node {
+    fn expressionStatement(self: *Self) ParseError!*Node {
         const expr = try self.expression();
         _ = try self.consume(.Semicolon, "Expected ';' after expression");
         
@@ -276,11 +308,11 @@ pub const Parser = struct {
         return exprStmt;
     }
 
-    fn expression(self: *Self) !*Node {
+    fn expression(self: *Self) ParseError!*Node {
         return self.logical_or();
     }
 
-    fn logical_or(self: *Self) !*Node {
+    fn logical_or(self: *Self) ParseError!*Node {
         var expr = try self.logical_and();
         
         while (self.match(.Or)) {
@@ -295,7 +327,7 @@ pub const Parser = struct {
         return expr;
     }
 
-    fn logical_and(self: *Self) !*Node {
+    fn logical_and(self: *Self) ParseError!*Node {
         var expr = try self.equality();
         
         while (self.match(.And)) {
@@ -310,7 +342,7 @@ pub const Parser = struct {
         return expr;
     }
 
-    fn equality(self: *Self) !*Node {
+    fn equality(self: *Self) ParseError!*Node {
         var expr = try self.comparison();
         
         while (self.match(.BangEqual) or self.match(.EqualEqual)) {
@@ -325,7 +357,7 @@ pub const Parser = struct {
         return expr;
     }
 
-    fn comparison(self: *Self) !*Node {
+    fn comparison(self: *Self) ParseError!*Node {
         var expr = try self.term();
         
         while (self.match(.Greater) or self.match(.GreaterEqual) or 
@@ -341,7 +373,7 @@ pub const Parser = struct {
         return expr;
     }
 
-    fn term(self: *Self) !*Node {
+    fn term(self: *Self) ParseError!*Node {
         var expr = try self.factor();
         
         while (self.match(.Minus) or self.match(.Plus)) {
@@ -356,7 +388,7 @@ pub const Parser = struct {
         return expr;
     }
 
-    fn factor(self: *Self) !*Node {
+    fn factor(self: *Self) ParseError!*Node {
         var expr = try self.unary();
         
         while (self.match(.Slash) or self.match(.Star)) {
@@ -371,19 +403,19 @@ pub const Parser = struct {
         return expr;
     }
 
-    fn unary(self: *Self) !*Node {
+    fn unary(self: *Self) ParseError!*Node {
         if (self.match(.Bang) or self.match(.Minus)) {
             const operator = self.previous();
             const right = try self.unary();
-            const unary = try Node.init(self.allocator, .UnaryExpr, operator);
-            try unary.addChild(right);
-            return unary;
+            const unary_expr = try Node.init(self.allocator, .UnaryExpr, operator);
+            try unary_expr.addChild(right);
+            return unary_expr;
         }
         
         return self.call();
     }
 
-    fn call(self: *Self) !*Node {
+    fn call(self: *Self) ParseError!*Node {
         var expr = try self.primary();
         
         while (true) {
@@ -397,28 +429,28 @@ pub const Parser = struct {
         return expr;
     }
 
-    fn finishCall(self: *Self, callee: *Node) !*Node {
-        const call = try Node.init(self.allocator, .CallExpr, Token{
+    fn finishCall(self: *Self, callee: *Node) ParseError!*Node {
+        const call_expr = try Node.init(self.allocator, .CallExpr, Token{
             .type = .LeftParen,
             .lexeme = "(",
             .line = self.previous().line,
             .column = self.previous().column,
         });
-        try call.addChild(callee);
+        try call_expr.addChild(callee);
         
         if (!self.check(.RightParen)) {
             while (true) {
                 const arg = try self.expression();
-                try call.addChild(arg);
+                try call_expr.addChild(arg);
                 if (!self.match(.Comma)) break;
             }
         }
         
         _ = try self.consume(.RightParen, "Expected ')' after arguments");
-        return call;
+        return call_expr;
     }
 
-    fn primary(self: *Self) !*Node {
+    fn primary(self: *Self) ParseError!*Node {
         if (self.match(.True) or self.match(.False)) {
             return Node.init(self.allocator, .Literal, self.previous());
         }
@@ -475,7 +507,7 @@ pub const Parser = struct {
         return self.tokens[self.current - 1];
     }
 
-    fn consume(self: *Self, tokenType: TokenType, message: []const u8) !Token {
+    fn consume(self: *Self, tokenType: TokenType, message: []const u8) ParseError!Token {
         if (self.check(tokenType)) return self.advance();
         
         std.debug.print("Parse error at line {d}: {s}\n", .{ self.peek().line, message });

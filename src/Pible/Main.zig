@@ -11,7 +11,7 @@ pub fn main() !void {
 
     if (args.len != 2) {
         std.debug.print("Usage: {s} <source_file>\n", .{args[0]});
-        std.debug.print("  Compiles HolyC source file to BPF bytecode\n");
+        std.debug.print("  Compiles HolyC source file to BPF bytecode\n", .{});
         return error.InvalidArguments;
     }
 
@@ -35,7 +35,7 @@ pub fn main() !void {
         // Print any error messages
         const errors = compiler.getErrors();
         if (errors.len > 0) {
-            std.debug.print("Error details:\n");
+            std.debug.print("Error details:\n", .{});
             for (errors) |error_msg| {
                 std.debug.print("  - {s}\n", .{error_msg});
             }
@@ -49,7 +49,7 @@ pub fn main() !void {
     defer allocator.free(out_path);
 
     // Write bytecode to output file
-    try std.fs.cwd().writeFile(out_path, bpf_bytecode);
+    try std.fs.cwd().writeFile(.{ .sub_path = out_path, .data = bpf_bytecode });
     
     std.debug.print("Successfully compiled to {s}\n", .{out_path});
     std.debug.print("Generated {d} bytes of BPF bytecode\n", .{bpf_bytecode.len});
