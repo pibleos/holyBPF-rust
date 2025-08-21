@@ -67,7 +67,7 @@ pub fn build(b: *std.Build) void {
     });
     test_step.dependOn(&b.addRunArtifact(tests).step);
     
-    // Add integration tests
+    // Add simplified integration tests
     const integration_tests = b.addTest(.{
         .root_source_file = std.Build.LazyPath{ .src_path = .{ .owner = b, .sub_path = "tests/main.zig" } },
         .target = target,
