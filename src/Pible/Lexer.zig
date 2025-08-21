@@ -87,13 +87,13 @@ pub const Lexer = struct {
     pub fn init(allocator: std.mem.Allocator, source: []const u8) Self {
         return .{
             .source = source,
-            .tokens = std.ArrayList(Token).init(allocator),
+            .tokens = std.ArrayList(Token){},
             .allocator = allocator,
         };
     }
 
     pub fn deinit(self: *Self) void {
-        self.tokens.deinit();
+        self.tokens.deinit(self.allocator);
     }
 
     pub fn scanTokens(self: *Self) !void {
@@ -102,7 +102,7 @@ pub const Lexer = struct {
             try self.scanToken();
         }
 
-        try self.tokens.append(Token{
+        try self.tokens.append(self.allocator, Token{
             .type = .Eof,
             .lexeme = "",
             .line = self.line,
@@ -226,7 +226,7 @@ pub const Lexer = struct {
 
     fn addToken(self: *Self, token_type: TokenType) !void {
         const lexeme = self.source[self.start..self.current];
-        try self.tokens.append(Token{
+        try self.tokens.append(self.allocator, Token{
             .type = token_type,
             .lexeme = lexeme,
             .line = self.line,
