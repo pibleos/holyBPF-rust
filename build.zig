@@ -7,7 +7,7 @@ pub fn build(b: *std.Build) void {
     // Build the HolyC compiler
     const holyc_compiler = b.addExecutable(.{
         .name = "pible",
-        .root_source_file = std.Build.LazyPath{ .src_path = .{ .owner = b, .sub_path = "src/Pible/Main.zig" } },
+        .root_source_file = b.path("src/Pible/Main.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -61,7 +61,7 @@ pub fn build(b: *std.Build) void {
     
     // Add unit tests from src
     const tests = b.addTest(.{
-        .root_source_file = std.Build.LazyPath{ .src_path = .{ .owner = b, .sub_path = "src/Pible/Tests.zig" } },
+        .root_source_file = b.path("src/Pible/Tests.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -69,7 +69,7 @@ pub fn build(b: *std.Build) void {
     
     // Add simplified integration tests
     const integration_tests = b.addTest(.{
-        .root_source_file = std.Build.LazyPath{ .src_path = .{ .owner = b, .sub_path = "tests/main.zig" } },
+        .root_source_file = b.path("tests/main.zig"),
         .target = target,
         .optimize = optimize,
     });
