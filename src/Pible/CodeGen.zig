@@ -74,8 +74,8 @@ pub const CodeGen = struct {
 
     pub fn deinit(self: *Self) void {
         self.instructions.deinit(self.allocator);
-        self.labels.deinit();
-        self.variables.deinit();
+        self.labels.deinit(self.allocator);
+        self.variables.deinit(self.allocator);
     }
 
     /// Generate BPF bytecode from AST

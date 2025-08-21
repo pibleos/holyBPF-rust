@@ -75,10 +75,14 @@ pub const Parser = struct {
             .line = 1,
             .column = 1,
         });
+        errdefer binary.deinit();
 
         while (!self.isAtEnd()) {
             if (self.peek().type == .Eof) break;
-            const decl = try self.declaration();
+            const decl = self.declaration() catch |err| {
+                // Clean up program node if declaration fails
+                return err;
+            };
             try program.addChild(decl);
         }
 
@@ -138,7 +142,11 @@ pub const Parser = struct {
                 
                 // Create parameter node
                 const param = try Node.init(self.allocator, .VarDecl, paramName);
-                try func.addChild(param);
+                func.addChild(param) catch |err| {
+                    // Clean up parameter node if adding fails
+                    param.deinit(self.allocator);
+                    return err;
+                };
                 
                 if (!self.match(.Comma)) break;
             }
@@ -150,6 +158,7 @@ pub const Parser = struct {
         const name = try self.consume(.Identifier, "Expected function name");
         
         const func = try Node.init(self.allocator, .FunctionDecl, name);
+        errdefer func.deinit();
         
         _ = try self.consume(.LeftParen, "Expected '(' after function name");
         
@@ -185,6 +194,7 @@ pub const Parser = struct {
     fn ifStatement(self: *Self) ParseError!*Node {
         const ifToken = self.previous();
         const stmt = try Node.init(self.allocator, .IfStmt, ifToken);
+        errdefer binary.deinit();
         
         _ = try self.consume(.LeftParen, "Expected '(' after 'if'");
         const condition = try self.expression();
@@ -205,6 +215,7 @@ pub const Parser = struct {
     fn whileStatement(self: *Self) ParseError!*Node {
         const whileToken = self.previous();
         const stmt = try Node.init(self.allocator, .WhileStmt, whileToken);
+        errdefer binary.deinit();
         
         _ = try self.consume(.LeftParen, "Expected '(' after 'while'");
         const condition = try self.expression();
@@ -220,6 +231,7 @@ pub const Parser = struct {
     fn forStatement(self: *Self) ParseError!*Node {
         const forToken = self.previous();
         const stmt = try Node.init(self.allocator, .WhileStmt, forToken); // Use WhileStmt for now
+        errdefer binary.deinit();
         
         _ = try self.consume(.LeftParen, "Expected '(' after 'for'");
         
@@ -252,6 +264,7 @@ pub const Parser = struct {
     fn returnStatement(self: *Self) ParseError!*Node {
         const returnToken = self.previous();
         const stmt = try Node.init(self.allocator, .ReturnStmt, returnToken);
+        errdefer binary.deinit();
         
         if (!self.check(.Semicolon)) {
             const value = try self.expression();
@@ -267,6 +280,7 @@ pub const Parser = struct {
         const name = try self.consume(.Identifier, "Expected variable name");
         
         const varDecl = try Node.init(self.allocator, .VarDecl, name);
+        errdefer varDecl.deinit();
         
         if (self.match(.Equal)) {
             const initializer = try self.expression();
@@ -284,6 +298,7 @@ pub const Parser = struct {
             .line = self.peek().line,
             .column = self.peek().column,
         });
+        errdefer blockNode.deinit();
         
         while (!self.check(.RightBrace) and !self.isAtEnd()) {
             const stmt = try self.declaration();
@@ -304,6 +319,7 @@ pub const Parser = struct {
             .line = self.previous().line,
             .column = self.previous().column,
         });
+        errdefer exprStmt.deinit();
         try exprStmt.addChild(expr);
         return exprStmt;
     }
@@ -319,6 +335,7 @@ pub const Parser = struct {
             const operator = self.previous();
             const right = try self.logical_and();
             const binary = try Node.init(self.allocator, .BinaryExpr, operator);
+            errdefer binary.deinit();
             try binary.addChild(expr);
             try binary.addChild(right);
             expr = binary;
@@ -334,6 +351,7 @@ pub const Parser = struct {
             const operator = self.previous();
             const right = try self.equality();
             const binary = try Node.init(self.allocator, .BinaryExpr, operator);
+            errdefer binary.deinit();
             try binary.addChild(expr);
             try binary.addChild(right);
             expr = binary;
@@ -349,6 +367,7 @@ pub const Parser = struct {
             const operator = self.previous();
             const right = try self.comparison();
             const binary = try Node.init(self.allocator, .BinaryExpr, operator);
+            errdefer binary.deinit();
             try binary.addChild(expr);
             try binary.addChild(right);
             expr = binary;
@@ -365,6 +384,7 @@ pub const Parser = struct {
             const operator = self.previous();
             const right = try self.term();
             const binary = try Node.init(self.allocator, .BinaryExpr, operator);
+            errdefer binary.deinit();
             try binary.addChild(expr);
             try binary.addChild(right);
             expr = binary;
@@ -380,6 +400,7 @@ pub const Parser = struct {
             const operator = self.previous();
             const right = try self.factor();
             const binary = try Node.init(self.allocator, .BinaryExpr, operator);
+            errdefer binary.deinit();
             try binary.addChild(expr);
             try binary.addChild(right);
             expr = binary;
@@ -395,6 +416,7 @@ pub const Parser = struct {
             const operator = self.previous();
             const right = try self.unary();
             const binary = try Node.init(self.allocator, .BinaryExpr, operator);
+            errdefer binary.deinit();
             try binary.addChild(expr);
             try binary.addChild(right);
             expr = binary;
@@ -408,6 +430,7 @@ pub const Parser = struct {
             const operator = self.previous();
             const right = try self.unary();
             const unary_expr = try Node.init(self.allocator, .UnaryExpr, operator);
+            errdefer unary_expr.deinit();
             try unary_expr.addChild(right);
             return unary_expr;
         }
@@ -436,6 +459,7 @@ pub const Parser = struct {
             .line = self.previous().line,
             .column = self.previous().column,
         });
+        errdefer call_expr.deinit();
         try call_expr.addChild(callee);
         
         if (!self.check(.RightParen)) {

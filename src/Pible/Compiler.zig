@@ -40,7 +40,7 @@ pub const Compiler = struct {
     pub fn compile(self: *Self) ![]const u8 {
         // Lexical analysis
         var lexer = Lexer.Lexer.init(self.allocator, self.source);
-        defer lexer.deinit();
+        defer lexer.deinit(self.allocator);
 
         lexer.scanTokens() catch |err| {
             try self.addError("Lexical analysis failed");
@@ -53,11 +53,11 @@ pub const Compiler = struct {
             try self.addError("Syntax analysis failed");
             return err;
         };
-        defer ast.deinit();
+        defer ast.deinit(self.allocator);
 
         // Code generation
         var codegen = CodeGen.CodeGen.init(self.allocator);
-        defer codegen.deinit();
+        defer codegen.deinit(self.allocator);
 
         codegen.generate(ast) catch |err| {
             try self.addError("Code generation failed");

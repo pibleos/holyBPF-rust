@@ -3,7 +3,7 @@ const Compiler = @import("Compiler.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
+    defer _ = gpa.deinit(self.allocator);
     const allocator = gpa.allocator();
 
     const args = try std.process.argsAlloc(allocator);
@@ -27,7 +27,7 @@ pub fn main() !void {
 
     // Compile source to BPF bytecode
     var compiler = Compiler.Compiler.init(allocator, source);
-    defer compiler.deinit();
+    defer compiler.deinit(self.allocator);
     
     const bpf_bytecode = compiler.compile() catch |err| {
         std.debug.print("Compilation failed: {}\n", .{err});
