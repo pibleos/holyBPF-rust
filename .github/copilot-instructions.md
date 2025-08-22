@@ -7,9 +7,9 @@ Always reference these instructions first and fallback to search or bash command
 ## Rules for This Project
 
 ### Zig Version Requirements
-- **ALWAYS use Zig 0.14.0 or later** for this project
-- The project requires Zig 0.14.0 minimum for proper build.zig.zon format support
-- Do not use older Zig versions (0.13.x or earlier) as they have incompatible build system formats
+- **ALWAYS use Zig 0.15.1 or later** for this project
+- The project requires Zig 0.15.1 minimum for proper build.zig.zon format support
+- Do not use older Zig versions (0.14.x or earlier) as they have incompatible build system formats
 - When updating Zig version requirements, always test the build to ensure compatibility
 
 ## Working Effectively
@@ -22,13 +22,13 @@ Pible transforms HolyC programs into BPF (Berkeley Packet Filter) bytecode that 
 4. **Output** → Produces .bpf files containing BPF bytecode
 
 ### Prerequisites and Setup
-- **CRITICAL**: Install Zig programming language (version 0.14.0 or later):
-  - **Primary method**: Download from https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz
+- **CRITICAL**: Install Zig programming language (version 0.15.1 or later):
+  - **Primary method**: Download from https://ziglang.org/download/0.15.1/zig-linux-x86_64-0.15.1.tar.xz
     ```bash
     cd /tmp
-    wget https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz
-    tar -xf zig-linux-x86_64-0.14.0.tar.xz
-    export PATH=/tmp/zig-linux-x86_64-0.14.0:$PATH
+    wget https://ziglang.org/download/0.15.1/zig-linux-x86_64-0.15.1.tar.xz
+    tar -xf zig-linux-x86_64-0.15.1.tar.xz
+    export PATH=/tmp/zig-linux-x86_64-0.15.1:$PATH
     ```
   - **Alternative method**: Via package manager (if available):
     ```bash
@@ -37,7 +37,7 @@ Pible transforms HolyC programs into BPF (Berkeley Packet Filter) bytecode that 
     # Or via snap
     sudo snap install zig --classic
     ```
-  - **Verify installation**: `zig version` (should show 0.14.0 or later)
+  - **Verify installation**: `zig version` (should show 0.15.1 or later)
   - **CRITICAL NOTE**: If network access is restricted, Zig installation may fail. 
     In such cases, the build commands documented below cannot be validated but represent 
     the expected workflow once Zig is properly installed.
@@ -187,7 +187,7 @@ After making changes, ALWAYS run through these validation scenarios:
 5. Update examples/ if the feature warrants demonstration
 
 ### Debugging Build Issues
-- **Check Zig version**: `zig version` (requires 0.13.0+)
+- **Check Zig version**: `zig version` (requires 0.15.1+)
 - **Clean build**: `rm -rf zig-cache zig-out && zig build`
 - **Verbose build**: `zig build --verbose`
 - **Check dependency fetch**: Dependencies are fetched from build.zig.zon

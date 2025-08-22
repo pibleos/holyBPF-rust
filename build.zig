@@ -7,7 +7,7 @@ pub fn build(b: *std.Build) void {
     // Build the HolyC compiler
     const holyc_compiler = b.addExecutable(.{
         .name = "pible",
-        .root_source_file = b.path("src/Pible/Main.zig"),
+        .root_source_file = .{ .cwd_relative = "src/Pible/Main.zig" },
         .target = target,
         .optimize = optimize,
     });
@@ -29,7 +29,7 @@ pub fn build(b: *std.Build) void {
             const bpf_file = b2.fmt("{s}.bpf", .{source_file});
             
             // Install the generated BPF file as an artifact
-            const install_bpf = b2.addInstallFile(b2.path(bpf_file), b2.fmt("bin/{s}.bpf", .{name}));
+            const install_bpf = b2.addInstallFile(.{ .cwd_relative = bpf_file }, b2.fmt("bin/{s}.bpf", .{name}));
             install_bpf.step.dependOn(&run_holyc.step);
 
             return install_bpf;
@@ -56,7 +56,7 @@ pub fn build(b: *std.Build) void {
     
     // Add unit tests from src
     const tests = b.addTest(.{
-        .root_source_file = b.path("src/Pible/Tests.zig"),
+        .root_source_file = .{ .cwd_relative = "src/Pible/Tests.zig" },
         .target = target,
         .optimize = optimize,
     });
@@ -64,7 +64,7 @@ pub fn build(b: *std.Build) void {
     
     // Add simplified integration tests
     const integration_tests = b.addTest(.{
-        .root_source_file = b.path("tests/main.zig"),
+        .root_source_file = .{ .cwd_relative = "tests/main.zig" },
         .target = target,
         .optimize = optimize,
     });
