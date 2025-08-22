@@ -25,7 +25,7 @@ pub const Compiler = struct {
         return .{
             .allocator = allocator,
             .source = source,
-            .error_messages = std.ArrayList([]const u8){},
+            .error_messages = std.ArrayList([]const u8).init(allocator),
         };
     }
 
@@ -40,7 +40,7 @@ pub const Compiler = struct {
     pub fn compile(self: *Self) ![]const u8 {
         // Lexical analysis
         var lexer = Lexer.Lexer.init(self.allocator, self.source);
-        defer lexer.deinit(self.allocator);
+        defer lexer.deinit();
 
         lexer.scanTokens() catch |err| {
             try self.addError("Lexical analysis failed");
@@ -84,7 +84,7 @@ pub const Compiler = struct {
 
     fn addError(self: *Self, message: []const u8) !void {
         const owned_msg = try self.allocator.dupe(u8, message);
-        try self.error_messages.append(self.allocator, owned_msg);
+        try self.error_messages.append(owned_msg);
     }
 
     /// Get compilation error messages
