@@ -33,7 +33,7 @@ pub const Compiler = struct {
         for (self.error_messages.items) |msg| {
             self.allocator.free(msg);
         }
-        self.error_messages.deinit(self.allocator);
+        self.error_messages.deinit();
     }
 
     /// Compile HolyC source code to BPF bytecode
@@ -53,11 +53,11 @@ pub const Compiler = struct {
             try self.addError("Syntax analysis failed");
             return err;
         };
-        defer ast.deinit(self.allocator);
+        defer ast.deinit();
 
         // Code generation
         var codegen = CodeGen.CodeGen.init(self.allocator);
-        defer codegen.deinit(self.allocator);
+        defer codegen.deinit();
 
         codegen.generate(ast) catch |err| {
             try self.addError("Code generation failed");
@@ -71,15 +71,15 @@ pub const Compiler = struct {
         }
 
         // Convert instructions to bytecode
-        var output = std.ArrayList(u8){};
-        errdefer output.deinit(self.allocator);
+        var output = std.ArrayList(u8).init(self.allocator);
+        errdefer output.deinit();
 
         for (codegen.instructions.items) |instruction| {
             const bytes = std.mem.asBytes(&instruction);
-            try output.appendSlice(self.allocator, bytes);
+            try output.appendSlice(bytes);
         }
 
-        return output.toOwnedSlice(self.allocator);
+        return output.toOwnedSlice();
     }
 
     fn addError(self: *Self, message: []const u8) !void {

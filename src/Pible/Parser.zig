@@ -35,7 +35,7 @@ pub const Node = struct {
         node.* = .{
             .type = node_type,
             .token = token,
-            .children = std.ArrayList(*Node){},
+            .children = std.ArrayList(*Node).init(allocator),
             .allocator = allocator,
         };
         return node;
@@ -45,12 +45,12 @@ pub const Node = struct {
         for (self.children.items) |child| {
             child.deinit();
         }
-        self.children.deinit(self.allocator);
+        self.children.deinit();
         self.allocator.destroy(self);
     }
 
     pub fn addChild(self: *Node, child: *Node) ParseError!void {
-        try self.children.append(self.allocator, child);
+        try self.children.append(child);
     }
 };
 
@@ -144,7 +144,7 @@ pub const Parser = struct {
                 const param = try Node.init(self.allocator, .VarDecl, paramName);
                 func.addChild(param) catch |err| {
                     // Clean up parameter node if adding fails
-                    param.deinit(self.allocator);
+                    param.deinit();
                     return err;
                 };
                 

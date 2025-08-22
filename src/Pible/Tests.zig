@@ -9,7 +9,7 @@ test "lexer basic functionality" {
     const source = "U0 main() { return 0; }";
     
     var lexer = Lexer.Lexer.init(testing.allocator, source);
-    defer lexer.deinit(self.allocator);
+    defer lexer.deinit();
     
     try lexer.scanTokens();
     try testing.expect(lexer.tokens.items.len > 0);
@@ -20,12 +20,12 @@ test "parser basic functionality" {
     const source = "U0 main() { return 0; }";
     
     var lexer = Lexer.Lexer.init(testing.allocator, source);
-    defer lexer.deinit(self.allocator);
+    defer lexer.deinit();
     try lexer.scanTokens();
     
     var parser = Parser.Parser.init(testing.allocator, lexer.tokens.items);
     const ast = try parser.parse();
-    defer ast.deinit(self.allocator);
+    defer ast.deinit();
     
     try testing.expectEqual(Parser.NodeType.Program, ast.type);
     try testing.expect(ast.children.items.len > 0);
@@ -35,15 +35,15 @@ test "codegen basic functionality" {
     const source = "U0 main() { return 0; }";
     
     var lexer = Lexer.Lexer.init(testing.allocator, source);
-    defer lexer.deinit(self.allocator);
+    defer lexer.deinit();
     try lexer.scanTokens();
     
     var parser = Parser.Parser.init(testing.allocator, lexer.tokens.items);
     const ast = try parser.parse();
-    defer ast.deinit(self.allocator);
+    defer ast.deinit();
     
     var codegen = CodeGen.CodeGen.init(testing.allocator);
-    defer codegen.deinit(self.allocator);
+    defer codegen.deinit();
     
     try codegen.generate(ast);
     try testing.expect(codegen.instructions.items.len > 0);
@@ -58,7 +58,7 @@ test "compiler end-to-end" {
     ;
     
     var compiler = Compiler.Compiler.init(testing.allocator, source);
-    defer compiler.deinit(self.allocator);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
     
@@ -74,7 +74,7 @@ test "arithmetic expression compilation" {
     ;
     
     var compiler = Compiler.Compiler.init(testing.allocator, source);
-    defer compiler.deinit(self.allocator);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
     
@@ -92,7 +92,7 @@ test "function with variables" {
     ;
     
     var compiler = Compiler.Compiler.init(testing.allocator, source);
-    defer compiler.deinit(self.allocator);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
     

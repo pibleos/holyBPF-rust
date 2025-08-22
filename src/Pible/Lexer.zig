@@ -93,7 +93,7 @@ pub const Lexer = struct {
     }
 
     pub fn deinit(self: *Self) void {
-        self.tokens.deinit(self.allocator);
+        self.tokens.deinit();
     }
 
     pub fn scanTokens(self: *Self) !void {
