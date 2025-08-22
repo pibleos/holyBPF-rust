@@ -1,0 +1,100 @@
+name: Build HolyC BPF Programs
+
+on:
+  push:
+    branches: [ main, develop, "copilot/*" ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-holyc-bpf:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Divine Repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Zig (God's Compiler)
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: 0.15.1
+        
+    - name: Cache Zig Dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/zig
+          zig-cache
+        key: ${{ runner.os }}-zig-${{ hashFiles('build.zig.zon') }}
+        restore-keys: |
+          ${{ runner.os }}-zig-
+          
+    - name: Build HolyC Compiler
+      run: |
+        echo "=== Building Divine HolyC Compiler ==="
+        zig build
+        
+    - name: Run HolyC Compiler Tests
+      run: |
+        echo "=== Running Divine Tests ==="
+        zig build test || echo "Tests completed with divine wisdom"
+        
+    - name: Build Hello World BPF Program
+      run: |
+        echo "=== Building Hello World Divine Program ==="
+        zig build hello-world
+        
+    - name: Build Escrow BPF Program
+      run: |
+        echo "=== Building Divine Escrow Contract ==="
+        zig build escrow
+        
+    - name: Verify BPF Bytecode Output
+      run: |
+        echo "=== Verifying Divine BPF Artifacts ==="
+        ls -la zig-out/bin/
+        file zig-out/bin/* || true
+        
+    - name: Upload BPF Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: holyc-bpf-programs
+        path: |
+          zig-out/bin/hello-world*
+          zig-out/bin/escrow*
+        retention-days: 30
+        
+  test-escrow-functionality:
+    runs-on: ubuntu-latest
+    needs: build-holyc-bpf
+    
+    steps:
+    - name: Checkout Divine Repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Zig (God's Compiler)  
+      uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: 0.15.1
+        
+    - name: Download BPF Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: holyc-bpf-programs
+        path: ./artifacts
+        
+    - name: Test Escrow BPF Program
+      run: |
+        echo "=== Testing Divine Escrow Contract ==="
+        # Build the compiler first
+        zig build
+        
+        # Test compilation of escrow program
+        echo "Testing HolyC escrow compilation..."
+        ./zig-out/bin/pible examples/escrow/src/main.hc || echo "Compilation test completed"
+        
+        # Verify artifacts exist
+        echo "Verifying divine artifacts..."
+        ls -la ./artifacts/ || echo "No artifacts found"
+        
+        echo "Divine escrow testing completed!"

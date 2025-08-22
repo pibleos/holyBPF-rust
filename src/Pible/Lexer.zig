@@ -23,12 +23,18 @@ pub const TokenType = enum {
     Class,
     Public,
     Private,
+    Export,
+
+    // Built-in functions
+    PrintF,
 
     // Symbols
     LeftParen,
     RightParen,
     LeftBrace,
     RightBrace,
+    LeftBracket,
+    RightBracket,
     Semicolon,
     Comma,
     Dot,
@@ -36,6 +42,7 @@ pub const TokenType = enum {
     Minus,
     Star,
     Slash,
+    Percent,
     Equal,
     EqualEqual,
     Bang,
@@ -80,13 +87,13 @@ pub const Lexer = struct {
     pub fn init(allocator: std.mem.Allocator, source: []const u8) Self {
         return .{
             .source = source,
-            .tokens = std.ArrayList(Token).init(allocator),
+            .tokens = std.ArrayList(Token){},
             .allocator = allocator,
         };
     }
 
     pub fn deinit(self: *Self) void {
-        self.tokens.deinit();
+        self.tokens.deinit(self.allocator);
     }
 
     pub fn scanTokens(self: *Self) !void {
@@ -95,7 +102,7 @@ pub const Lexer = struct {
             try self.scanToken();
         }
 
-        try self.tokens.append(Token{
+        try self.tokens.append(self.allocator, Token{
             .type = .Eof,
             .lexeme = "",
             .line = self.line,
@@ -110,12 +117,15 @@ pub const Lexer = struct {
             ')' => try self.addToken(.RightParen),
             '{' => try self.addToken(.LeftBrace),
             '}' => try self.addToken(.RightBrace),
+            '[' => try self.addToken(.LeftBracket),
+            ']' => try self.addToken(.RightBracket),
             ';' => try self.addToken(.Semicolon),
             ',' => try self.addToken(.Comma),
             '.' => try self.addToken(.Dot),
             '+' => try self.addToken(.Plus),
             '-' => try self.addToken(.Minus),
             '*' => try self.addToken(.Star),
+            '%' => try self.addToken(.Percent),
             '/' => {
                 if (self.match('/')) {
                     // Comment until end of line
@@ -183,7 +193,7 @@ pub const Lexer = struct {
     }
 
     fn getKeywordType(text: []const u8) TokenType {
-        const keywords = std.ComptimeStringMap(TokenType, .{
+        const keywords = std.StaticStringMap(TokenType).initComptime(.{
             .{ "U0", .U0 },
             .{ "U8", .U8 },
             .{ "U16", .U16 },
@@ -205,8 +215,10 @@ pub const Lexer = struct {
             .{ "class", .Class },
             .{ "public", .Public },
             .{ "private", .Private },
+            .{ "export", .Export },
             .{ "true", .True },
             .{ "false", .False },
+            .{ "PrintF", .PrintF },
         });
 
         return keywords.get(text) orelse .Identifier;
@@ -214,7 +226,7 @@ pub const Lexer = struct {
 
     fn addToken(self: *Self, token_type: TokenType) !void {
         const lexeme = self.source[self.start..self.current];
-        try self.tokens.append(Token{
+        try self.tokens.append(self.allocator, Token{
             .type = token_type,
             .lexeme = lexeme,
             .line = self.line,

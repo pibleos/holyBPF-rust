@@ -1,15 +1,12 @@
 .{
-    .name = "holyc-bpf",
+    .name = .holyc_bpf,
     .version = "0.1.0",
-    .dependencies = .{
-        .zbpf = .{
-            .url = "https://github.com/tw4452852/zbpf/archive/refs/tags/v0.2.0.tar.gz",
-            .hash = "1220000000000000000000000000000000000000000000000000000000000000",
-        },
-    },
+    .fingerprint = 0xe5034f2115cc8bf1,
+    .dependencies = .{},
     .paths = .{
-        "src/Pible",
+        "src",
         "examples",
+        "tests",
         "build.zig",
         "build.zig.zon",
         "LICENSE",

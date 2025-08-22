@@ -11,6 +11,7 @@ test "compile hello world" {
     ;
 
     var compiler = Compiler.Compiler.init(testing.allocator, source);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
 
@@ -27,6 +28,7 @@ test "compile arithmetic" {
     ;
 
     var compiler = Compiler.Compiler.init(testing.allocator, source);
+    defer compiler.deinit();
     const bytecode = try compiler.compile();
     defer testing.allocator.free(bytecode);
 
@@ -42,5 +44,6 @@ test "compile error handling" {
     ;
 
     var compiler = Compiler.Compiler.init(testing.allocator, invalid_source);
+    defer compiler.deinit();
     try testing.expectError(error.ParseError, compiler.compile());
 }
