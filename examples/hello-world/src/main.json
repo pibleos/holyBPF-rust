@@ -1,0 +1,13 @@
+{
+  "version": "0.1.0",
+  "name": "holyc_program",
+  "instructions": [
+    {
+      "name": "main",
+      "args": []
+    }
+  ],
+  "accounts": [
+  ],
+  "types": []
+}

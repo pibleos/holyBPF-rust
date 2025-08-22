@@ -40,6 +40,7 @@ pub fn build(b: *std.Build) void {
     inline for (.{
         .{ "hello-world", "examples/hello-world/src/main.hc" },
         .{ "escrow", "examples/escrow/src/main.hc" },
+        .{ "solana-token", "examples/solana-token/src/main.hc" },
     }) |example| {
         const name = example[0];
         const source = example[1];
