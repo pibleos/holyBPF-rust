@@ -75,7 +75,7 @@ pub const Parser = struct {
             .line = 1,
             .column = 1,
         });
-        errdefer binary.deinit();
+        errdefer program.deinit();
 
         while (!self.isAtEnd()) {
             if (self.peek().type == .Eof) break;
@@ -144,7 +144,7 @@ pub const Parser = struct {
                 const param = try Node.init(self.allocator, .VarDecl, paramName);
                 func.addChild(param) catch |err| {
                     // Clean up parameter node if adding fails
-                    param.deinit(self.allocator);
+                    param.deinit();
                     return err;
                 };
                 
@@ -194,7 +194,7 @@ pub const Parser = struct {
     fn ifStatement(self: *Self) ParseError!*Node {
         const ifToken = self.previous();
         const stmt = try Node.init(self.allocator, .IfStmt, ifToken);
-        errdefer binary.deinit();
+        errdefer stmt.deinit();
         
         _ = try self.consume(.LeftParen, "Expected '(' after 'if'");
         const condition = try self.expression();
@@ -215,7 +215,7 @@ pub const Parser = struct {
     fn whileStatement(self: *Self) ParseError!*Node {
         const whileToken = self.previous();
         const stmt = try Node.init(self.allocator, .WhileStmt, whileToken);
-        errdefer binary.deinit();
+        errdefer stmt.deinit();
         
         _ = try self.consume(.LeftParen, "Expected '(' after 'while'");
         const condition = try self.expression();
@@ -231,7 +231,7 @@ pub const Parser = struct {
     fn forStatement(self: *Self) ParseError!*Node {
         const forToken = self.previous();
         const stmt = try Node.init(self.allocator, .WhileStmt, forToken); // Use WhileStmt for now
-        errdefer binary.deinit();
+        errdefer stmt.deinit();
         
         _ = try self.consume(.LeftParen, "Expected '(' after 'for'");
         
@@ -264,7 +264,7 @@ pub const Parser = struct {
     fn returnStatement(self: *Self) ParseError!*Node {
         const returnToken = self.previous();
         const stmt = try Node.init(self.allocator, .ReturnStmt, returnToken);
-        errdefer binary.deinit();
+        errdefer stmt.deinit();
         
         if (!self.check(.Semicolon)) {
             const value = try self.expression();
