@@ -1,5 +1,5 @@
 .{
-    .name = "holyc_bpf",
+    .name = .holyc_bpf,
     .version = "0.1.0",
     .fingerprint = 0xe5034f2115cc8bf1,
     .dependencies = .{},
