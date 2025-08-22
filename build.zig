@@ -4,17 +4,12 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    // Create module for the HolyC compiler
-    const compiler_mod = b.createModule(.{
-        .root_source_file = b.path("src/Pible/Main.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-
     // Build the HolyC compiler
     const holyc_compiler = b.addExecutable(.{
         .name = "pible",
-        .root_module = compiler_mod,
+        .root_source_file = b.path("src/Pible/Main.zig"),
+        .target = target,
+        .optimize = optimize,
     });
     b.installArtifact(holyc_compiler);
 
@@ -58,29 +53,19 @@ pub fn build(b: *std.Build) void {
     // Add test step
     const test_step = b.step("test", "Run HolyC compiler tests");
     
-    // Create module for unit tests from src
-    const tests_mod = b.createModule(.{
+    // Add unit tests from src
+    const tests = b.addTest(.{
         .root_source_file = b.path("src/Pible/Tests.zig"),
         .target = target,
         .optimize = optimize,
     });
-    
-    // Add unit tests from src
-    const tests = b.addTest(.{
-        .root_module = tests_mod,
-    });
     test_step.dependOn(&b.addRunArtifact(tests).step);
-    
-    // Create module for integration tests
-    const integration_tests_mod = b.createModule(.{
-        .root_source_file = b.path("tests/main.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
     
     // Add simplified integration tests
     const integration_tests = b.addTest(.{
-        .root_module = integration_tests_mod,
+        .root_source_file = b.path("tests/main.zig"),
+        .target = target,
+        .optimize = optimize,
     });
     test_step.dependOn(&b.addRunArtifact(integration_tests).step);
 }
