@@ -2633,7 +2633,7 @@ mod solana_bpf_integration_tests {
         
         // Validate each instruction
         for (i, instr) in instructions.iter().enumerate() {
-            let validation_result = codegen.validate_bpf_program(&vec![*instr]);
+            let validation_result = codegen.validate_bpf_program(&[*instr]);
             assert!(validation_result.is_ok(), "Instruction {} should be valid: {:?}", i, instr);
         }
     }
@@ -2651,7 +2651,7 @@ mod solana_bpf_integration_tests {
         ];
         
         for instr in valid_instructions {
-            let result = codegen.validate_bpf_program(&vec![instr]);
+            let result = codegen.validate_bpf_program(&[instr]);
             assert!(result.is_ok(), "Valid register instruction should pass: {:?}", instr);
         }
         
@@ -2663,7 +2663,7 @@ mod solana_bpf_integration_tests {
         ];
         
         for instr in invalid_instructions {
-            let result = codegen.validate_bpf_program(&vec![instr]);
+            let result = codegen.validate_bpf_program(&[instr]);
             assert!(result.is_err(), "Invalid register instruction should fail: {:?}", instr);
         }
     }
@@ -2707,7 +2707,7 @@ mod solana_bpf_integration_tests {
                 dst_reg: (i % 10) as u8, 
                 src_reg: 0, 
                 offset: 0, 
-                immediate: i as i32 
+                immediate: i 
             }
         }).collect();
         // Add exit instruction
@@ -2725,7 +2725,7 @@ mod solana_bpf_integration_tests {
                 dst_reg: (i % 10) as u8, 
                 src_reg: 0, 
                 offset: 0, 
-                immediate: i as i32 
+                immediate: i 
             }
         }).collect();
         // Add exit instruction

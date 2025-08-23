@@ -25,6 +25,7 @@ pub struct BpfVm {
     program: Vec<BpfInstruction>,
     pc: usize,
     compute_units: u64,
+    #[allow(dead_code)]
     pub memory: Vec<u8>, // Public memory for testing
 }
 
@@ -40,12 +41,14 @@ impl BpfVm {
     }
 
     // Public accessors and mutators for testing
+    #[allow(dead_code)]
     pub fn set_register(&mut self, reg: usize, value: i64) {
         if reg < 11 {
             self.registers[reg] = value;
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_register(&self, reg: usize) -> i64 {
         if reg < 11 {
             self.registers[reg]
@@ -54,14 +57,17 @@ impl BpfVm {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_pc(&self) -> usize {
         self.pc
     }
 
+    #[allow(dead_code)]
     pub fn set_pc(&mut self, pc: usize) {
         self.pc = pc;
     }
 
+    #[allow(dead_code)]
     pub fn execute_instruction(&mut self, instruction: &BpfInstruction) -> Result<(), VmError> {
         match instruction.opcode {
             0x95 => {
@@ -191,59 +197,53 @@ impl BpfVm {
             }
             0x1d => {
                 // BPF_JMP | BPF_JEQ | BPF_X (jump if equal)
-                if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    if self.registers[instruction.dst_reg as usize] == self.registers[instruction.src_reg as usize] {
+                if instruction.dst_reg < 11 && instruction.src_reg < 11
+                    && self.registers[instruction.dst_reg as usize] == self.registers[instruction.src_reg as usize] {
                         // In single instruction execution, we update pc to simulate the jump
                         self.pc = instruction.offset as usize;
                     }
-                }
                 Ok(())
             }
             0x2d => {
                 // BPF_JMP | BPF_JGT | BPF_X (jump if greater than)
-                if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    if self.registers[instruction.dst_reg as usize] > self.registers[instruction.src_reg as usize] {
+                if instruction.dst_reg < 11 && instruction.src_reg < 11
+                    && self.registers[instruction.dst_reg as usize] > self.registers[instruction.src_reg as usize] {
                         // In single instruction execution, we update pc to simulate the jump
                         self.pc = instruction.offset as usize;
                     }
-                }
                 Ok(())
             }
             0xad => {
                 // BPF_JMP | BPF_JLT | BPF_X (jump if less than)
-                if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    if self.registers[instruction.dst_reg as usize] < self.registers[instruction.src_reg as usize] {
+                if instruction.dst_reg < 11 && instruction.src_reg < 11
+                    && self.registers[instruction.dst_reg as usize] < self.registers[instruction.src_reg as usize] {
                         // In single instruction execution, we update pc to simulate the jump
                         self.pc = instruction.offset as usize;
                     }
-                }
                 Ok(())
             }
             0x15 => {
                 // BPF_JMP | BPF_JEQ | BPF_K (jump if equal to immediate)
-                if instruction.dst_reg < 11 {
-                    if self.registers[instruction.dst_reg as usize] == instruction.immediate as i64 {
+                if instruction.dst_reg < 11
+                    && self.registers[instruction.dst_reg as usize] == instruction.immediate as i64 {
                         self.pc = instruction.offset as usize;
                     }
-                }
                 Ok(())
             }
             0x25 => {
                 // BPF_JMP | BPF_JGT | BPF_K (jump if greater than immediate)
-                if instruction.dst_reg < 11 {
-                    if self.registers[instruction.dst_reg as usize] > instruction.immediate as i64 {
+                if instruction.dst_reg < 11
+                    && self.registers[instruction.dst_reg as usize] > instruction.immediate as i64 {
                         self.pc = instruction.offset as usize;
                     }
-                }
                 Ok(())
             }
             0xa5 => {
                 // BPF_JMP | BPF_JLT | BPF_K (jump if less than immediate)
-                if instruction.dst_reg < 11 {
-                    if self.registers[instruction.dst_reg as usize] < instruction.immediate as i64 {
+                if instruction.dst_reg < 11
+                    && self.registers[instruction.dst_reg as usize] < instruction.immediate as i64 {
                         self.pc = instruction.offset as usize;
                     }
-                }
                 Ok(())
             }
             0x61 => {

@@ -301,6 +301,7 @@ impl CodeGen {
         true
     }
 
+    #[allow(dead_code)]
     pub fn validate_bpf_program(&self, instructions: &[BpfInstruction]) -> Result<(), CodeGenError> {
         // Validate register usage (R0-R10 are valid)
         for instr in instructions {
