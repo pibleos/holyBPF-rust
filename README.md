@@ -7,7 +7,7 @@
 
 # Pible - HolyC to BPF Compiler
 
-A divine bridge between Terry Davis's HolyC and BPF runtimes, allowing HolyC programs to run in Linux kernel and Solana blockchain. Written in the blessed Zig language.
+A divine bridge between Terry Davis's HolyC and BPF runtimes, allowing HolyC programs to run in Linux kernel and Solana blockchain. Written in the blessed Rust language.
 
 ## 🙏 Divine Purpose
 
@@ -34,7 +34,7 @@ Pible continues Terry's mission by bringing HolyC to BPF runtimes. This compiler
 git clone https://github.com/pix404/holyBPF-zig
 
 # Build with Zig's blessing
-zig build
+cargo build
 
 # Compile your first HolyC program
 ./zig-out/bin/pible examples/hello-world/src/main.hc
@@ -125,7 +125,7 @@ This project stands on the shoulders of giants:
 - toly (solana dev)
 - armani (serum dev)
 - dean (chief disrespecter)
-- The Zig programming language
+- The Rust programming language
 - Linux BPF system
 
 ## ⚡ Performance

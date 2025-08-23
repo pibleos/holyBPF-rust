@@ -1,17 +1,12 @@
 #!/bin/bash
 
-# Recursive Build Fixer Script for HolyBPF-zig
-# Attempts to build and recursively fix issues until all errors are resolved
+# HolyBPF-rust Recursive Build Fixer
+# Attempts to automatically fix common build issues
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MAX_ITERATIONS=5
-CURRENT_ITERATION=0
-
-echo "=== HolyBPF-zig Recursive Build Fixer ==="
+echo "=== HolyBPF-rust Recursive Build Fixer ==="
 echo "Timestamp: $(date)"
-echo "Max iterations: $MAX_ITERATIONS"
 echo ""
 
 # Function to log with timestamp
@@ -19,281 +14,226 @@ log() {
     echo "[$(date '+%H:%M:%S')] $1"
 }
 
-# Function to check if Zig is available and install if possible
-setup_zig() {
-    log "Checking Zig installation..."
+# Function to check Rust installation
+check_rust_installation() {
+    log "Checking Rust installation..."
     
-    if command -v zig &> /dev/null; then
-        local zig_version=$(zig version)
-        log "Found Zig version: $zig_version"
-        
-        # Check if version is 0.15.1 or later
-        if [[ "$zig_version" =~ ^0\.1[5-9]\.|^0\.[2-9][0-9]\.|^[1-9] ]]; then
-            log "✅ Zig version is 0.15.1 or later"
-            return 0
-        else
-            log "⚠️  Zig version may be too old (need 0.15.1+)"
-        fi
+    if command -v cargo &> /dev/null; then
+        local rust_version=$(rustc --version)
+        log "✅ Found Rust: $rust_version"
+        return 0
+    else
+        log "❌ Rust not found. Installing Rust toolchain..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        source ~/.cargo/env
+        log "✅ Rust installation completed"
+        return 0
     fi
-    
-    # Try to find Zig in common locations
-    local zig_paths=(
-        "/opt/hostedtoolcache/zig/0.15.1/x64/zig"
-        "/usr/local/bin/zig"
-        "/opt/zig/zig"
-        "/tmp/zig-linux-x86_64-0.15.1/zig"
-    )
-    
-    for zig_path in "${zig_paths[@]}"; do
-        if [ -f "$zig_path" ]; then
-            log "Found Zig at: $zig_path"
-            export PATH="$(dirname "$zig_path"):$PATH"
-            return 0
-        fi
-    done
-    
-    log "❌ Zig 0.15.1+ not found"
-    log "🔧 MANUAL FIX REQUIRED:"
-    log "   1. Download Zig 0.15.1 from https://ziglang.org/download/0.15.1/"
-    log "   2. Extract and add to PATH"
-    log "   3. Re-run this script"
-    return 1
 }
 
-# Function to apply a specific fix based on error pattern
-apply_fix() {
-    local error_pattern="$1"
-    local fix_description="$2"
-    
-    log "Applying fix: $fix_description"
-    
-    case "$error_pattern" in
-        "root_source_file")
-            log "Fixing deprecated .root_source_file usage..."
-            sed -i 's/\.root_source_file\s*=/\.root_src =/g' build.zig
-            log "✅ Updated .root_source_file to .root_src"
-            return 0
-            ;;
-            
-        "b.path")
-            log "Fixing deprecated b.path() usage..."
-            sed -i 's/b\.path(\([^)]*\))/\.{ \.cwd_relative = \1 }/g' build.zig
-            log "✅ Updated b.path() to LazyPath syntax"
-            return 0
-            ;;
-            
-        "enum_literal")
-            log "Fixing enum literal syntax in build.zig.zon..."
-            sed -i 's/\.name\s*=\s*"\([^"]*\)"/\.name = \.\1/g' build.zig.zon
-            log "✅ Updated string to enum literal in .name field"
-            return 0
-            ;;
-            
-        "missing_fingerprint")
-            log "Adding fingerprint to build.zig.zon..."
-            if ! grep -q "fingerprint" build.zig.zon; then
-                sed -i 's/\.version = "\([^"]*\)",/\.version = "\1",\n    \.fingerprint = 0xe5034f2115cc8bf1,/' build.zig.zon
-                log "✅ Added fingerprint field"
-            fi
-            return 0
-            ;;
-            
-        "missing_dependencies")
-            log "Ensuring dependencies section exists..."
-            if ! grep -q "dependencies" build.zig.zon; then
-                sed -i 's/\.fingerprint = \([^,]*\),/\.fingerprint = \1,\n    \.dependencies = \.{},/' build.zig.zon
-                log "✅ Added dependencies section"
-            fi
-            return 0
-            ;;
-            
-        *)
-            log "⚠️  Unknown error pattern: $error_pattern"
-            return 1
-            ;;
-    esac
-}
-
-# Function to analyze build output and determine fixes
-analyze_and_fix_errors() {
-    local build_log="$1"
-    local fixes_applied=0
-    
-    log "Analyzing build errors..."
-    
-    # Check for specific error patterns and apply fixes
-    if grep -q "no field named 'root_source_file'" "$build_log"; then
-        apply_fix "root_source_file" "Fix deprecated .root_source_file field"
-        ((fixes_applied++))
-    fi
-    
-    if grep -q "b\.path" "$build_log"; then
-        apply_fix "b.path" "Fix deprecated b.path() usage"
-        ((fixes_applied++))
-    fi
-    
-    if grep -q "expected enum literal" "$build_log"; then
-        apply_fix "enum_literal" "Fix enum literal syntax"
-        ((fixes_applied++))
-    fi
-    
-    # Check for missing fields that might be required
-    if ! grep -q "fingerprint" build.zig.zon; then
-        apply_fix "missing_fingerprint" "Add missing fingerprint field"
-        ((fixes_applied++))
-    fi
-    
-    if ! grep -q "dependencies" build.zig.zon; then
-        apply_fix "missing_dependencies" "Add missing dependencies section"
-        ((fixes_applied++))
-    fi
-    
-    return $fixes_applied
-}
-
-# Function to attempt build and capture output
+# Function to attempt build and capture issues
 attempt_build() {
-    local iteration=$1
-    local build_log="build_logs/build_attempt_${iteration}.log"
+    log "Attempting cargo build..."
     
-    log "Build attempt #$iteration"
+    local build_log="recursive_build_attempt.log"
     
-    # Ensure build_logs directory exists
-    mkdir -p build_logs
-    
-    # Clean previous build
-    rm -rf zig-cache zig-out 2>/dev/null || true
-    
-    # Attempt build with timeout
-    if timeout 300 zig build --verbose 2>&1 | tee "$build_log"; then
-        log "✅ Build successful!"
+    if timeout 300 cargo build --verbose 2>&1 | tee "$build_log"; then
+        log "✅ Build successful"
         return 0
     else
-        log "❌ Build failed - analyzing errors..."
+        log "❌ Build failed - analyzing issues..."
         return 1
     fi
 }
 
-# Function to attempt tests if build succeeds
+# Function to attempt tests
 attempt_tests() {
-    local iteration=$1
-    local test_log="build_logs/test_attempt_${iteration}.log"
+    log "Attempting cargo test..."
     
-    log "Running tests for build #$iteration"
+    local test_log="recursive_test_attempt.log"
     
-    if timeout 600 zig build test 2>&1 | tee "$test_log"; then
-        log "✅ Tests passed!"
+    if timeout 600 cargo test 2>&1 | tee "$test_log"; then
+        local test_count=$(grep -o "test result: ok\. [0-9]* passed" "$test_log" | grep -o "[0-9]*" || echo "0")
+        log "✅ Tests successful - $test_count tests passed"
         return 0
     else
-        log "❌ Tests failed - see $test_log for details"
+        log "❌ Tests failed - check $test_log for details"
         return 1
     fi
 }
 
-# Main recursive build loop
-recursive_build() {
-    while [ $CURRENT_ITERATION -lt $MAX_ITERATIONS ]; do
-        ((CURRENT_ITERATION++))
-        log "=== ITERATION $CURRENT_ITERATION of $MAX_ITERATIONS ==="
+# Function to fix common cargo issues
+fix_cargo_issues() {
+    log "Attempting to fix common cargo issues..."
+    
+    # Clean cargo cache
+    log "Cleaning cargo cache..."
+    cargo clean
+    
+    # Update cargo registry
+    log "Updating cargo registry..."
+    cargo update
+    
+    # Check for dependency conflicts
+    log "Checking for dependency conflicts..."
+    if cargo tree 2>&1 | grep -q "conflict"; then
+        log "⚠️  Dependency conflicts detected - manual resolution may be needed"
+    fi
+    
+    # Fix formatting issues
+    log "Fixing code formatting..."
+    cargo fmt
+    
+    log "✅ Common fixes applied"
+}
+
+# Function to check for missing files and create them if needed
+fix_missing_files() {
+    log "Checking for missing files..."
+    
+    # Ensure lib.rs exists if needed
+    if [[ ! -f "src/lib.rs" ]] && grep -q "\[lib\]" Cargo.toml 2>/dev/null; then
+        log "Creating missing src/lib.rs..."
+        cat > src/lib.rs << 'EOF'
+//! HolyC to BPF Compiler Library
+//! 
+//! This library provides the core functionality for compiling HolyC programs
+//! to BPF bytecode.
+
+pub mod pible;
+pub use pible::*;
+EOF
+    fi
+    
+    # Check for gitignore
+    if [[ ! -f ".gitignore" ]]; then
+        log "Creating .gitignore..."
+        cat > .gitignore << 'EOF'
+# Rust
+/target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+*.bpf
+*.log
+EOF
+    fi
+    
+    log "✅ Missing files check complete"
+}
+
+# Function to generate status report
+generate_status_report() {
+    log "Generating status report..."
+    
+    local report_file="build_fixer_report.txt"
+    
+    cat > "$report_file" << EOF
+HolyBPF-rust Build Fixer Report
+Generated: $(date)
+
+=== System Information ===
+Rust Version: $(rustc --version 2>/dev/null || echo "Not installed")
+Cargo Version: $(cargo --version 2>/dev/null || echo "Not installed")
+OS: $(uname -a)
+
+=== Project Status ===
+Root Directory: $(pwd)
+Cargo.toml: $([ -f "Cargo.toml" ] && echo "Found" || echo "Missing")
+Main Source: $([ -f "src/main.rs" ] && echo "Found" || echo "Missing")
+Tests: $([ -f "src/tests.rs" ] && echo "Found" || echo "Missing")
+
+=== Recommendations ===
+- Build project: cargo build
+- Run tests: cargo test
+- Compile examples: cargo run --bin pible examples/hello-world/src/main.hc
+- Format code: cargo fmt
+- Run lints: cargo clippy
+
+=== Next Steps ===
+If issues persist:
+1. Check Cargo.toml for dependency issues
+2. Ensure all required source files exist
+3. Run 'cargo clean' and rebuild
+4. Check the build logs for specific error messages
+
+EOF
+
+    log "✅ Status report generated: $report_file"
+}
+
+# Function to check if we're in the right directory
+check_project_root() {
+    if [[ ! -f "Cargo.toml" ]]; then
+        log "❌ Error: Cargo.toml not found. Are you in the project root?"
+        log "   Current directory: $(pwd)"
+        log "   Please navigate to the HolyBPF-rust project root directory"
+        exit 1
+    fi
+    
+    log "✅ Found Cargo.toml - we're in the project root"
+}
+
+# Main recursive fixing function
+main() {
+    log "Starting recursive build fixing process..."
+    
+    local max_attempts=3
+    local attempt=1
+    
+    # Initial checks
+    check_project_root
+    check_rust_installation
+    fix_missing_files
+    
+    while [[ $attempt -le $max_attempts ]]; do
+        log "=== Attempt $attempt of $max_attempts ==="
+        
+        # Try to fix issues
+        fix_cargo_issues
         
         # Attempt build
-        if attempt_build $CURRENT_ITERATION; then
-            log "Build successful on iteration $CURRENT_ITERATION"
+        if attempt_build; then
+            log "✅ Build successful on attempt $attempt"
             
-            # If build succeeds, try tests
-            if attempt_tests $CURRENT_ITERATION; then
-                log "🎉 SUCCESS: Both build and tests passed!"
+            # Try tests
+            if attempt_tests; then
+                log "🎉 Build and tests successful!"
+                generate_status_report
                 return 0
             else
-                log "Build passed but tests failed - manual investigation needed"
-                return 1
+                log "⚠️  Build succeeded but tests failed"
             fi
         else
-            # Build failed - analyze and fix
-            local build_log="build_logs/build_attempt_${CURRENT_ITERATION}.log"
-            local fixes_applied=0
-            
-            analyze_and_fix_errors "$build_log"
-            fixes_applied=$?
-            
-            if [ $fixes_applied -eq 0 ]; then
-                log "❌ No automated fixes available for current errors"
-                log "Manual intervention required - see $build_log"
-                return 1
-            else
-                log "Applied $fixes_applied automated fixes - retrying..."
-            fi
+            log "❌ Build failed on attempt $attempt"
+        fi
+        
+        ((attempt++))
+        
+        if [[ $attempt -le $max_attempts ]]; then
+            log "Waiting before next attempt..."
+            sleep 2
         fi
     done
     
-    log "❌ Maximum iterations ($MAX_ITERATIONS) reached without success"
+    log "❌ Failed to fix build issues after $max_attempts attempts"
+    generate_status_report
+    
+    echo ""
+    echo "=== Manual Investigation Required ==="
+    echo "The automatic fixer could not resolve all issues."
+    echo "Please check the generated report and logs for details."
+    echo ""
+    
     return 1
-}
-
-# Generate final report
-generate_report() {
-    local success=$1
-    
-    echo ""
-    echo "=== FINAL REPORT ==="
-    echo "Iterations completed: $CURRENT_ITERATION"
-    echo "Result: $([ $success -eq 0 ] && echo "SUCCESS ✅" || echo "FAILED ❌")"
-    echo ""
-    
-    if [ $success -eq 0 ]; then
-        echo "🎉 BUILD AND TESTS COMPLETED SUCCESSFULLY"
-        echo ""
-        echo "Project is ready for development:"
-        echo "- Compiler binary: ./zig-out/bin/pible"
-        echo "- Run tests: zig build test"
-        echo "- Build examples: zig build hello-world"
-    else
-        echo "❌ MANUAL INTERVENTION REQUIRED"
-        echo ""
-        echo "Issues that need manual fixing:"
-        
-        # List remaining issues from last build log
-        if [ -f "build_logs/build_attempt_${CURRENT_ITERATION}.log" ]; then
-            echo "Last build errors:"
-            grep "error:" "build_logs/build_attempt_${CURRENT_ITERATION}.log" | head -5
-        fi
-        
-        echo ""
-        echo "Recommended actions:"
-        echo "1. Review build logs in build_logs/ directory"
-        echo "2. Check Zig version compatibility (need 0.15.1+)"
-        echo "3. Verify all source files exist and are valid"
-        echo "4. Consider updating build system for newer Zig versions"
-    fi
-    
-    echo ""
-    echo "All logs saved in build_logs/ directory"
-}
-
-# Main execution
-main() {
-    log "Starting recursive build process..."
-    
-    # Check prerequisites
-    if [ ! -f "build.zig" ]; then
-        log "❌ Error: build.zig not found. Are you in the project root?"
-        exit 1
-    fi
-    
-    # Setup Zig
-    if ! setup_zig; then
-        log "❌ Cannot proceed without Zig 0.15.1+"
-        exit 1
-    fi
-    
-    # Run recursive build process
-    if recursive_build; then
-        generate_report 0
-        exit 0
-    else
-        generate_report 1
-        exit 1
-    fi
 }
 
 # Run main function
