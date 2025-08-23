@@ -45,6 +45,8 @@ pub fn build(b: *std.Build) void {
         .{ "hello-world", "examples/hello-world/src/main.hc" },
         .{ "escrow", "examples/escrow/src/main.hc" },
         .{ "solana-token", "examples/solana-token/src/main.hc" },
+        .{ "amm", "examples/amm/src/main.hc" },
+        .{ "lending", "examples/lending/src/main.hc" },
     }) |example| {
         const name = example[0];
         const source = example[1];

@@ -1,0 +1,74 @@
+# Site configuration for HolyBPF Documentation
+title: "HolyBPF Documentation"
+description: "Comprehensive guide for developing Solana programs using HolyC"
+url: "https://pibleos.github.io"
+baseurl: "/holyBPF-zig"
+
+# GitHub Pages settings
+source: .
+destination: ./_site
+permalink: /:categories/:title/
+markdown: kramdown
+highlighter: rouge
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Theme settings
+theme: minima
+
+# Build settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name/
+
+# Navigation
+navigation:
+  - title: "Getting Started"
+    url: "/getting-started/"
+  - title: "Language Reference"
+    url: "/language-reference/"
+  - title: "Programs"
+    url: "/programs/"
+  - title: "API Reference"
+    url: "/api/"
+  - title: "Advanced"
+    url: "/advanced/"
+  - title: "Examples"
+    url: "/examples/"
+
+# Site metadata
+author:
+  name: "Pible Team"
+  email: "info@pible.dev"
+
+# Exclude files from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - src/
+  - tests/
+  - build.zig
+  - build.zig.zon
+  - "*.sh"
+  - LICENSE
+  - README.md
+  - IMPLEMENTATION.md
+  - BUILD_VALIDATION.md
+  - SOLANA_BPF.md

@@ -5,6 +5,16 @@ zig-out/
 # Compiled BPF files
 *.bpf
 
+# Jekyll site files
+_site/
+.jekyll-cache/
+.jekyll-metadata
+vendor/
+
+# Ruby/Bundler
+Gemfile.lock
+.bundle/
+
 # OS generated files
 .DS_Store
 .DS_Store?

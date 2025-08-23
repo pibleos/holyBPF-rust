@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if page.title %}{{ page.title | escape }} | {% endif %}{{ site.title | escape }}</title>
+    <meta name="description" content="{% if page.description %}{{ page.description | escape }}{% else %}{{ site.description | escape }}{% endif %}">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    
+    <!-- SEO and Meta -->
+    {% seo %}
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ '/assets/favicon.ico' | relative_url }}">
+</head>
+<body>
+    <!-- Blueprint Grid Background -->
+    <div class="blueprint-grid"></div>
+    
+    <!-- Header -->
+    <header class="site-header">
+        <nav class="site-nav">
+            <div class="nav-container">
+                <a href="{{ '/' | relative_url }}" class="nav-brand">
+                    <span class="brand-icon">⚡</span>
+                    <span class="brand-text">HolyBPF</span>
+                </a>
+                
+                <button class="nav-toggle" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                
+                <ul class="nav-menu">
+                    {% for item in site.navigation %}
+                    <li class="nav-item">
+                        <a href="{{ item.url | relative_url }}" class="nav-link">{{ item.title }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="nav-item">
+                        <a href="https://github.com/pibleos/holyBPF-zig" class="nav-link nav-github" target="_blank">
+                            GitHub
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="site-main">
+        {% if page.layout == 'default' and page.url == '/' %}
+        <!-- Homepage content -->
+        {{ content }}
+        {% else %}
+        <!-- Other pages -->
+        <div class="content-container">
+            {% if page.title and page.url != '/' %}
+            <header class="page-header">
+                <h1 class="page-title">{{ page.title }}</h1>
+                {% if page.description %}
+                <p class="page-description">{{ page.description }}</p>
+                {% endif %}
+            </header>
+            {% endif %}
+            
+            <div class="page-content">
+                {{ content }}
+            </div>
+        </div>
+        {% endif %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Documentation</h4>
+                <ul>
+                    <li><a href="{{ '/getting-started/quick-start/' | relative_url }}">Quick Start</a></li>
+                    <li><a href="{{ '/language-reference/holyc-solana/' | relative_url }}">Language Reference</a></li>
+                    <li><a href="{{ '/api/stdlib/' | relative_url }}">API Reference</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Programs</h4>
+                <ul>
+                    <li><a href="{{ '/programs/amm/' | relative_url }}">AMM</a></li>
+                    <li><a href="{{ '/programs/lending/' | relative_url }}">Lending</a></li>
+                    <li><a href="{{ '/programs/orderbook/' | relative_url }}">Orderbook</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Community</h4>
+                <ul>
+                    <li><a href="https://github.com/pibleos/holyBPF-zig" target="_blank">GitHub</a></li>
+                    <li><a href="https://github.com/pibleos/holyBPF-zig/issues" target="_blank">Issues</a></li>
+                    <li><a href="https://github.com/pibleos/holyBPF-zig/discussions" target="_blank">Discussions</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {{ site.time | date: '%Y' }} Pible Team. Built with Jekyll and hosted on GitHub Pages.</p>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+</body>
+</html>
