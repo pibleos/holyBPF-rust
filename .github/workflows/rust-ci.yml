@@ -9,7 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -Dwarnings
-  SOLANA_VERSION: v1.18.22
+  SOLANA_VERSION: v1.18.26
 
 jobs:
   check:
@@ -19,9 +19,24 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: stable
+        with:
+          toolchain: stable
           components: rustfmt, clippy
 
       - name: Cache Cargo Registry
@@ -45,8 +60,24 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+        with:
+          toolchain: stable
 
       - name: Cache Cargo Registry
         uses: actions/cache@v4
@@ -87,9 +118,24 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: stable
+        with:
+          toolchain: stable
           components: rustfmt, clippy
 
       - name: Cache Cargo Registry
@@ -117,8 +163,24 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+        with:
+          toolchain: stable
 
       - name: Install Solana CLI
         run: |
@@ -301,8 +363,24 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+        with:
+          toolchain: stable
 
       - name: Install Solana CLI
         run: |
@@ -375,8 +453,16 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
       - name: Build Release Binary
         run: cargo build --release
@@ -417,8 +503,16 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
       - name: Install cargo-audit
         run: cargo install cargo-audit
@@ -439,8 +533,16 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
         with:
           components: llvm-tools-preview
 
@@ -470,8 +572,16 @@ jobs:
       - name: Checkout Divine Repository
         uses: actions/checkout@v4
 
+      - name: Ensure bash is installed
+        run: |
+          if ! command -v bash &>/dev/null; then
+            sudo apt-get update && sudo apt-get install -y bash
+          fi
+
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
       - name: Build Release Binary
         run: cargo build --release

@@ -21,6 +21,7 @@ pub struct CompileOptions<'a> {
     pub enable_vm_testing: bool,
     pub solana_program_id: Option<[u8; 32]>,
     pub output_directory: Option<&'a str>,
+    pub output_path: Option<String>,
 }
 
 impl<'a> Default for CompileOptions<'a> {
@@ -31,6 +32,7 @@ impl<'a> Default for CompileOptions<'a> {
             enable_vm_testing: false,
             solana_program_id: None,
             output_directory: None,
+            output_path: None,
         }
     }
 }
@@ -254,6 +256,12 @@ impl Compiler {
     }
 
     fn determine_output_path(&self, input_path: &str, options: &CompileOptions) -> String {
+        // Use explicit output_path if provided
+        if let Some(ref output_path) = options.output_path {
+            return output_path.clone();
+        }
+
+        // Otherwise, determine based on input path and output directory
         let input_path = Path::new(input_path);
         let file_stem = input_path.file_stem().unwrap().to_str().unwrap();
         let dir = if let Some(output_dir) = options.output_directory {

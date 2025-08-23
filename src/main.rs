@@ -64,6 +64,7 @@ fn main() -> anyhow::Result<()> {
         enable_vm_testing: matches.get_flag("enable-vm-testing"),
         solana_program_id: None,
         output_directory: matches.get_one::<String>("output-dir").map(|s| s.as_str()),
+        output_path: None,
     };
 
     println!("=== Pible - HolyC to BPF Compiler ===");

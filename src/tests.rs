@@ -1519,11 +1519,11 @@ mod solana_bpf_integration_tests {
     // SECTION 1: Advanced Solana BPF Instruction Set Tests
     #[test]
     fn test_solana_bpf_arithmetic_instructions() {
-        let mut vm = BpfVm::new();
+        let mut vm = BpfVm::new(&[]);
         
         // Test ADD64 instruction
-        vm.registers[1] = 100;
-        vm.registers[2] = 50;
+        vm.set_register(1, 100);
+        vm.set_register(2, 50);
         let add_instr = BpfInstruction {
             opcode: 0x0f, // ADD64
             dst_reg: 1,
@@ -1532,11 +1532,11 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&add_instr).is_ok());
-        assert_eq!(vm.registers[1], 150);
+        assert_eq!(vm.get_register(1), 150);
 
         // Test SUB64 instruction
-        vm.registers[3] = 200;
-        vm.registers[4] = 75;
+        vm.set_register(3, 200);
+        vm.set_register(4, 75);
         let sub_instr = BpfInstruction {
             opcode: 0x1f, // SUB64
             dst_reg: 3,
@@ -1545,11 +1545,11 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&sub_instr).is_ok());
-        assert_eq!(vm.registers[3], 125);
+        assert_eq!(vm.get_register(3), 125);
 
         // Test MUL64 instruction
-        vm.registers[5] = 12;
-        vm.registers[6] = 8;
+        vm.set_register(5, 12);
+        vm.set_register(6, 8);
         let mul_instr = BpfInstruction {
             opcode: 0x2f, // MUL64
             dst_reg: 5,
@@ -1558,16 +1558,16 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&mul_instr).is_ok());
-        assert_eq!(vm.registers[5], 96);
+        assert_eq!(vm.get_register(5), 96);
     }
 
     #[test]
     fn test_solana_bpf_bitwise_operations() {
-        let mut vm = BpfVm::new();
+        let mut vm = BpfVm::new(&[]);
         
         // Test AND64 instruction
-        vm.registers[1] = 0xFF00FF00;
-        vm.registers[2] = 0x00FF00FF;
+        vm.set_register(1, 0xFF00FF00);
+        vm.set_register(2, 0x00FF00FF);
         let and_instr = BpfInstruction {
             opcode: 0x5f, // AND64
             dst_reg: 1,
@@ -1576,11 +1576,11 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&and_instr).is_ok());
-        assert_eq!(vm.registers[1], 0x00000000);
+        assert_eq!(vm.get_register(1), 0x00000000);
 
         // Test OR64 instruction
-        vm.registers[3] = 0xFF000000;
-        vm.registers[4] = 0x00FF0000;
+        vm.set_register(3, 0xFF000000);
+        vm.set_register(4, 0x00FF0000);
         let or_instr = BpfInstruction {
             opcode: 0x4f, // OR64
             dst_reg: 3,
@@ -1589,11 +1589,11 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&or_instr).is_ok());
-        assert_eq!(vm.registers[3], 0xFFFF0000);
+        assert_eq!(vm.get_register(3), 0xFFFF0000);
 
         // Test XOR64 instruction
-        vm.registers[5] = 0xAAAAAAAA;
-        vm.registers[6] = 0x55555555;
+        vm.set_register(5, 0xAAAAAAAA);
+        vm.set_register(6, 0x55555555);
         let xor_instr = BpfInstruction {
             opcode: 0xaf, // XOR64
             dst_reg: 5,
@@ -1602,15 +1602,16 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&xor_instr).is_ok());
-        assert_eq!(vm.registers[5], 0xFFFFFFFF);
+        assert_eq!(vm.get_register(5), 0xFFFFFFFF);
     }
 
     #[test]
     fn test_solana_bpf_shift_operations() {
-        let mut vm = BpfVm::new();
+        let mut vm = BpfVm::new(&[]);
         
         // Test left shift
-        vm.registers[1] = 0x12345678;
+        vm.set_register(1, 0x12345678);
+        vm.set_register(0, 4); // Set shift amount in register 0
         let lsh_instr = BpfInstruction {
             opcode: 0x6f, // LSH64
             dst_reg: 1,
@@ -1619,10 +1620,10 @@ mod solana_bpf_integration_tests {
             immediate: 4,
         };
         assert!(vm.execute_instruction(&lsh_instr).is_ok());
-        assert_eq!(vm.registers[1], 0x123456780);
+        assert_eq!(vm.get_register(1), 0x123456780);
 
         // Test right shift
-        vm.registers[2] = 0x12345678;
+        vm.set_register(2, 0x12345678);
         let rsh_instr = BpfInstruction {
             opcode: 0x7f, // RSH64
             dst_reg: 2,
@@ -1631,10 +1632,10 @@ mod solana_bpf_integration_tests {
             immediate: 4,
         };
         assert!(vm.execute_instruction(&rsh_instr).is_ok());
-        assert_eq!(vm.registers[2], 0x1234567);
+        assert_eq!(vm.get_register(2), 0x1234567);
 
         // Test arithmetic right shift
-        vm.registers[3] = 0x80000000;
+        vm.set_register(3, 0x80000000);
         let arsh_instr = BpfInstruction {
             opcode: 0xcf, // ARSH64
             dst_reg: 3,
@@ -1643,12 +1644,12 @@ mod solana_bpf_integration_tests {
             immediate: 4,
         };
         assert!(vm.execute_instruction(&arsh_instr).is_ok());
-        assert_eq!(vm.registers[3], 0xf8000000);
+        assert_eq!(vm.get_register(3), 0xf8000000);
     }
 
     #[test]
     fn test_solana_bpf_memory_load_operations() {
-        let mut vm = BpfVm::new();
+        let mut vm = BpfVm::new(&[]);
         vm.memory.resize(1024, 0);
         
         // Setup test data in memory
@@ -1658,7 +1659,7 @@ mod solana_bpf_integration_tests {
         vm.memory[103] = 0x12;
         
         // Test LDX word (32-bit) load
-        vm.registers[1] = 100; // Base address
+        vm.set_register(1, 100); // Base address
         let ldx_w_instr = BpfInstruction {
             opcode: 0x61, // LDXW
             dst_reg: 2,
@@ -1667,7 +1668,7 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&ldx_w_instr).is_ok());
-        assert_eq!(vm.registers[2], 0x12345678);
+        assert_eq!(vm.get_register(2), 0x12345678);
 
         // Test LDX byte load
         let ldx_b_instr = BpfInstruction {
@@ -1678,7 +1679,7 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&ldx_b_instr).is_ok());
-        assert_eq!(vm.registers[3], 0x78);
+        assert_eq!(vm.get_register(3), 0x78);
 
         // Test LDX halfword load
         let ldx_h_instr = BpfInstruction {
@@ -1689,17 +1690,17 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&ldx_h_instr).is_ok());
-        assert_eq!(vm.registers[4], 0x5678);
+        assert_eq!(vm.get_register(4), 0x5678);
     }
 
     #[test]
     fn test_solana_bpf_memory_store_operations() {
-        let mut vm = BpfVm::new();
+        let mut vm = BpfVm::new(&[]);
         vm.memory.resize(1024, 0);
         
         // Test STX word (32-bit) store
-        vm.registers[1] = 200; // Base address
-        vm.registers[2] = 0x87654321;
+        vm.set_register(1, 200); // Base address
+        vm.set_register(2, 0x87654321);
         let stx_w_instr = BpfInstruction {
             opcode: 0x63, // STXW
             dst_reg: 1,
@@ -1714,8 +1715,8 @@ mod solana_bpf_integration_tests {
         assert_eq!(vm.memory[203], 0x87);
 
         // Test STX byte store
-        vm.registers[3] = 300;
-        vm.registers[4] = 0xAB;
+        vm.set_register(3, 300);
+        vm.set_register(4, 0xAB);
         let stx_b_instr = BpfInstruction {
             opcode: 0x73, // STXB
             dst_reg: 3,
@@ -1727,7 +1728,7 @@ mod solana_bpf_integration_tests {
         assert_eq!(vm.memory[300], 0xAB);
 
         // Test immediate store
-        vm.registers[5] = 400;
+        vm.set_register(5, 400);
         let st_instr = BpfInstruction {
             opcode: 0x62, // STW
             dst_reg: 5,
@@ -1744,11 +1745,11 @@ mod solana_bpf_integration_tests {
 
     #[test]
     fn test_solana_bpf_conditional_jumps() {
-        let mut vm = BpfVm::new();
+        let mut vm = BpfVm::new(&[]);
         
         // Test JEQ (jump if equal)
-        vm.registers[1] = 42;
-        vm.registers[2] = 42;
+        vm.set_register(1, 42);
+        vm.set_register(2, 42);
         let jeq_instr = BpfInstruction {
             opcode: 0x1d, // JEQ
             dst_reg: 1,
@@ -1757,12 +1758,12 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&jeq_instr).is_ok());
-        assert_eq!(vm.pc, 5);
+        assert_eq!(vm.get_pc(), 5);
 
         // Test JGT (jump if greater than)
-        vm.pc = 0;
-        vm.registers[3] = 100;
-        vm.registers[4] = 50;
+        vm.set_pc(0);
+        vm.set_register(3, 100);
+        vm.set_register(4, 50);
         let jgt_instr = BpfInstruction {
             opcode: 0x2d, // JGT
             dst_reg: 3,
@@ -1771,12 +1772,12 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&jgt_instr).is_ok());
-        assert_eq!(vm.pc, 10);
+        assert_eq!(vm.get_pc(), 10);
 
         // Test JLT (jump if less than)
-        vm.pc = 0;
-        vm.registers[5] = 25;
-        vm.registers[6] = 75;
+        vm.set_pc(0);
+        vm.set_register(5, 25);
+        vm.set_register(6, 75);
         let jlt_instr = BpfInstruction {
             opcode: 0xad, // JLT
             dst_reg: 5,
@@ -1785,15 +1786,15 @@ mod solana_bpf_integration_tests {
             immediate: 0,
         };
         assert!(vm.execute_instruction(&jlt_instr).is_ok());
-        assert_eq!(vm.pc, 15);
+        assert_eq!(vm.get_pc(), 15);
     }
 
     #[test]
     fn test_solana_bpf_immediate_conditional_jumps() {
-        let mut vm = BpfVm::new();
+        let mut vm = BpfVm::new(&[]);
         
         // Test JEQI (jump if equal to immediate)
-        vm.registers[1] = 100;
+        vm.set_register(1, 100);
         let jeqi_instr = BpfInstruction {
             opcode: 0x15, // JEQI
             dst_reg: 1,
@@ -1802,11 +1803,11 @@ mod solana_bpf_integration_tests {
             immediate: 100,
         };
         assert!(vm.execute_instruction(&jeqi_instr).is_ok());
-        assert_eq!(vm.pc, 8);
+        assert_eq!(vm.get_pc(), 8);
 
         // Test JGTI (jump if greater than immediate)
-        vm.pc = 0;
-        vm.registers[2] = 150;
+        vm.set_pc(0);
+        vm.set_register(2, 150);
         let jgti_instr = BpfInstruction {
             opcode: 0x25, // JGTI
             dst_reg: 2,
@@ -1815,11 +1816,11 @@ mod solana_bpf_integration_tests {
             immediate: 100,
         };
         assert!(vm.execute_instruction(&jgti_instr).is_ok());
-        assert_eq!(vm.pc, 12);
+        assert_eq!(vm.get_pc(), 12);
 
         // Test JLTI (jump if less than immediate)
-        vm.pc = 0;
-        vm.registers[3] = 50;
+        vm.set_pc(0);
+        vm.set_register(3, 50);
         let jlti_instr = BpfInstruction {
             opcode: 0xa5, // JLTI
             dst_reg: 3,
@@ -1828,7 +1829,7 @@ mod solana_bpf_integration_tests {
             immediate: 100,
         };
         assert!(vm.execute_instruction(&jlti_instr).is_ok());
-        assert_eq!(vm.pc, 16);
+        assert_eq!(vm.get_pc(), 16);
     }
 
     // SECTION 2: Solana Runtime Environment Tests
@@ -1841,12 +1842,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("entrypoint_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -1878,12 +1881,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("account_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -1915,12 +1920,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("pda_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -1952,12 +1959,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("cpi_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -1991,12 +2000,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("performance_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: true,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2045,12 +2056,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("defi_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2081,12 +2094,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("spl_token_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2116,12 +2131,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("multisig_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2164,12 +2181,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("amm_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2227,12 +2246,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("orderbook_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2276,12 +2297,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("governance_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2334,12 +2357,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("treasury_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2408,12 +2433,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("oracle_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2469,12 +2496,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("lending_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2536,12 +2565,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("bridge_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2554,7 +2585,7 @@ mod solana_bpf_integration_tests {
     // SECTION 11: Advanced BPF Instruction Validation
     #[test]
     fn test_solana_bpf_instruction_validation_comprehensive() {
-        let mut codegen = CodeGen::new();
+        let codegen = CodeGen::new();
         
         // Test various BPF instruction formats
         let instructions = vec![
@@ -2609,7 +2640,7 @@ mod solana_bpf_integration_tests {
 
     #[test]
     fn test_solana_bpf_register_bounds_checking() {
-        let mut codegen = CodeGen::new();
+        let codegen = CodeGen::new();
         
         // Test valid register usage (R0-R10)
         let valid_instructions = vec![
@@ -2639,7 +2670,7 @@ mod solana_bpf_integration_tests {
 
     #[test]
     fn test_solana_bpf_jump_target_validation() {
-        let mut codegen = CodeGen::new();
+        let codegen = CodeGen::new();
         
         // Create a program with valid jump targets
         let valid_program = vec![
@@ -2667,7 +2698,7 @@ mod solana_bpf_integration_tests {
 
     #[test]
     fn test_solana_bpf_program_size_limits() {
-        let mut codegen = CodeGen::new();
+        let codegen = CodeGen::new();
         
         // Test program within size limits (typical BPF programs should be under 64KB)
         let normal_program: Vec<BpfInstruction> = (0..1000).map(|i| {
@@ -2716,12 +2747,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("syscall_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2762,12 +2795,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("account_meta_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
@@ -2820,12 +2855,14 @@ mod solana_bpf_integration_tests {
             }
         "#;
 
-        let mut compiler = Compiler::new();
+        let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             output_path: Some("crypto_test.bpf".to_string()),
             generate_idl: false,
             enable_vm_testing: false,
+            solana_program_id: None,
+            output_directory: None,
         };
 
         let result = compiler.compile(holyc_code, &options);
