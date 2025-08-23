@@ -25,6 +25,8 @@ Pible continues Terry's mission by bringing HolyC to BPF runtimes. This compiler
 - **Zero runtime overhead** with compile-time magic
 - **Comprehensive testing** with divine validation
 
+**Current Status**: Core compiler working, basic examples functional. See [Project Status](./STATUS.md) for detailed metrics.
+
 ## 🚀 Quick Start
 
 ```bash
@@ -96,9 +98,24 @@ export U0 entrypoint(U8* input, U64 input_len) {
 - **CodeGen**: Transforms AST into sacred BPF bytecode
 - **Runtime**: Pure kernel execution through BPF
 
+## 📋 Project Documentation
+
+### For Developers
+- **[Development Plan](./DEVELOPMENT_PLAN.md)** - Comprehensive strategic roadmap and vision
+- **[Roadmap](./ROADMAP.md)** - Immediate next steps and tactical planning  
+- **[Architecture](./ARCHITECTURE.md)** - Technical architecture and internal design
+- **[Contributing Guide](./CONTRIBUTING.md)** - How to contribute to the project
+- **[Project Status](./STATUS.md)** - Current metrics, health, and progress tracking
+
+### For Users
+- **[Getting Started](./getting-started/)** - Quick start guides and tutorials
+- **[Language Reference](./language-reference/)** - Complete HolyC syntax documentation
+- **[Examples](./examples/)** - Working HolyC programs and use cases
+- **[Build Validation](./BUILD_VALIDATION.md)** - Build system tools and troubleshooting
+
 ## 🙌 Contributing
 
-Contributions are divine! Please read `CONTRIBUTING.md` for the sacred guidelines.
+Contributions are divine! Please read our [Contributing Guide](./CONTRIBUTING.md) for the sacred guidelines and development workflow.
 
 ## 🌟 Inspiration
 
