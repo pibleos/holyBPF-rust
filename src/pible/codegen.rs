@@ -1,5 +1,5 @@
-use thiserror::Error;
 use crate::pible::parser::{Node, NodeType};
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 #[allow(dead_code)]
@@ -33,23 +33,23 @@ impl BpfInstruction {
         }
     }
 
-    pub fn to_bytes(&self) -> [u8; 8] {
+    pub fn as_bytes(self) -> [u8; 8] {
         let mut bytes = [0u8; 8];
-        
+
         // BPF instruction format: [opcode] [dst_reg|src_reg] [offset_lo] [offset_hi] [immediate_bytes]
         bytes[0] = self.opcode;
         bytes[1] = (self.dst_reg & 0x0f) | ((self.src_reg & 0x0f) << 4);
-        
+
         let offset_bytes = self.offset.to_le_bytes();
         bytes[2] = offset_bytes[0];
         bytes[3] = offset_bytes[1];
-        
+
         let immediate_bytes = self.immediate.to_le_bytes();
         bytes[4] = immediate_bytes[0];
         bytes[5] = immediate_bytes[1];
         bytes[6] = immediate_bytes[2];
         bytes[7] = immediate_bytes[3];
-        
+
         bytes
     }
 }
@@ -102,10 +102,10 @@ impl CodeGen {
 
     pub fn generate(&mut self, ast: &Node) -> Result<Vec<BpfInstruction>, CodeGenError> {
         self.visit_node(ast)?;
-        
+
         // Add exit instruction
         self.emit_exit(0);
-        
+
         Ok(self.instructions.clone())
     }
 
@@ -115,15 +115,15 @@ impl CodeGen {
                 for child in &node.children {
                     self.visit_node(child)?;
                 }
-            },
+            }
             NodeType::FunctionDecl => {
                 self.generate_function(node)?;
-            },
+            }
             NodeType::Block => {
                 for child in &node.children {
                     self.visit_node(child)?;
                 }
-            },
+            }
             NodeType::Statement => {
                 if let Some(ref value) = node.value {
                     match value.as_str() {
@@ -132,7 +132,7 @@ impl CodeGen {
                                 self.visit_node(&node.children[0])?;
                             }
                             self.emit_exit(0);
-                        },
+                        }
                         _ => {
                             for child in &node.children {
                                 self.visit_node(child)?;
@@ -144,13 +144,13 @@ impl CodeGen {
                         self.visit_node(child)?;
                     }
                 }
-            },
+            }
             NodeType::Expression => {
                 if let Some(ref value) = node.value {
                     match value.as_str() {
                         "call" => {
                             self.generate_call(node)?;
-                        },
+                        }
                         _ => {
                             for child in &node.children {
                                 self.visit_node(child)?;
@@ -162,14 +162,14 @@ impl CodeGen {
                         self.visit_node(child)?;
                     }
                 }
-            },
+            }
             NodeType::Identifier => {
                 // Process identifier - could be variable reference or function name
                 if let Some(ref _value) = node.value {
                     // For identifiers, we might need to load from memory or reference
                     // This is context-dependent and handled by parent nodes
                 }
-            },
+            }
             NodeType::Literal => {
                 // Process literal values - numbers, strings, etc.
                 if let Some(ref value) = node.value {
@@ -179,7 +179,7 @@ impl CodeGen {
                     }
                     // String literals would need special handling for BPF
                 }
-            },
+            }
         }
         Ok(())
     }
@@ -190,10 +190,10 @@ impl CodeGen {
             // Function entry point - could emit function label here
             // For BPF, functions are typically inlined or called via helper functions
         }
-        
+
         // Process function parameters if any
         // Parameters would be in the first children before the body
-        
+
         // Process the function body (last child is typically the block)
         if let Some(body) = node.children.last() {
             self.visit_node(body)?;
@@ -211,14 +211,15 @@ impl CodeGen {
                         if node.children.len() > 1 {
                             // Process arguments and load into appropriate registers
                             for (i, arg) in node.children.iter().skip(1).enumerate() {
-                                if i < 5 { // BPF allows up to 5 arguments in R1-R5
+                                if i < 5 {
+                                    // BPF allows up to 5 arguments in R1-R5
                                     self.current_reg = (i + 1) as u8;
                                     self.visit_node(arg)?;
                                 }
                             }
                         }
                         self.emit_call(6); // BPF_FUNC_trace_printk
-                    },
+                    }
                     func_name => {
                         // User-defined function call
                         // In BPF, this might be inlined or use a call instruction
@@ -231,7 +232,7 @@ impl CodeGen {
         }
         Ok(())
     }
-    
+
     fn hash_function_name(&self, name: &str) -> i32 {
         // Simple hash function for function names
         let mut hash = 0i32;
@@ -241,7 +242,14 @@ impl CodeGen {
         hash.abs() % 1000 + 100 // Keep in a reasonable range for BPF
     }
 
-    fn emit_instruction(&mut self, opcode: u8, dst_reg: u8, src_reg: u8, offset: i16, immediate: i32) {
+    fn emit_instruction(
+        &mut self,
+        opcode: u8,
+        dst_reg: u8,
+        src_reg: u8,
+        offset: i16,
+        immediate: i32,
+    ) {
         let instruction = BpfInstruction::new(opcode, dst_reg, src_reg, offset, immediate);
         self.instructions.push(instruction);
     }
@@ -270,13 +278,7 @@ impl CodeGen {
         // Move exit code to R0
         self.emit_move_immediate(0, exit_code);
         // Exit instruction
-        self.emit_instruction(
-            bpf_opcodes::BPF_JMP | bpf_opcodes::BPF_EXIT,
-            0,
-            0,
-            0,
-            0,
-        );
+        self.emit_instruction(bpf_opcodes::BPF_JMP | bpf_opcodes::BPF_EXIT, 0, 0, 0, 0);
     }
 
     pub fn validate_instructions(&self, instructions: &[BpfInstruction]) -> bool {
@@ -284,12 +286,15 @@ impl CodeGen {
         for instruction in instructions {
             let class = instruction.opcode & 0x07;
             match class {
-                bpf_opcodes::BPF_LD | bpf_opcodes::BPF_LDX | 
-                bpf_opcodes::BPF_ST | bpf_opcodes::BPF_STX |
-                bpf_opcodes::BPF_ALU | bpf_opcodes::BPF_JMP | 
-                bpf_opcodes::BPF_ALU64 => {
+                bpf_opcodes::BPF_LD
+                | bpf_opcodes::BPF_LDX
+                | bpf_opcodes::BPF_ST
+                | bpf_opcodes::BPF_STX
+                | bpf_opcodes::BPF_ALU
+                | bpf_opcodes::BPF_JMP
+                | bpf_opcodes::BPF_ALU64 => {
                     // Valid instruction class
-                },
+                }
                 _ => return false,
             }
         }

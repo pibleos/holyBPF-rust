@@ -156,7 +156,7 @@ impl<'a> Lexer<'a> {
 
     fn scan_token(&mut self, tokens: &mut Vec<Token<'a>>) -> Result<(), LexError> {
         let c = self.advance();
-        
+
         match c {
             '(' => self.add_token(tokens, TokenType::LeftParen),
             ')' => self.add_token(tokens, TokenType::RightParen),
@@ -180,56 +180,56 @@ impl<'a> Lexer<'a> {
                 } else {
                     self.add_token(tokens, TokenType::Slash);
                 }
-            },
+            }
             '=' => {
-                let token_type = if self.match_char('=') { 
-                    TokenType::EqualEqual 
-                } else { 
-                    TokenType::Equal 
+                let token_type = if self.match_char('=') {
+                    TokenType::EqualEqual
+                } else {
+                    TokenType::Equal
                 };
                 self.add_token(tokens, token_type);
-            },
+            }
             '!' => {
-                let token_type = if self.match_char('=') { 
-                    TokenType::BangEqual 
-                } else { 
-                    TokenType::Bang 
+                let token_type = if self.match_char('=') {
+                    TokenType::BangEqual
+                } else {
+                    TokenType::Bang
                 };
                 self.add_token(tokens, token_type);
-            },
+            }
             '<' => {
-                let token_type = if self.match_char('=') { 
-                    TokenType::LessEqual 
-                } else { 
-                    TokenType::Less 
+                let token_type = if self.match_char('=') {
+                    TokenType::LessEqual
+                } else {
+                    TokenType::Less
                 };
                 self.add_token(tokens, token_type);
-            },
+            }
             '>' => {
-                let token_type = if self.match_char('=') { 
-                    TokenType::GreaterEqual 
-                } else { 
-                    TokenType::Greater 
+                let token_type = if self.match_char('=') {
+                    TokenType::GreaterEqual
+                } else {
+                    TokenType::Greater
                 };
                 self.add_token(tokens, token_type);
-            },
+            }
             '&' => {
                 if self.match_char('&') {
                     self.add_token(tokens, TokenType::And);
                 }
-            },
+            }
             '|' => {
                 if self.match_char('|') {
                     self.add_token(tokens, TokenType::Or);
                 }
-            },
+            }
             ' ' | '\r' | '\t' => {
                 // Ignore whitespace
-            },
+            }
             '\n' => {
                 self.line += 1;
                 self.column = 1;
-            },
+            }
             '"' => self.string(tokens)?,
             _ => {
                 if c.is_ascii_digit() {
@@ -284,7 +284,11 @@ impl<'a> Lexer<'a> {
         }
 
         let text = &self.source[self.start..self.current];
-        let token_type = self.keywords.get(text).copied().unwrap_or(TokenType::Identifier);
+        let token_type = self
+            .keywords
+            .get(text)
+            .copied()
+            .unwrap_or(TokenType::Identifier);
         self.add_token(tokens, token_type);
     }
 

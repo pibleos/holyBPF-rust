@@ -5,7 +5,7 @@ mod pible;
 #[cfg(test)]
 mod tests;
 
-use pible::{Compiler, CompileOptions, CompileTarget};
+use pible::{CompileOptions, CompileTarget, Compiler};
 
 fn main() -> anyhow::Result<()> {
     let matches = Command::new("pible")
@@ -13,14 +13,14 @@ fn main() -> anyhow::Result<()> {
         .about("HolyC to BPF Compiler - In Memory of Terry A. Davis")
         .long_about(
             "A divine bridge between Terry Davis's HolyC and BPF runtimes, \
-             allowing HolyC programs to run in Linux kernel and Solana blockchain."
+             allowing HolyC programs to run in Linux kernel and Solana blockchain.",
         )
         .arg(
             Arg::new("input")
                 .help("HolyC source file to compile")
                 .required(true)
                 .value_name("FILE")
-                .index(1)
+                .index(1),
         )
         .arg(
             Arg::new("target")
@@ -28,25 +28,25 @@ fn main() -> anyhow::Result<()> {
                 .help("Compilation target")
                 .value_name("TARGET")
                 .default_value("linux-bpf")
-                .value_parser(["linux-bpf", "solana-bpf", "bpf-vm"])
+                .value_parser(["linux-bpf", "solana-bpf", "bpf-vm"]),
         )
         .arg(
             Arg::new("generate-idl")
                 .long("generate-idl")
                 .help("Generate Interface Definition Language for Solana programs")
-                .action(clap::ArgAction::SetTrue)
+                .action(clap::ArgAction::SetTrue),
         )
         .arg(
             Arg::new("enable-vm-testing")
                 .long("enable-vm-testing")
                 .help("Enable BPF VM testing and emulation")
-                .action(clap::ArgAction::SetTrue)
+                .action(clap::ArgAction::SetTrue),
         )
         .arg(
             Arg::new("output-dir")
                 .long("output-dir")
                 .help("Output directory for generated files")
-                .value_name("DIR")
+                .value_name("DIR"),
         )
         .get_matches();
 

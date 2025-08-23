@@ -62,7 +62,12 @@ jobs:
         run: cargo test --all-features --no-fail-fast
 
       - name: Run Doc Tests
-        run: cargo test --doc
+        run: |
+          if [ -f src/lib.rs ]; then
+            cargo test --doc
+          else
+            echo "No lib.rs found, skipping doc tests (binary-only crate)"
+          fi
 
   lint:
     name: Rust Linting

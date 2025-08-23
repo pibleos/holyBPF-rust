@@ -1,5 +1,5 @@
-use thiserror::Error;
 use crate::pible::lexer::{Token, TokenType};
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 #[allow(dead_code)]
@@ -7,7 +7,11 @@ pub enum ParseError {
     #[error("Unexpected token: {0:?} at line {1}")]
     UnexpectedToken(TokenType, usize),
     #[error("Expected token: {expected:?}, found: {found:?} at line {line}")]
-    ExpectedToken { expected: TokenType, found: TokenType, line: usize },
+    ExpectedToken {
+        expected: TokenType,
+        found: TokenType,
+        line: usize,
+    },
     #[error("Unexpected end of file")]
     UnexpectedEof,
 }
@@ -59,15 +63,12 @@ pub struct Parser<'a> {
 
 impl<'a> Parser<'a> {
     pub fn new(tokens: Vec<Token<'a>>) -> Self {
-        Self {
-            tokens,
-            current: 0,
-        }
+        Self { tokens, current: 0 }
     }
 
     pub fn parse(&mut self) -> Result<Node, ParseError> {
         let mut program = Node::new(NodeType::Program);
-        
+
         while !self.is_at_end() {
             if let Ok(declaration) = self.declaration() {
                 program.add_child(declaration);
@@ -81,11 +82,13 @@ impl<'a> Parser<'a> {
     }
 
     fn declaration(&mut self) -> Result<Node, ParseError> {
-        if self.match_token(&[TokenType::Export]) {
-            self.function_declaration()
-        } else if self.check(&TokenType::U0) || self.check(&TokenType::U8) || 
-                  self.check(&TokenType::U16) || self.check(&TokenType::U32) || 
-                  self.check(&TokenType::U64) {
+        if self.match_token(&[TokenType::Export])
+            || self.check(&TokenType::U0)
+            || self.check(&TokenType::U8)
+            || self.check(&TokenType::U16)
+            || self.check(&TokenType::U32)
+            || self.check(&TokenType::U64)
+        {
             self.function_declaration()
         } else {
             self.statement()
@@ -95,15 +98,15 @@ impl<'a> Parser<'a> {
     fn function_declaration(&mut self) -> Result<Node, ParseError> {
         // Parse return type
         let return_type_str = self.advance().lexeme.to_string();
-        
+
         // Parse function name
         let name_token = self.consume(TokenType::Identifier, "Expected function name")?;
         let name_str = name_token.lexeme.to_string();
-        
+
         // Parse parameters
         self.consume(TokenType::LeftParen, "Expected '(' after function name")?;
         let mut params = Vec::new();
-        
+
         if !self.check(&TokenType::RightParen) {
             loop {
                 // Parse parameter type and name
@@ -114,27 +117,31 @@ impl<'a> Parser<'a> {
                 }
                 if self.check(&TokenType::Identifier) {
                     let param_name_token = self.advance();
-                    let mut param_node = Node::with_value(NodeType::Identifier, param_name_token.lexeme.to_string());
+                    let mut param_node =
+                        Node::with_value(NodeType::Identifier, param_name_token.lexeme.to_string());
                     param_node.value = Some(param_type_str);
                     params.push(param_node);
                 }
-                
+
                 if !self.match_token(&[TokenType::Comma]) {
                     break;
                 }
             }
         }
         self.consume(TokenType::RightParen, "Expected ')' after parameters")?;
-        
+
         // Parse function body
         let body = self.block_statement()?;
-        
-        let mut function = Node::with_value(NodeType::FunctionDecl, format!("{}:{}", return_type_str, name_str));
+
+        let mut function = Node::with_value(
+            NodeType::FunctionDecl,
+            format!("{}:{}", return_type_str, name_str),
+        );
         for param in params {
             function.add_child(param);
         }
         function.add_child(body);
-        
+
         Ok(function)
     }
 
@@ -150,24 +157,24 @@ impl<'a> Parser<'a> {
 
     fn return_statement(&mut self) -> Result<Node, ParseError> {
         let mut stmt = Node::with_value(NodeType::Statement, "return".to_string());
-        
+
         if !self.check(&TokenType::Semicolon) {
             let expr = self.expression()?;
             stmt.add_child(expr);
         }
-        
+
         self.consume(TokenType::Semicolon, "Expected ';' after return value")?;
         Ok(stmt)
     }
 
     fn block_statement(&mut self) -> Result<Node, ParseError> {
         let mut block = Node::new(NodeType::Block);
-        
+
         while !self.check(&TokenType::RightBrace) && !self.is_at_end() {
             let stmt = self.declaration()?;
             block.add_child(stmt);
         }
-        
+
         self.consume(TokenType::RightBrace, "Expected '}' after block")?;
         Ok(block)
     }
@@ -184,45 +191,40 @@ impl<'a> Parser<'a> {
 
     fn call(&mut self) -> Result<Node, ParseError> {
         let mut expr = self.primary()?;
-        
+
         while self.match_token(&[TokenType::LeftParen]) {
             expr = self.finish_call(expr)?;
         }
-        
+
         Ok(expr)
     }
 
     fn finish_call(&mut self, callee: Node) -> Result<Node, ParseError> {
         let mut call = Node::with_value(NodeType::Expression, "call".to_string());
         call.add_child(callee);
-        
+
         if !self.check(&TokenType::RightParen) {
             loop {
                 let arg = self.expression()?;
                 call.add_child(arg);
-                
+
                 if !self.match_token(&[TokenType::Comma]) {
                     break;
                 }
             }
         }
-        
+
         self.consume(TokenType::RightParen, "Expected ')' after arguments")?;
         Ok(call)
     }
 
     fn primary(&mut self) -> Result<Node, ParseError> {
-        if self.match_token(&[TokenType::True, TokenType::False]) {
-            let token_str = self.previous().lexeme.to_string();
-            let mut node = Node::new(NodeType::Literal);
-            node.value = Some(token_str);
-            Ok(node)
-        } else if self.match_token(&[TokenType::NumberLiteral]) {
-            let token_str = self.previous().lexeme.to_string();
-            let mut node = Node::new(NodeType::Literal);
-            node.value = Some(token_str);
-            Ok(node)
-        } else if self.match_token(&[TokenType::StringLiteral]) {
+        if self.match_token(&[
+            TokenType::True,
+            TokenType::False,
+            TokenType::NumberLiteral,
+            TokenType::StringLiteral,
+        ]) {
             let token_str = self.previous().lexeme.to_string();
             let mut node = Node::new(NodeType::Literal);
             node.value = Some(token_str);
@@ -239,7 +241,7 @@ impl<'a> Parser<'a> {
         } else {
             Err(ParseError::UnexpectedToken(
                 self.peek().token_type,
-                self.peek().line
+                self.peek().line,
             ))
         }
     }
@@ -302,8 +304,11 @@ impl<'a> Parser<'a> {
             }
 
             match self.peek().token_type {
-                TokenType::Class | TokenType::For | TokenType::If | 
-                TokenType::While | TokenType::Return => return,
+                TokenType::Class
+                | TokenType::For
+                | TokenType::If
+                | TokenType::While
+                | TokenType::Return => return,
                 _ => {}
             }
 

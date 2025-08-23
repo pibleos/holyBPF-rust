@@ -1,13 +1,14 @@
 use crate::pible::{
-    lexer::{Lexer, TokenType}, 
-    parser::Parser, 
-    codegen::{CodeGen, BpfInstruction}, 
-    compiler::{Compiler, CompileOptions, CompileTarget},
+    bpf_vm::BpfVm,
+    codegen::{BpfInstruction, CodeGen},
+    compiler::{CompileOptions, CompileTarget, Compiler},
+    lexer::{Lexer, TokenType},
+    parser::Parser,
     solana_bpf::SolanaBpf,
-    bpf_vm::BpfVm
 };
 
 #[cfg(test)]
+#[allow(clippy::module_inception)]
 mod tests {
     use super::*;
 
@@ -29,24 +30,27 @@ mod tests {
         let source = "U0 main() { return 0; }";
         let mut lexer = Lexer::new(source);
         let tokens = lexer.scan_tokens().expect("Lexing should succeed");
-        
+
         println!("Tokens: {:?}", tokens);
-        
+
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().expect("Parsing should succeed");
 
         println!("AST: {:?}", ast);
-        
+
         // The AST should have a program node with children
         assert_eq!(ast.node_type, crate::pible::parser::NodeType::Program);
-        
+
         // Check if we have any children (functions or statements)
         if ast.children.is_empty() {
             println!("AST has no children - checking if this is expected for current parser implementation");
             // Current implementation might be incomplete - let's just verify it doesn't crash
         } else {
             // Should have at least one function declaration
-            assert!(ast.children.iter().any(|child| matches!(child.node_type, crate::pible::parser::NodeType::FunctionDecl)));
+            assert!(ast.children.iter().any(|child| matches!(
+                child.node_type,
+                crate::pible::parser::NodeType::FunctionDecl
+            )));
         }
     }
 
@@ -55,12 +59,14 @@ mod tests {
         let source = "U0 main() { return 0; }";
         let mut lexer = Lexer::new(source);
         let tokens = lexer.scan_tokens().expect("Lexing should succeed");
-        
+
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().expect("Parsing should succeed");
 
         let mut codegen = CodeGen::new();
-        let instructions = codegen.generate(&ast).expect("Code generation should succeed");
+        let instructions = codegen
+            .generate(&ast)
+            .expect("Code generation should succeed");
 
         assert!(!instructions.is_empty());
         // Should have at least an exit instruction
@@ -88,8 +94,12 @@ mod tests {
         let tokens = lexer.scan_tokens().expect("Lexing should succeed");
 
         // Should recognize PrintF as a function
-        assert!(tokens.iter().any(|token| token.token_type == TokenType::PrintF));
-        assert!(tokens.iter().any(|token| token.token_type == TokenType::StringLiteral));
+        assert!(tokens
+            .iter()
+            .any(|token| token.token_type == TokenType::PrintF));
+        assert!(tokens
+            .iter()
+            .any(|token| token.token_type == TokenType::StringLiteral));
     }
 
     #[test]
@@ -127,7 +137,7 @@ mod tests {
         let source = r#"U0 main() { "unterminated string }"#;
         let mut lexer = Lexer::new(source);
         let result = lexer.scan_tokens();
-        
+
         // Should handle unterminated strings gracefully
         assert!(result.is_err());
     }
@@ -138,10 +148,10 @@ mod tests {
         let source = "U0 main( { return 0; }"; // Missing closing paren
         let mut lexer = Lexer::new(source);
         let tokens = lexer.scan_tokens().expect("Lexing should succeed");
-        
+
         let mut parser = Parser::new(tokens);
         let result = parser.parse();
-        
+
         // Parser should handle syntax errors gracefully
         // Note: Current parser might be lenient, so this test verifies behavior
         assert!(result.is_ok() || result.is_err());
@@ -150,10 +160,10 @@ mod tests {
     #[test]
     fn test_bpf_instruction_encoding() {
         use crate::pible::codegen::BpfInstruction;
-        
+
         let instruction = BpfInstruction::new(0x95, 0, 0, 0, 0); // BPF_EXIT
-        let bytes = instruction.to_bytes();
-        
+        let bytes = instruction.as_bytes();
+
         assert_eq!(bytes.len(), 8);
         assert_eq!(bytes[0], 0x95); // Opcode should be first byte
     }
@@ -164,10 +174,10 @@ mod tests {
             BpfInstruction::new(0xb7, 0, 0, 0, 42), // mov r0, 42
             BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit
         ];
-        
+
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert!(vm_result.compute_units > 0);
@@ -186,16 +196,16 @@ mod solana_bpf_entrypoint_tests {
     fn test_solana_entrypoint_generation() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let result = solana_bpf.generate_entrypoint("main");
         assert!(result.is_ok());
-        
+
         let instructions = solana_bpf.get_instructions();
         assert!(!instructions.is_empty());
-        
+
         // Should have account loading, stack setup, function call, and exit
         assert!(instructions.len() >= 4);
-        
+
         // Last instruction should be exit
         let last_instr = &instructions[instructions.len() - 1];
         assert_eq!(last_instr.opcode, 0x95); // BPF_EXIT
@@ -205,10 +215,12 @@ mod solana_bpf_entrypoint_tests {
     fn test_solana_account_loading() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
-        solana_bpf.generate_entrypoint("process_instruction").unwrap();
+
+        solana_bpf
+            .generate_entrypoint("process_instruction")
+            .unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Should contain account loading instructions (LDX)
         assert!(instructions.iter().any(|inst| (inst.opcode & 0xf8) == 0x78));
     }
@@ -217,24 +229,26 @@ mod solana_bpf_entrypoint_tests {
     fn test_solana_stack_setup() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("main").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Should contain immediate move to register 10 (stack pointer)
-        assert!(instructions.iter().any(|inst| 
-            inst.opcode == 0xb7 && inst.dst_reg == 10
-        ));
+        assert!(instructions
+            .iter()
+            .any(|inst| inst.opcode == 0xb7 && inst.dst_reg == 10));
     }
 
     #[test]
     fn test_solana_function_call() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
-        solana_bpf.generate_entrypoint("process_instruction").unwrap();
+
+        solana_bpf
+            .generate_entrypoint("process_instruction")
+            .unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Should contain function call instruction
         assert!(instructions.iter().any(|inst| inst.opcode == 0x85));
     }
@@ -243,16 +257,16 @@ mod solana_bpf_entrypoint_tests {
     fn test_solana_program_success_return() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("main").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Should set r0 to 0 (success) before exit
         let has_success_return = instructions.windows(2).any(|window| {
-            window[0].opcode == 0xb7 && 
-            window[0].dst_reg == 0 && 
-            window[0].immediate == 0 &&
-            window[1].opcode == 0x95
+            window[0].opcode == 0xb7
+                && window[0].dst_reg == 0
+                && window[0].immediate == 0
+                && window[1].opcode == 0x95
         });
         assert!(has_success_return);
     }
@@ -261,13 +275,13 @@ mod solana_bpf_entrypoint_tests {
     fn test_multiple_entrypoint_generations() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("entrypoint1").unwrap();
         let count1 = solana_bpf.get_instructions().len();
-        
+
         solana_bpf.generate_entrypoint("entrypoint2").unwrap();
         let count2 = solana_bpf.get_instructions().len();
-        
+
         // Second generation should add more instructions
         assert!(count2 > count1);
     }
@@ -276,10 +290,10 @@ mod solana_bpf_entrypoint_tests {
     fn test_entrypoint_register_usage() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("main").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Should use specific registers for Solana conventions
         // R1 = program_id, R2 = accounts, R3 = instruction_data
         assert!(instructions.iter().any(|inst| inst.src_reg == 2)); // accounts
@@ -292,10 +306,10 @@ mod solana_bpf_entrypoint_tests {
     fn test_entrypoint_with_empty_name() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let result = solana_bpf.generate_entrypoint("");
         assert!(result.is_ok());
-        
+
         let instructions = solana_bpf.get_instructions();
         assert!(!instructions.is_empty());
     }
@@ -304,7 +318,7 @@ mod solana_bpf_entrypoint_tests {
     fn test_entrypoint_with_special_characters() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let result = solana_bpf.generate_entrypoint("main_function_123");
         assert!(result.is_ok());
     }
@@ -313,21 +327,27 @@ mod solana_bpf_entrypoint_tests {
     fn test_entrypoint_instruction_ordering() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("main").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Should have proper ordering: loads, moves, calls, exit
         let mut has_load = false;
         let mut has_move = false;
         let mut has_call = false;
-        
+
         for inst in instructions {
-            if (inst.opcode & 0xf8) == 0x78 { has_load = true; }
-            if inst.opcode == 0xb7 { has_move = true; }
-            if inst.opcode == 0x85 { has_call = true; }
+            if (inst.opcode & 0xf8) == 0x78 {
+                has_load = true;
+            }
+            if inst.opcode == 0xb7 {
+                has_move = true;
+            }
+            if inst.opcode == 0x85 {
+                has_call = true;
+            }
         }
-        
+
         assert!(has_load && has_move && has_call);
     }
 }
@@ -340,15 +360,17 @@ mod solana_bpf_instruction_tests {
     fn test_solana_load_register_instruction() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         // Test internal method via entrypoint generation
         solana_bpf.generate_entrypoint("test").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Find LDX instruction
-        let ldx_instr = instructions.iter().find(|inst| (inst.opcode & 0xf8) == 0x78);
+        let ldx_instr = instructions
+            .iter()
+            .find(|inst| (inst.opcode & 0xf8) == 0x78);
         assert!(ldx_instr.is_some());
-        
+
         let instr = ldx_instr.unwrap();
         assert_eq!(instr.opcode, 0x79); // BPF_LDX | BPF_MEM | BPF_DW
     }
@@ -357,14 +379,14 @@ mod solana_bpf_instruction_tests {
     fn test_solana_move_immediate_instruction() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("test").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Find MOV immediate instruction
         let mov_instr = instructions.iter().find(|inst| inst.opcode == 0xb7);
         assert!(mov_instr.is_some());
-        
+
         let instr = mov_instr.unwrap();
         assert_eq!(instr.src_reg, 0); // Source should be 0 for immediate
     }
@@ -373,14 +395,14 @@ mod solana_bpf_instruction_tests {
     fn test_solana_call_instruction() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("test").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Find CALL instruction
         let call_instr = instructions.iter().find(|inst| inst.opcode == 0x85);
         assert!(call_instr.is_some());
-        
+
         let instr = call_instr.unwrap();
         assert_eq!(instr.immediate, 1); // Function index
     }
@@ -389,10 +411,10 @@ mod solana_bpf_instruction_tests {
     fn test_solana_exit_instruction() {
         let mut codegen = CodeGen::new();
         let mut solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         solana_bpf.generate_entrypoint("test").unwrap();
         let instructions = solana_bpf.get_instructions();
-        
+
         // Last instruction should be exit
         let last_instr = &instructions[instructions.len() - 1];
         assert_eq!(last_instr.opcode, 0x95); // BPF_EXIT
@@ -405,8 +427,8 @@ mod solana_bpf_instruction_tests {
     #[test]
     fn test_instruction_byte_encoding() {
         let instr = BpfInstruction::new(0x95, 0, 0, 0, 0);
-        let bytes = instr.to_bytes();
-        
+        let bytes = instr.as_bytes();
+
         assert_eq!(bytes.len(), 8);
         assert_eq!(bytes[0], 0x95); // Opcode
         assert_eq!(bytes[1], 0x00); // Registers (dst:4, src:4)
@@ -421,8 +443,8 @@ mod solana_bpf_instruction_tests {
     #[test]
     fn test_instruction_with_registers() {
         let instr = BpfInstruction::new(0x79, 6, 2, 0, 0);
-        let bytes = instr.to_bytes();
-        
+        let bytes = instr.as_bytes();
+
         assert_eq!(bytes[0], 0x79); // LDX opcode
         assert_eq!(bytes[1], 0x26); // dst_reg=6 (lower 4 bits), src_reg=2 (upper 4 bits)
     }
@@ -430,8 +452,8 @@ mod solana_bpf_instruction_tests {
     #[test]
     fn test_instruction_with_offset() {
         let instr = BpfInstruction::new(0x79, 6, 2, 8, 0);
-        let bytes = instr.to_bytes();
-        
+        let bytes = instr.as_bytes();
+
         assert_eq!(bytes[2], 0x08); // Offset low byte
         assert_eq!(bytes[3], 0x00); // Offset high byte
     }
@@ -439,8 +461,8 @@ mod solana_bpf_instruction_tests {
     #[test]
     fn test_instruction_with_immediate() {
         let instr = BpfInstruction::new(0xb7, 10, 0, 0, 512);
-        let bytes = instr.to_bytes();
-        
+        let bytes = instr.as_bytes();
+
         assert_eq!(bytes[4], 0x00); // 512 = 0x0200, little endian low byte
         assert_eq!(bytes[5], 0x02); // 512 = 0x0200, little endian second byte
         assert_eq!(bytes[6], 0x00);
@@ -450,8 +472,8 @@ mod solana_bpf_instruction_tests {
     #[test]
     fn test_instruction_negative_offset() {
         let instr = BpfInstruction::new(0x55, 1, 2, -4, 0);
-        let bytes = instr.to_bytes();
-        
+        let bytes = instr.as_bytes();
+
         // -4 as 16-bit two's complement = 0xFFFC
         assert_eq!(bytes[2], 0xFC);
         assert_eq!(bytes[3], 0xFF);
@@ -460,8 +482,8 @@ mod solana_bpf_instruction_tests {
     #[test]
     fn test_instruction_large_immediate() {
         let instr = BpfInstruction::new(0xb7, 0, 0, 0, 0x12345678);
-        let bytes = instr.to_bytes();
-        
+        let bytes = instr.as_bytes();
+
         // Little endian encoding of 0x12345678
         assert_eq!(bytes[4], 0x78);
         assert_eq!(bytes[5], 0x56);
@@ -471,17 +493,17 @@ mod solana_bpf_instruction_tests {
 
     #[test]
     fn test_multiple_instruction_sequence() {
-        let instructions = vec![
-            BpfInstruction::new(0x79, 6, 2, 0, 0),   // ldx r6, [r2+0]
-            BpfInstruction::new(0x79, 7, 3, 0, 0),   // ldx r7, [r3+0]
+        let instructions = [
+            BpfInstruction::new(0x79, 6, 2, 0, 0),    // ldx r6, [r2+0]
+            BpfInstruction::new(0x79, 7, 3, 0, 0),    // ldx r7, [r3+0]
             BpfInstruction::new(0xb7, 10, 0, 0, 512), // mov r10, 512
-            BpfInstruction::new(0x85, 0, 0, 0, 1),   // call 1
-            BpfInstruction::new(0xb7, 0, 0, 0, 0),   // mov r0, 0
-            BpfInstruction::new(0x95, 0, 0, 0, 0),   // exit
+            BpfInstruction::new(0x85, 0, 0, 0, 1),    // call 1
+            BpfInstruction::new(0xb7, 0, 0, 0, 0),    // mov r0, 0
+            BpfInstruction::new(0x95, 0, 0, 0, 0),    // exit
         ];
-        
+
         assert_eq!(instructions.len(), 6);
-        
+
         // Verify each instruction type
         assert_eq!(instructions[0].opcode, 0x79); // LDX
         assert_eq!(instructions[1].opcode, 0x79); // LDX
@@ -500,7 +522,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_empty_program() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let empty_instructions = vec![];
         assert!(!solana_bpf.validate_solana_program(&empty_instructions));
     }
@@ -509,7 +531,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_program_without_exit() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0xb7, 0, 0, 0, 42), // mov r0, 42
         ];
@@ -520,7 +542,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_program_with_exit() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0xb7, 0, 0, 0, 42), // mov r0, 42
             BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit
@@ -532,7 +554,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_invalid_register() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0xb7, 15, 0, 0, 42), // mov r15, 42 (invalid register)
             BpfInstruction::new(0x95, 0, 0, 0, 0),   // exit
@@ -544,7 +566,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_invalid_src_register() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0x79, 1, 12, 0, 0), // ldx r1, [r12+0] (invalid src register)
             BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit
@@ -556,7 +578,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_valid_registers() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0xb7, 10, 0, 0, 512), // mov r10, 512 (valid)
             BpfInstruction::new(0x79, 6, 2, 0, 0),    // ldx r6, [r2+0] (valid)
@@ -569,11 +591,11 @@ mod solana_bpf_validation_tests {
     fn test_validate_jump_forward() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
-            BpfInstruction::new(0x55, 1, 2, 1, 0),  // jeq r1, r2, +1
-            BpfInstruction::new(0xb7, 0, 0, 0, 1),  // mov r0, 1
-            BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit
+            BpfInstruction::new(0x55, 1, 2, 1, 0), // jeq r1, r2, +1
+            BpfInstruction::new(0xb7, 0, 0, 0, 1), // mov r0, 1
+            BpfInstruction::new(0x95, 0, 0, 0, 0), // exit
         ];
         assert!(solana_bpf.validate_solana_program(&instructions));
     }
@@ -582,7 +604,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_jump_backward() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0xb7, 0, 0, 0, 1),  // mov r0, 1
             BpfInstruction::new(0x55, 1, 2, -1, 0), // jeq r1, r2, -1
@@ -595,7 +617,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_invalid_jump_target() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0x55, 1, 2, 10, 0), // jeq r1, r2, +10 (out of bounds)
             BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit
@@ -607,7 +629,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_invalid_negative_jump() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0x55, 1, 2, -10, 0), // jeq r1, r2, -10 (out of bounds)
             BpfInstruction::new(0x95, 0, 0, 0, 0),   // exit
@@ -619,14 +641,14 @@ mod solana_bpf_validation_tests {
     fn test_validate_program_size_limit() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         // Create a program that's too large (> 16384 instructions)
         let mut large_instructions = Vec::new();
         for _ in 0..16385 {
             large_instructions.push(BpfInstruction::new(0xb7, 0, 0, 0, 0));
         }
         large_instructions.push(BpfInstruction::new(0x95, 0, 0, 0, 0)); // exit
-        
+
         assert!(!solana_bpf.validate_solana_program(&large_instructions));
     }
 
@@ -634,14 +656,14 @@ mod solana_bpf_validation_tests {
     fn test_validate_maximum_valid_size() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         // Create a program at the size limit (16384 instructions)
         let mut max_instructions = Vec::new();
         for _ in 0..16383 {
             max_instructions.push(BpfInstruction::new(0xb7, 0, 0, 0, 0));
         }
         max_instructions.push(BpfInstruction::new(0x95, 0, 0, 0, 0)); // exit
-        
+
         assert!(solana_bpf.validate_solana_program(&max_instructions));
     }
 
@@ -649,18 +671,18 @@ mod solana_bpf_validation_tests {
     fn test_validate_instruction_classes() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         // Test all valid instruction classes
         let valid_classes = vec![
             0x00, // LD
-            0x01, // LDX  
+            0x01, // LDX
             0x02, // ST
             0x03, // STX
             0x04, // ALU
             0x05, // JMP
             0x07, // ALU64
         ];
-        
+
         for class in valid_classes {
             let instructions = vec![
                 BpfInstruction::new(class, 0, 0, 0, 0),
@@ -674,7 +696,7 @@ mod solana_bpf_validation_tests {
     fn test_validate_invalid_instruction_class() {
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
-        
+
         let instructions = vec![
             BpfInstruction::new(0x06, 0, 0, 0, 0), // Invalid class
             BpfInstruction::new(0x95, 0, 0, 0, 0), // exit
@@ -926,7 +948,7 @@ mod solana_bpf_compilation_tests {
             }
         "#;
         let compiler = Compiler::new();
-        
+
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
@@ -940,12 +962,12 @@ mod solana_bpf_compilation_tests {
     fn test_compile_large_solana_program() {
         let mut source = String::new();
         source.push_str("U0 main() {\n");
-        
+
         // Generate a large program with many operations
         for i in 0..100 {
             source.push_str(&format!("    U64 var{} = {};\n", i, i));
         }
-        
+
         source.push_str("    return 0;\n");
         source.push_str("}\n");
 
@@ -957,7 +979,7 @@ mod solana_bpf_compilation_tests {
 
         let result = compiler.compile(&source, &options);
         assert!(result.is_ok());
-        
+
         let bytecode = result.unwrap();
         assert!(bytecode.len() > 8); // Should generate at least basic bytecode
     }
@@ -997,7 +1019,7 @@ mod solana_bpf_vm_tests {
         };
 
         let bytecode = compiler.compile(source, &options).unwrap();
-        
+
         // Convert bytecode to instructions
         let mut instructions = Vec::new();
         for chunk in bytecode.chunks(8) {
@@ -1008,30 +1030,32 @@ mod solana_bpf_vm_tests {
                 let src_reg = (regs & 0xf0) >> 4;
                 let offset = i16::from_le_bytes([chunk[2], chunk[3]]);
                 let immediate = i32::from_le_bytes([chunk[4], chunk[5], chunk[6], chunk[7]]);
-                
-                instructions.push(BpfInstruction::new(opcode, dst_reg, src_reg, offset, immediate));
+
+                instructions.push(BpfInstruction::new(
+                    opcode, dst_reg, src_reg, offset, immediate,
+                ));
             }
         }
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_vm_register_operations() {
         let instructions = vec![
-            BpfInstruction::new(0xb7, 1, 0, 0, 100),   // mov r1, 100
-            BpfInstruction::new(0xb7, 2, 0, 0, 200),   // mov r2, 200
-            BpfInstruction::new(0x0f, 1, 2, 0, 0),     // add r1, r2
-            BpfInstruction::new(0xbf, 0, 1, 0, 0),     // mov r0, r1
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit
+            BpfInstruction::new(0xb7, 1, 0, 0, 100), // mov r1, 100
+            BpfInstruction::new(0xb7, 2, 0, 0, 200), // mov r2, 200
+            BpfInstruction::new(0x0f, 1, 2, 0, 0),   // add r1, r2
+            BpfInstruction::new(0xbf, 0, 1, 0, 0),   // mov r0, r1
+            BpfInstruction::new(0x95, 0, 0, 0, 0),   // exit
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.exit_code, 300); // 100 + 200
@@ -1040,15 +1064,15 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_memory_operations() {
         let instructions = vec![
-            BpfInstruction::new(0xb7, 1, 0, 0, 42),    // mov r1, 42
-            BpfInstruction::new(0x63, 10, 1, -8, 0),   // stw [r10-8], r1
-            BpfInstruction::new(0x61, 0, 10, -8, 0),   // ldw r0, [r10-8]
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit
+            BpfInstruction::new(0xb7, 1, 0, 0, 42),  // mov r1, 42
+            BpfInstruction::new(0x63, 10, 1, -8, 0), // stw [r10-8], r1
+            BpfInstruction::new(0x61, 0, 10, -8, 0), // ldw r0, [r10-8]
+            BpfInstruction::new(0x95, 0, 0, 0, 0),   // exit
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.exit_code, 42);
@@ -1057,18 +1081,18 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_conditional_jumps() {
         let instructions = vec![
-            BpfInstruction::new(0xb7, 1, 0, 0, 10),    // mov r1, 10
-            BpfInstruction::new(0xb7, 2, 0, 0, 5),     // mov r2, 5
-            BpfInstruction::new(0x2d, 1, 2, 2, 0),     // jgt r1, r2, +2
-            BpfInstruction::new(0xb7, 0, 0, 0, 0),     // mov r0, 0
-            BpfInstruction::new(0x05, 0, 0, 1, 0),     // ja +1
-            BpfInstruction::new(0xb7, 0, 0, 0, 1),     // mov r0, 1
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit
+            BpfInstruction::new(0xb7, 1, 0, 0, 10), // mov r1, 10
+            BpfInstruction::new(0xb7, 2, 0, 0, 5),  // mov r2, 5
+            BpfInstruction::new(0x2d, 1, 2, 2, 0),  // jgt r1, r2, +2
+            BpfInstruction::new(0xb7, 0, 0, 0, 0),  // mov r0, 0
+            BpfInstruction::new(0x05, 0, 0, 1, 0),  // ja +1
+            BpfInstruction::new(0xb7, 0, 0, 0, 1),  // mov r0, 1
+            BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.exit_code, 1); // 10 > 5, so should be 1
@@ -1077,14 +1101,14 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_function_calls() {
         let instructions = vec![
-            BpfInstruction::new(0x85, 0, 0, 0, 1),     // call 1 (print function)
-            BpfInstruction::new(0xb7, 0, 0, 0, 0),     // mov r0, 0
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit
+            BpfInstruction::new(0x85, 0, 0, 0, 1), // call 1 (print function)
+            BpfInstruction::new(0xb7, 0, 0, 0, 0), // mov r0, 0
+            BpfInstruction::new(0x95, 0, 0, 0, 0), // exit
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert!(vm_result.compute_units > 0);
@@ -1093,14 +1117,14 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_compute_unit_tracking() {
         let instructions = vec![
-            BpfInstruction::new(0xb7, 0, 0, 0, 42),    // mov r0, 42 (1 unit)
-            BpfInstruction::new(0x07, 0, 0, 0, 10),    // add r0, 10 (1 unit)
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit (1 unit)
+            BpfInstruction::new(0xb7, 0, 0, 0, 42), // mov r0, 42 (1 unit)
+            BpfInstruction::new(0x07, 0, 0, 0, 10), // add r0, 10 (1 unit)
+            BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit (1 unit)
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.compute_units, 3);
@@ -1109,14 +1133,14 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_stack_pointer_initialization() {
         let instructions = vec![
-            BpfInstruction::new(0xb7, 10, 0, 0, 512),  // mov r10, 512 (stack pointer)
-            BpfInstruction::new(0xbf, 0, 10, 0, 0),    // mov r0, r10
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit
+            BpfInstruction::new(0xb7, 10, 0, 0, 512), // mov r10, 512 (stack pointer)
+            BpfInstruction::new(0xbf, 0, 10, 0, 0),   // mov r0, r10
+            BpfInstruction::new(0x95, 0, 0, 0, 0),    // exit
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.exit_code, 512);
@@ -1125,17 +1149,17 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_arithmetic_operations() {
         let instructions = vec![
-            BpfInstruction::new(0xb7, 1, 0, 0, 20),    // mov r1, 20
-            BpfInstruction::new(0xb7, 2, 0, 0, 3),     // mov r2, 3
-            BpfInstruction::new(0x2f, 1, 2, 0, 0),     // mul r1, r2
-            BpfInstruction::new(0x07, 1, 0, 0, 4),     // add r1, 4
-            BpfInstruction::new(0xbf, 0, 1, 0, 0),     // mov r0, r1
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit
+            BpfInstruction::new(0xb7, 1, 0, 0, 20), // mov r1, 20
+            BpfInstruction::new(0xb7, 2, 0, 0, 3),  // mov r2, 3
+            BpfInstruction::new(0x2f, 1, 2, 0, 0),  // mul r1, r2
+            BpfInstruction::new(0x07, 1, 0, 0, 4),  // add r1, 4
+            BpfInstruction::new(0xbf, 0, 1, 0, 0),  // mov r0, r1
+            BpfInstruction::new(0x95, 0, 0, 0, 0),  // exit
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.exit_code, 64); // (20 * 3) + 4 = 64
@@ -1144,16 +1168,16 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_bitwise_operations() {
         let instructions = vec![
-            BpfInstruction::new(0xb7, 1, 0, 0, 0xFF),  // mov r1, 0xFF
-            BpfInstruction::new(0xb7, 2, 0, 0, 0x0F),  // mov r2, 0x0F
-            BpfInstruction::new(0x5f, 1, 2, 0, 0),     // and r1, r2
-            BpfInstruction::new(0xbf, 0, 1, 0, 0),     // mov r0, r1
-            BpfInstruction::new(0x95, 0, 0, 0, 0),     // exit
+            BpfInstruction::new(0xb7, 1, 0, 0, 0xFF), // mov r1, 0xFF
+            BpfInstruction::new(0xb7, 2, 0, 0, 0x0F), // mov r2, 0x0F
+            BpfInstruction::new(0x5f, 1, 2, 0, 0),    // and r1, r2
+            BpfInstruction::new(0xbf, 0, 1, 0, 0),    // mov r0, r1
+            BpfInstruction::new(0x95, 0, 0, 0, 0),    // exit
         ];
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.exit_code, 0x0F); // 0xFF & 0x0F = 0x0F
@@ -1162,7 +1186,7 @@ mod solana_bpf_vm_tests {
     #[test]
     fn test_vm_large_program_execution() {
         let mut instructions = Vec::new();
-        
+
         // Generate a larger program
         for i in 0..50 {
             instructions.push(BpfInstruction::new(0xb7, 1, 0, 0, i)); // mov r1, i
@@ -1172,7 +1196,7 @@ mod solana_bpf_vm_tests {
 
         let mut vm = BpfVm::new(&instructions);
         let result = vm.execute();
-        
+
         assert!(result.is_ok());
         let vm_result = result.unwrap();
         assert_eq!(vm_result.exit_code, 50); // Should have added 1 fifty times
@@ -1192,22 +1216,22 @@ mod solana_bpf_integration_tests {
                 return 0;
             }
         "#;
-        
+
         // Compile to Solana BPF
         let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
-        
+
         let bytecode = compiler.compile(source, &options).unwrap();
         assert!(!bytecode.is_empty());
-        
+
         // Validate the bytecode represents valid BPF instructions
         assert_eq!(bytecode.len() % 8, 0);
-        
+
         // Check that we have an exit instruction at the end
-        let last_8_bytes = &bytecode[bytecode.len()-8..];
+        let last_8_bytes = &bytecode[bytecode.len() - 8..];
         assert_eq!(last_8_bytes[0], 0x95); // BPF_EXIT opcode
     }
 
@@ -1227,16 +1251,16 @@ mod solana_bpf_integration_tests {
                 return 0;
             }
         "#;
-        
+
         let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
-        
+
         let result = compiler.compile(source, &options);
         assert!(result.is_ok());
-        
+
         let bytecode = result.unwrap();
         assert!(bytecode.len() > 50); // Should be a substantial program
     }
@@ -1267,13 +1291,13 @@ mod solana_bpf_integration_tests {
                 return 0;
             }
         "#;
-        
+
         let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
-        
+
         let result = compiler.compile(source, &options);
         assert!(result.is_ok());
     }
@@ -1281,7 +1305,7 @@ mod solana_bpf_integration_tests {
     #[test]
     fn test_compile_and_validate_solana_program() {
         let source = "U0 main() { return 0; }";
-        
+
         // Compile
         let compiler = Compiler::new();
         let options = CompileOptions {
@@ -1289,7 +1313,7 @@ mod solana_bpf_integration_tests {
             ..Default::default()
         };
         let bytecode = compiler.compile(source, &options).unwrap();
-        
+
         // Convert to instructions for validation
         let mut instructions = Vec::new();
         for chunk in bytecode.chunks(8) {
@@ -1300,11 +1324,13 @@ mod solana_bpf_integration_tests {
                 let src_reg = (regs & 0xf0) >> 4;
                 let offset = i16::from_le_bytes([chunk[2], chunk[3]]);
                 let immediate = i32::from_le_bytes([chunk[4], chunk[5], chunk[6], chunk[7]]);
-                
-                instructions.push(BpfInstruction::new(opcode, dst_reg, src_reg, offset, immediate));
+
+                instructions.push(BpfInstruction::new(
+                    opcode, dst_reg, src_reg, offset, immediate,
+                ));
             }
         }
-        
+
         // Validate
         let mut codegen = CodeGen::new();
         let solana_bpf = SolanaBpf::new(&mut codegen);
@@ -1329,16 +1355,16 @@ mod solana_bpf_integration_tests {
                 return 0;
             }
         "#;
-        
+
         let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
-        
+
         let result = compiler.compile(source, &options);
         assert!(result.is_ok());
-        
+
         let bytecode = result.unwrap();
         assert!(bytecode.len() > 40); // Multiple functions should generate more code
     }
@@ -1383,13 +1409,13 @@ mod solana_bpf_integration_tests {
                 return 0;
             }
         "#;
-        
+
         let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
-        
+
         let result = compiler.compile(source, &options);
         assert!(result.is_ok());
     }
@@ -1422,13 +1448,13 @@ mod solana_bpf_integration_tests {
                 return 0;
             }
         "#;
-        
+
         let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
-        
+
         let result = compiler.compile(source, &options);
         assert!(result.is_ok());
     }
@@ -1437,52 +1463,52 @@ mod solana_bpf_integration_tests {
     fn test_solana_vs_linux_bpf_differences() {
         let source = "U0 main() { return 0; }";
         let compiler = Compiler::new();
-        
+
         let solana_options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
         let solana_bytecode = compiler.compile(source, &solana_options).unwrap();
-        
+
         let linux_options = CompileOptions {
             target: CompileTarget::LinuxBpf,
             ..Default::default()
         };
         let linux_bytecode = compiler.compile(source, &linux_options).unwrap();
-        
+
         // Both should be valid BPF bytecode
         assert_eq!(solana_bytecode.len() % 8, 0);
         assert_eq!(linux_bytecode.len() % 8, 0);
-        
+
         // Both should have exit instructions
-        assert_eq!(solana_bytecode[solana_bytecode.len()-8], 0x95);
-        assert_eq!(linux_bytecode[linux_bytecode.len()-8], 0x95);
+        assert_eq!(solana_bytecode[solana_bytecode.len() - 8], 0x95);
+        assert_eq!(linux_bytecode[linux_bytecode.len() - 8], 0x95);
     }
 
     #[test]
     fn test_performance_intensive_program() {
         let mut source = String::from("U0 main() {\n");
-        
+
         // Generate a performance-intensive program
         source.push_str("    U64 result = 0;\n");
         for i in 0..200 {
             source.push_str(&format!("    result += {};\n", i));
-            source.push_str(&format!("    result *= 2;\n"));
-            source.push_str(&format!("    result = result % 1000000;\n"));
+            source.push_str("    result *= 2;\n");
+            source.push_str("    result = result % 1000000;\n");
         }
         source.push_str("    PrintF(\"Final result: %d\\n\", result);\n");
         source.push_str("    return 0;\n");
         source.push_str("}\n");
-        
+
         let compiler = Compiler::new();
         let options = CompileOptions {
             target: CompileTarget::SolanaBpf,
             ..Default::default()
         };
-        
+
         let result = compiler.compile(&source, &options);
         assert!(result.is_ok());
-        
+
         let bytecode = result.unwrap();
         assert!(bytecode.len() > 8); // Should generate at least basic bytecode
     }
