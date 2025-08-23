@@ -5,34 +5,34 @@ This comprehensive documentation system provides detailed guides for developing 
 ## Documentation Structure
 
 ### Getting Started
-- [Quick Start Guide](./getting-started/quick-start.md)
-- [HolyC Language Reference](./language-reference/holyc-solana.md)
-- [Development Environment Setup](./getting-started/environment-setup.md)
+- [Quick Start Guide](./getting-started/quick-start.md) - Get up and running in minutes
+- [HolyC Language Reference](./language-reference/holyc-solana.md) - Complete language syntax and features
+- [Development Environment Setup](./getting-started/environment-setup.md) - Development environment configuration
 
 ### Program Guides
-- [AMM (Automated Market Maker)](./programs/amm.md)
-- [Borrow/Lending Protocols](./programs/lending.md)
-- [Orderbook Systems](./programs/orderbook.md)
-- [Prediction Markets](./programs/prediction-markets.md)
-- [Token Programs](./programs/token.md)
-- [Escrow Contracts](./programs/escrow.md)
+- [AMM (Automated Market Maker)](./programs/amm.md) - Constant product AMM with TWAP oracles
+- [Borrow/Lending Protocols](./programs/lending.md) - Interest rate models and liquidation systems
+- [Orderbook Systems](./programs/orderbook.md) - Traditional order matching with advanced features
+- [Prediction Markets](./programs/prediction-markets.md) - LMSR pricing with oracle integration
+- [Token Programs](./programs/token.md) - SPL Token compatible implementations
+- [Escrow Contracts](./programs/escrow.md) - Multi-party escrow with arbitration
 
 ### Advanced Topics
-- [Cross-Program Invocation (CPI)](./advanced/cpi.md)
-- [Account Management](./advanced/accounts.md)
-- [Program Derived Addresses (PDAs)](./advanced/pdas.md)
-- [Security Best Practices](./advanced/security.md)
-- [Performance Optimization](./advanced/performance.md)
+- [Cross-Program Invocation (CPI)](./advanced/cpi.md) - Program composability and integration
+- [Account Management](./advanced/accounts.md) - Account lifecycle and optimization
+- [Program Derived Addresses (PDAs)](./advanced/pdas.md) - Deterministic account generation
+- [Security Best Practices](./advanced/security.md) - Security patterns and vulnerability prevention
+- [Performance Optimization](./advanced/performance.md) - Compute unit optimization and efficiency
 
 ### API Reference
-- [HolyC Solana Standard Library](./api/stdlib.md)
-- [BPF System Calls](./api/syscalls.md)
-- [Data Structures](./api/data-structures.md)
+- [HolyC Solana Standard Library](./api/stdlib.md) - Core functions and utilities
+- [BPF System Calls](./api/syscalls.md) - Low-level BPF operations
+- [Data Structures](./api/data-structures.md) - Standard data structures and serialization
 
 ### Examples
-- [Complete Program Examples](../examples/)
-- [Code Snippets](./examples/snippets.md)
-- [Common Patterns](./examples/patterns.md)
+- [Complete Program Examples](../examples/) - Full implementation examples
+- [Code Snippets](./examples/snippets.md) - Reusable code patterns
+- [Common Patterns](./examples/patterns.md) - Best practice implementations
 
 ## Innovative Documentation Features
 
