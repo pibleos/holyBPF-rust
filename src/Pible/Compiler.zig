@@ -173,7 +173,9 @@ pub const Compiler = struct {
             BpfVm.BpfVmError.ProgramExit => {
                 // Normal program exit
                 const stats = vm.getStats();
-                try self.addError(try std.fmt.allocPrint(self.allocator, "VM test completed: exit_code={}, compute_units={}, logs={}", .{ vm.registers[0], stats.compute_units, stats.log_count }));
+                const success_msg = try std.fmt.allocPrint(self.allocator, "VM test completed: exit_code={}, compute_units={}, logs={}", .{ vm.registers[0], stats.compute_units, stats.log_count });
+                defer self.allocator.free(success_msg);
+                try self.addError(success_msg);
                 return;
             },
             else => {
@@ -184,6 +186,7 @@ pub const Compiler = struct {
         
         // Log execution results
         const log_msg = try std.fmt.allocPrint(self.allocator, "VM execution successful: exit_code={}, compute_units={}", .{ result.exit_code, result.compute_units_used });
+        defer self.allocator.free(log_msg);
         try self.addError(log_msg);
     }
     
