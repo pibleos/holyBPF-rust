@@ -2,6 +2,7 @@ use thiserror::Error;
 use crate::pible::codegen::{CodeGen, BpfInstruction};
 
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum SolanaError {
     #[error("IDL generation failed: {0}")]
     IdlGenerationFailed(String),
@@ -9,10 +10,12 @@ pub enum SolanaError {
     InvalidProgram(String),
 }
 
+#[allow(dead_code)]
 pub struct SolanaBpf {
     codegen: Vec<BpfInstruction>,
 }
 
+#[allow(dead_code)]
 impl SolanaBpf {
     pub fn new(_codegen: &mut CodeGen) -> Self {
         Self {

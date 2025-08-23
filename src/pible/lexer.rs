@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum TokenType {
     // Keywords
     U0,
@@ -69,6 +70,7 @@ pub enum TokenType {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct Token<'a> {
     pub token_type: TokenType,
     pub lexeme: &'a str,

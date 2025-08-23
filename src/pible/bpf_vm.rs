@@ -2,6 +2,7 @@ use thiserror::Error;
 use crate::pible::codegen::BpfInstruction;
 
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum VmError {
     #[error("Invalid instruction: {0}")]
     InvalidInstruction(String),

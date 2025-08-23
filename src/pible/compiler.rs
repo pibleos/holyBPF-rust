@@ -12,6 +12,7 @@ pub enum CompileTarget {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct CompileOptions<'a> {
     pub target: CompileTarget,
     pub generate_idl: bool,
@@ -33,6 +34,7 @@ impl<'a> Default for CompileOptions<'a> {
 }
 
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum CompileError {
     #[error("Lexical analysis failed: {0}")]
     LexError(String),
@@ -58,6 +60,7 @@ pub enum CompileError {
     IoError(#[from] std::io::Error),
 }
 
+#[allow(dead_code)]
 pub struct Compiler {
     error_messages: Vec<String>,
 }
@@ -224,6 +227,7 @@ impl Compiler {
         dir.join(format!("{}.bpf", file_stem)).to_str().unwrap().to_string()
     }
 
+    #[allow(dead_code)]
     pub fn get_errors(&self) -> &[String] {
         &self.error_messages
     }

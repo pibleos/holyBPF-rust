@@ -2,6 +2,7 @@ use thiserror::Error;
 use crate::pible::lexer::{Token, TokenType};
 
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum ParseError {
     #[error("Unexpected token: {0:?} at line {1}")]
     UnexpectedToken(TokenType, usize),

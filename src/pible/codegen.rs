@@ -2,6 +2,7 @@ use thiserror::Error;
 use crate::pible::parser::{Node, NodeType};
 
 #[derive(Error, Debug)]
+#[allow(dead_code)]
 pub enum CodeGenError {
     #[error("Unsupported node type: {0:?}")]
     UnsupportedNodeType(NodeType),
@@ -164,7 +165,7 @@ impl CodeGen {
             },
             NodeType::Identifier => {
                 // Process identifier - could be variable reference or function name
-                if let Some(ref value) = node.value {
+                if let Some(ref _value) = node.value {
                     // For identifiers, we might need to load from memory or reference
                     // This is context-dependent and handled by parent nodes
                 }
@@ -185,7 +186,7 @@ impl CodeGen {
 
     fn generate_function(&mut self, node: &Node) -> Result<(), CodeGenError> {
         // Generate function prologue and process function body
-        if let Some(ref name) = node.value {
+        if let Some(ref _name) = node.value {
             // Function entry point - could emit function label here
             // For BPF, functions are typically inlined or called via helper functions
         }
