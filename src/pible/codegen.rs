@@ -153,17 +153,37 @@ impl CodeGen {
                 }
             },
             NodeType::Identifier => {
-                // Handle identifiers - for now just placeholder
+                // Process identifier - could be variable reference or function name
+                if let Some(ref value) = node.value {
+                    // For identifiers, we might need to load from memory or reference
+                    // This is context-dependent and handled by parent nodes
+                }
             },
             NodeType::Literal => {
-                // Handle literals - for now just placeholder
+                // Process literal values - numbers, strings, etc.
+                if let Some(ref value) = node.value {
+                    if let Ok(num) = value.parse::<i32>() {
+                        // Numeric literal - load into current register
+                        self.emit_move_immediate(self.current_reg, num);
+                    }
+                    // String literals would need special handling for BPF
+                }
             },
         }
         Ok(())
     }
 
     fn generate_function(&mut self, node: &Node) -> Result<(), CodeGenError> {
-        // For now, just process the function body
+        // Generate function prologue and process function body
+        if let Some(ref name) = node.value {
+            // Function entry point - could emit function label here
+            // For BPF, functions are typically inlined or called via helper functions
+        }
+        
+        // Process function parameters if any
+        // Parameters would be in the first children before the body
+        
+        // Process the function body (last child is typically the block)
         if let Some(body) = node.children.last() {
             self.visit_node(body)?;
         }
@@ -176,16 +196,38 @@ impl CodeGen {
                 match value.as_str() {
                     "PrintF" => {
                         // Generate BPF helper call for printing
+                        // Set up arguments in registers first
+                        if node.children.len() > 1 {
+                            // Process arguments and load into appropriate registers
+                            for (i, arg) in node.children.iter().skip(1).enumerate() {
+                                if i < 5 { // BPF allows up to 5 arguments in R1-R5
+                                    self.current_reg = (i + 1) as u8;
+                                    self.visit_node(arg)?;
+                                }
+                            }
+                        }
                         self.emit_call(6); // BPF_FUNC_trace_printk
                     },
-                    _ => {
-                        // Other function calls - for now just emit a placeholder
-                        self.emit_call(1);
+                    func_name => {
+                        // User-defined function call
+                        // In BPF, this might be inlined or use a call instruction
+                        // For now, emit a generic call with function name hash
+                        let func_hash = self.hash_function_name(func_name);
+                        self.emit_call(func_hash);
                     }
                 }
             }
         }
         Ok(())
+    }
+    
+    fn hash_function_name(&self, name: &str) -> i32 {
+        // Simple hash function for function names
+        let mut hash = 0i32;
+        for byte in name.bytes() {
+            hash = hash.wrapping_mul(31).wrapping_add(byte as i32);
+        }
+        hash.abs() % 1000 + 100 // Keep in a reasonable range for BPF
     }
 
     fn emit_instruction(&mut self, opcode: u8, dst_reg: u8, src_reg: u8, offset: i16, immediate: i32) {

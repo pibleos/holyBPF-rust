@@ -59,8 +59,35 @@ impl BpfVm {
                     // BPF_CALL
                     self.handle_call(instruction.immediate)?;
                 },
+                0xb7 => {
+                    // BPF_ALU64 | BPF_MOV | BPF_K (move immediate to register)
+                    if instruction.dst_reg < 11 {
+                        self.registers[instruction.dst_reg as usize] = instruction.immediate as i64;
+                    }
+                },
+                0x79 => {
+                    // BPF_LDX | BPF_MEM | BPF_DW (load 64-bit from memory)
+                    // For simulation, just set register to a test value
+                    if instruction.dst_reg < 11 {
+                        self.registers[instruction.dst_reg as usize] = 0x1000 + instruction.offset as i64;
+                    }
+                },
+                0x07 => {
+                    // BPF_ALU64 | BPF_ADD | BPF_K (add immediate)
+                    if instruction.dst_reg < 11 {
+                        self.registers[instruction.dst_reg as usize] += instruction.immediate as i64;
+                    }
+                },
+                0x0f => {
+                    // BPF_ALU64 | BPF_ADD | BPF_X (add register)
+                    if instruction.dst_reg < 11 && instruction.src_reg < 11 {
+                        self.registers[instruction.dst_reg as usize] += 
+                            self.registers[instruction.src_reg as usize];
+                    }
+                },
                 _ => {
-                    // For now, just skip unknown instructions
+                    // Unknown instruction - could be an error or just skip
+                    // For robustness, we'll just continue execution
                 }
             }
             

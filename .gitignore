@@ -6,6 +6,26 @@ zig-out/
 target/
 Cargo.lock
 
+# Rust artifacts and cache
+**/*.rs.bk
+*.pdb
+**/debug/
+**/release/
+
+# Rust IDE files
+.vscode/settings.json
+*.code-workspace
+
+# Rustfmt backup files
+**/*.rs.bk
+
+# Rust documentation
+doc/
+
+# Rust profiling
+perf.data*
+flamegraph.svg
+
 # Compiled BPF files
 *.bpf
 
