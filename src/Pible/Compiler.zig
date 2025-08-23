@@ -52,7 +52,7 @@ pub const Compiler = struct {
         return .{
             .allocator = allocator,
             .source = source,
-            .error_messages = std.ArrayList([]const u8).init(allocator),
+            .error_messages = std.ArrayList([]const u8){},
             .options = options,
             .idl = if (options.generate_idl) SolanaBpf.SolanaIdl.init(allocator, "holyc_program") else null,
         };
@@ -62,7 +62,7 @@ pub const Compiler = struct {
         for (self.error_messages.items) |msg| {
             self.allocator.free(msg);
         }
-        self.error_messages.deinit();
+        self.error_messages.deinit(self.allocator);
         
         if (self.idl) |*idl| {
             idl.deinit();
@@ -203,9 +203,9 @@ pub const Compiler = struct {
         if (node.type == .FunctionDecl) {
             const instruction = SolanaBpf.IdlInstruction{
                 .name = node.token.lexeme,
-                .args = std.ArrayList(SolanaBpf.IdlArg).init(self.allocator),
+                .args = std.ArrayList(SolanaBpf.IdlArg){},
             };
-            try idl.instructions.append(instruction);
+            try idl.instructions.append(self.allocator, instruction);
         }
         
         // Recursively process children
@@ -225,15 +225,15 @@ pub const Compiler = struct {
     
     /// Convert instructions to byte array
     fn instructionsToBytes(self: *Self, instructions: []const CodeGen.BpfInstruction) ![]const u8 {
-        var output = std.ArrayList(u8).init(self.allocator);
-        defer output.deinit();
+        var output = std.ArrayList(u8){};
+        defer output.deinit(self.allocator);
 
         for (instructions) |instruction| {
             const bytes = std.mem.asBytes(&instruction);
-            try output.appendSlice(bytes);
+            try output.appendSlice(self.allocator, bytes);
         }
 
-        return output.toOwnedSlice();
+        return output.toOwnedSlice(self.allocator);
     }
     
     /// Generate IDL JSON output
@@ -246,7 +246,7 @@ pub const Compiler = struct {
 
     fn addError(self: *Self, message: []const u8) !void {
         const owned_msg = try self.allocator.dupe(u8, message);
-        try self.error_messages.append(owned_msg);
+        try self.error_messages.append(self.allocator, owned_msg);
     }
 
     /// Get compilation error messages

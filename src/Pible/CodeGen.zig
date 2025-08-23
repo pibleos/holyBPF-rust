@@ -62,7 +62,7 @@ pub const CodeGen = struct {
 
     pub fn init(allocator: std.mem.Allocator) Self {
         return .{
-            .instructions = std.ArrayList(BpfInstruction).init(allocator),
+            .instructions = std.ArrayList(BpfInstruction){},
             .current_function = null,
             .stack_size = 0,
             .allocator = allocator,
@@ -73,7 +73,7 @@ pub const CodeGen = struct {
     }
 
     pub fn deinit(self: *Self) void {
-        self.instructions.deinit();
+        self.instructions.deinit(self.allocator);
         self.labels.deinit();
         self.variables.deinit();
     }
@@ -319,7 +319,7 @@ pub const CodeGen = struct {
 
     // BPF instruction emission helpers
     fn emitMov(self: *Self, dst_reg: u4, imm: i32) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_ALU64 | BPF_MOV,
             .dst_reg = dst_reg,
             .src_reg = 0,
@@ -329,7 +329,7 @@ pub const CodeGen = struct {
     }
 
     fn emitAlu64(self: *Self, op: u8, dst_reg: u4, src_reg: u4) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_ALU64 | op,
             .dst_reg = dst_reg,
             .src_reg = src_reg,
@@ -339,7 +339,7 @@ pub const CodeGen = struct {
     }
 
     fn emitLoad(self: *Self, offset: i16) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_LDX | 0x08, // LDXDW
             .dst_reg = 0,
             .src_reg = 10, // Frame pointer
@@ -349,7 +349,7 @@ pub const CodeGen = struct {
     }
 
     fn emitStore(self: *Self, offset: i16) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_STX | 0x08, // STXDW
             .dst_reg = 10, // Frame pointer
             .src_reg = 0,
@@ -359,7 +359,7 @@ pub const CodeGen = struct {
     }
 
     fn emitCall(self: *Self, func_id: i32) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_JMP | BPF_CALL,
             .dst_reg = 0,
             .src_reg = 0,
@@ -369,7 +369,7 @@ pub const CodeGen = struct {
     }
 
     fn emitJump(self: *Self, offset: i16) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_JMP | 0x00, // JA
             .dst_reg = 0,
             .src_reg = 0,
@@ -379,7 +379,7 @@ pub const CodeGen = struct {
     }
 
     fn emitJumpIf(self: *Self, dst_reg: u4, offset: i16) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_JMP | 0x10, // JEQ
             .dst_reg = dst_reg,
             .src_reg = 0,
@@ -390,7 +390,7 @@ pub const CodeGen = struct {
 
     /// Emit conditional jump instruction
     fn emitJumpCond(self: *Self, condition: u8, dst_reg: u4, src_reg: u4, offset: i16) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_JMP | condition,
             .dst_reg = dst_reg,
             .src_reg = src_reg,
@@ -400,7 +400,7 @@ pub const CodeGen = struct {
     }
 
     fn emitExit(self: *Self) CodeGenError!void {
-        try self.instructions.append( BpfInstruction{
+        try self.instructions.append(self.allocator, BpfInstruction{
             .opcode = BPF_JMP | BPF_EXIT,
             .dst_reg = 0,
             .src_reg = 0,

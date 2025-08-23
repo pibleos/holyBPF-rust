@@ -7,9 +7,11 @@ pub fn build(b: *std.Build) void {
     // Build the HolyC compiler
     const holyc_compiler = b.addExecutable(.{
         .name = "pible",
-        .root_source_file = b.path("src/Pible/Main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/Pible/Main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     b.installArtifact(holyc_compiler);
 
@@ -56,17 +58,21 @@ pub fn build(b: *std.Build) void {
     
     // Add unit tests from src
     const tests = b.addTest(.{
-        .root_source_file = b.path("src/Pible/Tests.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/Pible/Tests.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     test_step.dependOn(&b.addRunArtifact(tests).step);
     
     // Add simplified integration tests
     const integration_tests = b.addTest(.{
-        .root_source_file = b.path("tests/main.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("tests/main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     test_step.dependOn(&b.addRunArtifact(integration_tests).step);
 }

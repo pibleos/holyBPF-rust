@@ -7,9 +7,15 @@ Always reference these instructions first and fallback to search or bash command
 ## Rules for This Project
 
 ### Zig Version Requirements
-- **ALWAYS use Zig 0.15.1 or later** for this project
-- The project requires Zig 0.15.1 minimum for proper build.zig.zon format support
-- Do not use older Zig versions (0.14.x or earlier) as they have incompatible build system formats
+- **ALWAYS use Zig 0.16.x or later** for this project
+- The project requires Zig 0.16.x minimum for proper build system and ArrayList API compatibility
+- Do not use older Zig versions (0.15.x or earlier) as they have incompatible APIs:
+  - ArrayList.init() vs ArrayList{} initialization
+  - append() requiring allocator parameter 
+  - deinit() requiring allocator parameter
+  - writer() requiring allocator parameter
+  - toOwnedSlice() requiring allocator parameter
+  - .root_source_file vs .root_module build API changes
 - When updating Zig version requirements, always test the build to ensure compatibility
 
 ## Working Effectively
@@ -23,12 +29,13 @@ Pible transforms HolyC programs into BPF (Berkeley Packet Filter) bytecode that 
 
 ### Prerequisites and Setup
 - **CRITICAL**: Install Zig programming language (version 0.15.1 or later):
-  - **Primary method**: Download from https://ziglang.org/download/0.15.1/zig-linux-x86_64-0.15.1.tar.xz
+  - **Primary method**: Download from https://ziglang.org/builds/ (latest 0.16.x development build)
     ```bash
     cd /tmp
-    wget https://ziglang.org/download/0.15.1/zig-linux-x86_64-0.15.1.tar.xz
-    tar -xf zig-linux-x86_64-0.15.1.tar.xz
-    export PATH=/tmp/zig-linux-x86_64-0.15.1:$PATH
+    # Get latest development build (0.16.x)
+    wget https://ziglang.org/builds/zig-x86_64-linux-0.16.0-dev.13+1594c8055.tar.xz
+    tar -xf zig-x86_64-linux-0.16.0-dev.13+1594c8055.tar.xz
+    export PATH=/tmp/zig-x86_64-linux-0.16.0-dev.13+1594c8055:$PATH
     ```
   - **Alternative method**: Via package manager (if available):
     ```bash
@@ -37,7 +44,7 @@ Pible transforms HolyC programs into BPF (Berkeley Packet Filter) bytecode that 
     # Or via snap
     sudo snap install zig --classic
     ```
-  - **Verify installation**: `zig version` (should show 0.15.1 or later)
+  - **Verify installation**: `zig version` (should show 0.16.x or later)
   - **CRITICAL NOTE**: If network access is restricted, Zig installation may fail. 
     In such cases, the build commands documented below cannot be validated but represent 
     the expected workflow once Zig is properly installed.

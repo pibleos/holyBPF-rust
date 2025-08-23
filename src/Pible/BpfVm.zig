@@ -68,11 +68,11 @@ pub const BpfVm = struct {
             .program = program,
             .stack = [_]u8{0} ** 512,
             .stack_ptr = 512, // Stack grows downward
-            .heap = std.ArrayList(u8).init(allocator),
+            .heap = std.ArrayList(u8){},
             .compute_units = 0,
             .max_compute_units = 200_000, // Solana BPF limit
             .allocator = allocator,
-            .logs = std.ArrayList([]const u8).init(allocator),
+            .logs = std.ArrayList([]const u8){},
             .return_data = null,
             .solana_accounts = null,
             .program_id = null,
@@ -80,11 +80,11 @@ pub const BpfVm = struct {
     }
     
     pub fn deinit(self: *Self) void {
-        self.heap.deinit();
+        self.heap.deinit(self.allocator);
         for (self.logs.items) |log| {
             self.allocator.free(log);
         }
-        self.logs.deinit();
+        self.logs.deinit(self.allocator);
         if (self.return_data) |data| {
             self.allocator.free(data);
         }
@@ -236,7 +236,7 @@ pub const BpfVm = struct {
         
         // For now, just log the fact that printk was called
         const log_msg = try std.fmt.allocPrint(self.allocator, "BPF trace_printk called with format at 0x{x}", .{fmt_ptr});
-        try self.logs.append(log_msg);
+        try self.logs.append(self.allocator, log_msg);
         
         // Return number of bytes written
         self.registers[0] = 20; // Fake return value
@@ -251,7 +251,7 @@ pub const BpfVm = struct {
         
         // For emulation, create a log entry
         const log_msg = try std.fmt.allocPrint(self.allocator, "SOL_LOG: message at 0x{x}, length {}", .{ msg_ptr, msg_len });
-        try self.logs.append(log_msg);
+        try self.logs.append(self.allocator, log_msg);
         
         self.registers[0] = 0; // Success
     }
@@ -261,17 +261,17 @@ pub const BpfVm = struct {
         // r1-r5 contain 64-bit values to log
         const values = [_]u64{ self.registers[1], self.registers[2], self.registers[3], self.registers[4], self.registers[5] };
         
-        var log_buffer = std.ArrayList(u8).init(self.allocator);
-        defer log_buffer.deinit();
+        var log_buffer = std.ArrayList(u8){};
+        defer log_buffer.deinit(self.allocator);
         
-        try log_buffer.appendSlice("SOL_LOG_64: ");
+        try log_buffer.appendSlice(self.allocator, "SOL_LOG_64: ");
         for (values, 0..) |value, i| {
-            if (i > 0) try log_buffer.appendSlice(", ");
-            try std.fmt.format(log_buffer.writer(), "{}", .{value});
+            if (i > 0) try log_buffer.appendSlice(self.allocator, ", ");
+            try std.fmt.format(log_buffer.writer(self.allocator), "{}", .{value});
         }
         
-        const log_msg = try log_buffer.toOwnedSlice();
-        try self.logs.append(log_msg);
+        const log_msg = try log_buffer.toOwnedSlice(self.allocator);
+        try self.logs.append(self.allocator, log_msg);
         
         self.registers[0] = 0; // Success
     }
@@ -282,7 +282,7 @@ pub const BpfVm = struct {
         const pubkey_ptr = self.registers[1];
         
         const log_msg = try std.fmt.allocPrint(self.allocator, "SOL_LOG_PUBKEY: pubkey at 0x{x}", .{pubkey_ptr});
-        try self.logs.append(log_msg);
+        try self.logs.append(self.allocator, log_msg);
         
         self.registers[0] = 0; // Success
     }

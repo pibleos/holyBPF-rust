@@ -69,16 +69,17 @@ pub const SolanaCodeGen = struct {
     const Self = @This();
     
     pub fn init(allocator: std.mem.Allocator, base_codegen: *CodeGen.CodeGen) Self {
+        _ = allocator; // Currently unused but kept for API consistency
         return .{
             .base_codegen = base_codegen,
             .program_type = .Native,
             .program_id = null,
-            .accounts_used = std.ArrayList([]const u8).init(allocator),
+            .accounts_used = std.ArrayList([]const u8){},
         };
     }
     
     pub fn deinit(self: *Self) void {
-        self.accounts_used.deinit();
+        self.accounts_used.deinit(self.base_codegen.allocator);
     }
     
     /// Generate Solana BPF entrypoint function
@@ -185,81 +186,79 @@ pub const SolanaIdl = struct {
         return .{
             .program_name = program_name,
             .program_id = null,
-            .instructions = std.ArrayList(IdlInstruction).init(allocator),
-            .accounts = std.ArrayList(IdlAccount).init(allocator),
-            .types = std.ArrayList(IdlType).init(allocator),
+            .instructions = std.ArrayList(IdlInstruction){},
+            .accounts = std.ArrayList(IdlAccount){},
+            .types = std.ArrayList(IdlType){},
             .allocator = allocator,
         };
     }
     
     pub fn deinit(self: *Self) void {
-        self.instructions.deinit();
-        self.accounts.deinit();
-        self.types.deinit();
+        self.instructions.deinit(self.allocator);
+        self.accounts.deinit(self.allocator);
+        self.types.deinit(self.allocator);
     }
     
     /// Generate IDL JSON from the current program definition
     pub fn generateJson(self: *Self) ![]const u8 {
-        var json_buffer = std.ArrayList(u8).init(self.allocator);
-        defer json_buffer.deinit();
+        var json_buffer = std.ArrayList(u8){};
+        defer json_buffer.deinit(self.allocator);
         
-        try json_buffer.appendSlice("{\n");
-        try json_buffer.appendSlice("  \"version\": \"0.1.0\",\n");
+        try json_buffer.appendSlice(self.allocator, "{\n");
+        try json_buffer.appendSlice(self.allocator, "  \"version\": \"0.1.0\",\n");
         
         // Program name
-        try json_buffer.appendSlice("  \"name\": \"");
-        try json_buffer.appendSlice(self.program_name);
-        try json_buffer.appendSlice("\",\n");
+        try json_buffer.appendSlice(self.allocator, "  \"name\": \"");
+        try json_buffer.appendSlice(self.allocator, self.program_name);
+        try json_buffer.appendSlice(self.allocator, "\",\n");
         
         // Instructions
-        try json_buffer.appendSlice("  \"instructions\": [\n");
+        try json_buffer.appendSlice(self.allocator, "  \"instructions\": [\n");
         for (self.instructions.items, 0..) |instruction, i| {
             try self.serializeInstruction(&json_buffer, instruction);
             if (i < self.instructions.items.len - 1) {
-                try json_buffer.appendSlice(",");
+                try json_buffer.appendSlice(self.allocator, ",");
             }
-            try json_buffer.appendSlice("\n");
+            try json_buffer.appendSlice(self.allocator, "\n");
         }
-        try json_buffer.appendSlice("  ],\n");
+        try json_buffer.appendSlice(self.allocator, "  ],\n");
         
         // Accounts
-        try json_buffer.appendSlice("  \"accounts\": [\n");
+        try json_buffer.appendSlice(self.allocator, "  \"accounts\": [\n");
         for (self.accounts.items, 0..) |account, i| {
             try self.serializeAccount(&json_buffer, account);
             if (i < self.accounts.items.len - 1) {
-                try json_buffer.appendSlice(",");
+                try json_buffer.appendSlice(self.allocator, ",");
             }
-            try json_buffer.appendSlice("\n");
+            try json_buffer.appendSlice(self.allocator, "\n");
         }
-        try json_buffer.appendSlice("  ],\n");
+        try json_buffer.appendSlice(self.allocator, "  ],\n");
         
         // Types
-        try json_buffer.appendSlice("  \"types\": []\n");
-        try json_buffer.appendSlice("}\n");
+        try json_buffer.appendSlice(self.allocator, "  \"types\": []\n");
+        try json_buffer.appendSlice(self.allocator, "}\n");
         
-        return json_buffer.toOwnedSlice();
+        return json_buffer.toOwnedSlice(self.allocator);
     }
     
     fn serializeInstruction(self: *Self, buffer: *std.ArrayList(u8), instruction: IdlInstruction) !void {
-        _ = self; // TODO: Use self for additional context if needed
-        try buffer.appendSlice("    {\n");
-        try buffer.appendSlice("      \"name\": \"");
-        try buffer.appendSlice(instruction.name);
-        try buffer.appendSlice("\",\n");
-        try buffer.appendSlice("      \"args\": []\n");
-        try buffer.appendSlice("    }");
+        try buffer.appendSlice(self.allocator, "    {\n");
+        try buffer.appendSlice(self.allocator, "      \"name\": \"");
+        try buffer.appendSlice(self.allocator, instruction.name);
+        try buffer.appendSlice(self.allocator, "\",\n");
+        try buffer.appendSlice(self.allocator, "      \"args\": []\n");
+        try buffer.appendSlice(self.allocator, "    }");
     }
     
     fn serializeAccount(self: *Self, buffer: *std.ArrayList(u8), account: IdlAccount) !void {
-        _ = self; // TODO: Use self for additional context if needed
-        try buffer.appendSlice("    {\n");
-        try buffer.appendSlice("      \"name\": \"");
-        try buffer.appendSlice(account.name);
-        try buffer.appendSlice("\",\n");
-        try buffer.appendSlice("      \"type\": \"");
-        try buffer.appendSlice(account.account_type);
-        try buffer.appendSlice("\"\n");
-        try buffer.appendSlice("    }");
+        try buffer.appendSlice(self.allocator, "    {\n");
+        try buffer.appendSlice(self.allocator, "      \"name\": \"");
+        try buffer.appendSlice(self.allocator, account.name);
+        try buffer.appendSlice(self.allocator, "\",\n");
+        try buffer.appendSlice(self.allocator, "      \"type\": \"");
+        try buffer.appendSlice(self.allocator, account.account_type);
+        try buffer.appendSlice(self.allocator, "\"\n");
+        try buffer.appendSlice(self.allocator, "    }");
     }
 };
 
