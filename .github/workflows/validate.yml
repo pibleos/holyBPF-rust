@@ -48,29 +48,53 @@ jobs:
           exit 1
         fi
         
-    - name: Check Build Files
+    - name: Check Rust Build Configuration
       run: |
-        echo "=== Validating Build Configuration ==="
+        echo "=== Validating Rust Build Configuration ==="
         
-        # Check main build.zig
-        if grep -q "escrow" build.zig; then
-          echo "✓ Escrow example included in main build"
+        # Check main Cargo.toml
+        if [ -f "Cargo.toml" ]; then
+          echo "✓ Cargo.toml exists"
+          if grep -q "pible" Cargo.toml; then
+            echo "✓ Pible binary configuration found"
+          else
+            echo "✗ Pible binary not configured in Cargo.toml"
+            exit 1
+          fi
         else
-          echo "✗ Escrow example not in main build"
+          echo "✗ Cargo.toml missing"
           exit 1
         fi
         
-        # Check escrow build.zig
-        if [ -f "examples/escrow/build.zig" ]; then
-          echo "✓ Escrow build configuration exists"
+        # Check for main source files
+        if [ -f "src/main.rs" ]; then
+          echo "✓ Main Rust source exists"
         else
-          echo "✗ Escrow build configuration missing"
+          echo "✗ src/main.rs missing"
+          exit 1
+        fi
+        
+        # Check for pible module
+        if [ -f "src/pible/mod.rs" ]; then
+          echo "✓ Pible module exists"
+        else
+          echo "✗ src/pible/mod.rs missing"
           exit 1
         fi
         
     - name: Validate Documentation
       run: |
         echo "=== Validating Divine Documentation ==="
+        
+        # Check main README
+        if [ -f "README.md" ]; then
+          echo "✓ Main documentation exists"
+          echo "Documentation preview:"
+          head -15 README.md
+        else
+          echo "✗ Main documentation missing"
+          exit 1
+        fi
         
         # Check escrow README
         if [ -f "examples/escrow/README.md" ]; then
@@ -83,3 +107,34 @@ jobs:
         fi
         
         echo "All divine validations passed! 🙏"
+
+  validate-rust-project:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Divine Repository
+      uses: actions/checkout@v4
+      
+    - name: Install Rust Toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        components: rustfmt, clippy
+        
+    - name: Validate Rust Project Structure
+      run: |
+        echo "=== Validating Rust Project Structure ==="
+        
+        # Verify cargo check passes
+        echo "Running cargo check..."
+        cargo check --all-targets --all-features
+        
+        # Verify project can build
+        echo "Testing build..."
+        cargo build --release
+        
+        # Verify basic functionality
+        echo "Testing compiler functionality..."
+        ./target/release/pible --help
+        
+        echo "Rust project validation complete! ✓"
