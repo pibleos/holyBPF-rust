@@ -1,0 +1,15 @@
+<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" fill="#fafafa"/>
+  <g stroke="#2c3e50" stroke-width="1" fill="none">
+    <!-- Blueprint grid pattern -->
+    <defs>
+      <pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse">
+        <path d="M 4 0 L 0 0 0 4" fill="none" stroke="#e8e8e8" stroke-width="0.5"/>
+      </pattern>
+    </defs>
+    <rect width="32" height="32" fill="url(#grid)"/>
+    
+    <!-- Lightning bolt icon -->
+    <path d="M18 2L10 16h6l-2 12 8-14h-6l2-12z" fill="#2c3e50" stroke="none"/>
+  </g>
+</svg>

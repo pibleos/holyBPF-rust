@@ -1,0 +1,23 @@
+---
+layout: default
+---
+
+<article class="doc-content">
+    {{ content }}
+</article>
+
+{% if page.prev_page or page.next_page %}
+<nav class="doc-navigation">
+    {% if page.prev_page %}
+    <a href="{{ page.prev_page.url | relative_url }}" class="nav-prev">
+        ← {{ page.prev_page.title }}
+    </a>
+    {% endif %}
+    
+    {% if page.next_page %}
+    <a href="{{ page.next_page.url | relative_url }}" class="nav-next">
+        {{ page.next_page.title }} →
+    </a>
+    {% endif %}
+</nav>
+{% endif %}
