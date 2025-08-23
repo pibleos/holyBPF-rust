@@ -23,3 +23,10 @@ Thumbs.db
 
 # Temporary files
 /tmp/
+
+# Build validation logs
+build_logs/
+*.log
+
+# Build validation suggestions
+build.zig.zon.suggested
