@@ -33,13 +33,23 @@ impl BpfInstruction {
     }
 
     pub fn to_bytes(&self) -> [u8; 8] {
-        let bytes = unsafe { std::mem::transmute::<BpfInstruction, [u8; std::mem::size_of::<BpfInstruction>()]>(*self) };
-        // Ensure we return exactly 8 bytes
-        let mut result = [0u8; 8];
-        for (i, &byte) in bytes.iter().take(8).enumerate() {
-            result[i] = byte;
-        }
-        result
+        let mut bytes = [0u8; 8];
+        
+        // BPF instruction format: [opcode] [dst_reg|src_reg] [offset_lo] [offset_hi] [immediate_bytes]
+        bytes[0] = self.opcode;
+        bytes[1] = (self.dst_reg & 0x0f) | ((self.src_reg & 0x0f) << 4);
+        
+        let offset_bytes = self.offset.to_le_bytes();
+        bytes[2] = offset_bytes[0];
+        bytes[3] = offset_bytes[1];
+        
+        let immediate_bytes = self.immediate.to_le_bytes();
+        bytes[4] = immediate_bytes[0];
+        bytes[5] = immediate_bytes[1];
+        bytes[6] = immediate_bytes[2];
+        bytes[7] = immediate_bytes[3];
+        
+        bytes
     }
 }
 
