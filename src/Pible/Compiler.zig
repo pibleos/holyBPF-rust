@@ -2,6 +2,24 @@ const std = @import("std");
 const Lexer = @import("Lexer.zig");
 const Parser = @import("Parser.zig");
 const CodeGen = @import("CodeGen.zig");
+const SolanaBpf = @import("SolanaBpf.zig");
+const BpfVm = @import("BpfVm.zig");
+
+// Compilation target types
+pub const CompileTarget = enum {
+    LinuxBpf,     // Traditional Linux BPF
+    SolanaBpf,    // Solana BPF runtime
+    BpfVm,        // BPF VM emulation for testing
+};
+
+// Compilation options
+pub const CompileOptions = struct {
+    target: CompileTarget = .LinuxBpf,
+    generate_idl: bool = false,
+    enable_vm_testing: bool = false,
+    solana_program_id: ?[32]u8 = null,
+    output_directory: ?[]const u8 = null,
+};
 
 pub const CompileError = error{
     LexError,
@@ -12,20 +30,31 @@ pub const CompileError = error{
     UndefinedFunction,
     TypeMismatch,
     OutOfMemory,
+    UnsupportedTarget,
+    IdlGenerationError,
+    VmExecutionError,
 };
 
 pub const Compiler = struct {
     allocator: std.mem.Allocator,
     source: []const u8,
     error_messages: std.ArrayList([]const u8),
+    options: CompileOptions,
+    idl: ?SolanaBpf.SolanaIdl,
 
     const Self = @This();
 
     pub fn init(allocator: std.mem.Allocator, source: []const u8) Self {
+        return Self.initWithOptions(allocator, source, CompileOptions{});
+    }
+
+    pub fn initWithOptions(allocator: std.mem.Allocator, source: []const u8, options: CompileOptions) Self {
         return .{
             .allocator = allocator,
             .source = source,
             .error_messages = std.ArrayList([]const u8){},
+            .options = options,
+            .idl = if (options.generate_idl) SolanaBpf.SolanaIdl.init(allocator, "holyc_program") else null,
         };
     }
 
@@ -34,6 +63,10 @@ pub const Compiler = struct {
             self.allocator.free(msg);
         }
         self.error_messages.deinit(self.allocator);
+        
+        if (self.idl) |*idl| {
+            idl.deinit();
+        }
     }
 
     /// Compile HolyC source code to BPF bytecode
@@ -55,12 +88,26 @@ pub const Compiler = struct {
         };
         defer ast.deinit();
 
-        // Code generation
+        // Generate IDL if requested
+        if (self.options.generate_idl) {
+            try self.generateIdlFromAst(ast);
+        }
+
+        // Code generation based on target
+        return switch (self.options.target) {
+            .LinuxBpf => try self.compileLinuxBpf(ast),
+            .SolanaBpf => try self.compileSolanaBpf(ast),
+            .BpfVm => try self.compileForVm(ast),
+        };
+    }
+    
+    /// Compile for Linux BPF target
+    fn compileLinuxBpf(self: *Self, ast: *Parser.Node) ![]const u8 {
         var codegen = CodeGen.CodeGen.init(self.allocator);
         defer codegen.deinit();
 
         codegen.generate(ast) catch |err| {
-            try self.addError("Code generation failed");
+            try self.addError("Linux BPF code generation failed");
             return err;
         };
 
@@ -70,16 +117,134 @@ pub const Compiler = struct {
             return error.CodeGenError;
         }
 
-        // Convert instructions to bytecode
-        var output = std.ArrayList(u8){};
-        errdefer output.deinit(self.allocator);
+        return try self.instructionsToBytes(codegen.instructions.items);
+    }
+    
+    /// Compile for Solana BPF target
+    fn compileSolanaBpf(self: *Self, ast: *Parser.Node) ![]const u8 {
+        var codegen = CodeGen.CodeGen.init(self.allocator);
+        defer codegen.deinit();
+        
+        var solana_codegen = SolanaBpf.SolanaCodeGen.init(self.allocator, &codegen);
+        defer solana_codegen.deinit();
 
-        for (codegen.instructions.items) |instruction| {
+        // Generate Solana-specific entrypoint
+        try solana_codegen.generateEntrypoint("entrypoint");
+        
+        // Generate regular code
+        codegen.generate(ast) catch |err| {
+            try self.addError("Solana BPF code generation failed");
+            return err;
+        };
+
+        // Validate Solana BPF constraints
+        if (!solana_codegen.validateSolanaProgram()) {
+            try self.addError("Generated program violates Solana BPF constraints");
+            return error.CodeGenError;
+        }
+
+        return try self.instructionsToBytes(codegen.instructions.items);
+    }
+    
+    /// Compile for BPF VM testing
+    fn compileForVm(self: *Self, ast: *Parser.Node) ![]const u8 {
+        var codegen = CodeGen.CodeGen.init(self.allocator);
+        defer codegen.deinit();
+
+        codegen.generate(ast) catch |err| {
+            try self.addError("VM code generation failed");
+            return err;
+        };
+
+        // Test execution in VM if enabled
+        if (self.options.enable_vm_testing) {
+            try self.testInVm(codegen.instructions.items);
+        }
+
+        return try self.instructionsToBytes(codegen.instructions.items);
+    }
+    
+    /// Test program execution in BPF VM
+    fn testInVm(self: *Self, instructions: []const CodeGen.BpfInstruction) !void {
+        var vm = BpfVm.BpfVm.init(self.allocator, instructions);
+        defer vm.deinit();
+        
+        const result = vm.execute() catch |err| switch (err) {
+            BpfVm.BpfVmError.ProgramExit => {
+                // Normal program exit
+                const stats = vm.getStats();
+                const success_msg = try std.fmt.allocPrint(self.allocator, "VM test completed: exit_code={}, compute_units={}, logs={}", .{ vm.registers[0], stats.compute_units, stats.log_count });
+                defer self.allocator.free(success_msg);
+                try self.addError(success_msg);
+                return;
+            },
+            else => {
+                try self.addError("VM execution failed");
+                return err;
+            },
+        };
+        
+        // Log execution results
+        const log_msg = try std.fmt.allocPrint(self.allocator, "VM execution successful: exit_code={}, compute_units={}", .{ result.exit_code, result.compute_units_used });
+        defer self.allocator.free(log_msg);
+        try self.addError(log_msg);
+    }
+    
+    /// Generate IDL from AST
+    fn generateIdlFromAst(self: *Self, ast: *Parser.Node) !void {
+        if (self.idl) |*idl| {
+            // Extract functions from AST and add to IDL
+            try self.extractIdlInstructions(ast, idl);
+            
+            // Extract account definitions
+            try self.extractIdlAccounts(ast, idl);
+        }
+    }
+    
+    /// Extract IDL instructions from AST
+    fn extractIdlInstructions(self: *Self, node: *Parser.Node, idl: *SolanaBpf.SolanaIdl) !void {
+        if (node.type == .FunctionDecl) {
+            const instruction = SolanaBpf.IdlInstruction{
+                .name = node.token.lexeme,
+                .args = std.ArrayList(SolanaBpf.IdlArg){},
+            };
+            try idl.instructions.append(self.allocator, instruction);
+        }
+        
+        // Recursively process children
+        for (node.children.items) |child| {
+            try self.extractIdlInstructions(child, idl);
+        }
+    }
+    
+    /// Extract IDL account definitions from AST
+    fn extractIdlAccounts(self: *Self, node: *Parser.Node, idl: *SolanaBpf.SolanaIdl) !void {
+        // For now, we'll just add basic account information
+        // In a full implementation, this would parse account structures from the AST
+        _ = self;
+        _ = node;
+        _ = idl;
+    }
+    
+    /// Convert instructions to byte array
+    fn instructionsToBytes(self: *Self, instructions: []const CodeGen.BpfInstruction) ![]const u8 {
+        var output = std.ArrayList(u8){};
+        defer output.deinit(self.allocator);
+
+        for (instructions) |instruction| {
             const bytes = std.mem.asBytes(&instruction);
             try output.appendSlice(self.allocator, bytes);
         }
 
         return output.toOwnedSlice(self.allocator);
+    }
+    
+    /// Generate IDL JSON output
+    pub fn generateIdlJson(self: *Self) !?[]const u8 {
+        if (self.idl) |*idl| {
+            return try idl.generateJson();
+        }
+        return null;
     }
 
     fn addError(self: *Self, message: []const u8) !void {

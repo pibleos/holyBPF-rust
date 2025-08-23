@@ -4,17 +4,14 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    // Create module for the HolyC compiler
-    const compiler_mod = b.createModule(.{
-        .root_source_file = b.path("src/Pible/Main.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-
     // Build the HolyC compiler
     const holyc_compiler = b.addExecutable(.{
         .name = "pible",
-        .root_module = compiler_mod,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/Pible/Main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     b.installArtifact(holyc_compiler);
 
@@ -30,11 +27,13 @@ pub fn build(b: *std.Build) void {
             const run_holyc = b2.addRunArtifact(compiler_exe);
             run_holyc.addArg(source_file);
 
-            // The HolyC compiler generates a .bpf file next to the source
-            const bpf_file = b2.fmt("{s}.bpf", .{source_file});
+            // The HolyC compiler generates a .bpf file with the same basename as the source
+            const source_dirname = std.fs.path.dirname(source_file) orelse ".";
+            const source_basename = std.fs.path.stem(source_file);
+            const bpf_file = b2.fmt("{s}/{s}.bpf", .{ source_dirname, source_basename });
             
             // Install the generated BPF file as an artifact
-            const install_bpf = b2.addInstallFile(b2.path(bpf_file), b2.fmt("bin/{s}.bpf", .{name}));
+            const install_bpf = b2.addInstallFile(.{ .cwd_relative = bpf_file }, b2.fmt("bin/{s}.bpf", .{name}));
             install_bpf.step.dependOn(&run_holyc.step);
 
             return install_bpf;
@@ -45,6 +44,7 @@ pub fn build(b: *std.Build) void {
     inline for (.{
         .{ "hello-world", "examples/hello-world/src/main.hc" },
         .{ "escrow", "examples/escrow/src/main.hc" },
+        .{ "solana-token", "examples/solana-token/src/main.hc" },
     }) |example| {
         const name = example[0];
         const source = example[1];
@@ -58,29 +58,23 @@ pub fn build(b: *std.Build) void {
     // Add test step
     const test_step = b.step("test", "Run HolyC compiler tests");
     
-    // Create module for unit tests from src
-    const tests_mod = b.createModule(.{
-        .root_source_file = b.path("src/Pible/Tests.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    
     // Add unit tests from src
     const tests = b.addTest(.{
-        .root_module = tests_mod,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/Pible/Tests.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     test_step.dependOn(&b.addRunArtifact(tests).step);
     
-    // Create module for integration tests
-    const integration_tests_mod = b.createModule(.{
-        .root_source_file = b.path("tests/main.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-    
     // Add simplified integration tests
     const integration_tests = b.addTest(.{
-        .root_module = integration_tests_mod,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("tests/main.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     test_step.dependOn(&b.addRunArtifact(integration_tests).step);
 }
