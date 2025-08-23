@@ -2,6 +2,10 @@
 zig-out/
 .zig-cache/
 
+# Rust build artifacts
+target/
+Cargo.lock
+
 # Compiled BPF files
 *.bpf
 

@@ -11,7 +11,7 @@ pub enum ParseError {
     UnexpectedEof,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum NodeType {
     Program,
     FunctionDecl,

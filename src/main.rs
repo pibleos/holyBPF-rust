@@ -2,6 +2,9 @@ use clap::{Arg, Command};
 
 mod pible;
 
+#[cfg(test)]
+mod tests;
+
 use pible::{Compiler, CompileOptions, CompileTarget};
 
 fn main() -> anyhow::Result<()> {

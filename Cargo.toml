@@ -22,16 +22,18 @@ serde_json = "1.0"
 thiserror = "1.0"
 anyhow = "1.0"
 
-# TODO: Add Solana and BPF dependencies later
-# solana-program = "2.0"  
-# solana-sdk = "2.0"
-# anchor-lang = { version = "0.30", features = ["init-if-needed"] }
+# BPF and blockchain related (optional, can be enabled as needed)
+# solana-program = { version = "2.0", optional = true }
+# solana-sdk = { version = "2.0", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["full"] }
 tempfile = "3.0"
 assert_cmd = "2.0"
 predicates = "3.0"
+
+# Solana BPF testing tools (commented out until needed)
+# mollusk-svm = "0.1"
 
 [features]
 default = ["solana-bpf"]
