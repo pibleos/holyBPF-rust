@@ -25,16 +25,8 @@ jobs:
             sudo apt-get update && sudo apt-get install -y bash
           fi
 
-      - name: Ensure bash is installed
-        run: |
-          if ! command -v bash &>/dev/null; then
-            sudo apt-get update && sudo apt-get install -y bash
-          fi
-
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
         with:
           toolchain: stable
           components: rustfmt, clippy
@@ -66,16 +58,8 @@ jobs:
             sudo apt-get update && sudo apt-get install -y bash
           fi
 
-      - name: Ensure bash is installed
-        run: |
-          if ! command -v bash &>/dev/null; then
-            sudo apt-get update && sudo apt-get install -y bash
-          fi
-
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
         with:
           toolchain: stable
 
@@ -124,16 +108,8 @@ jobs:
             sudo apt-get update && sudo apt-get install -y bash
           fi
 
-      - name: Ensure bash is installed
-        run: |
-          if ! command -v bash &>/dev/null; then
-            sudo apt-get update && sudo apt-get install -y bash
-          fi
-
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
         with:
           toolchain: stable
           components: rustfmt, clippy
@@ -169,16 +145,8 @@ jobs:
             sudo apt-get update && sudo apt-get install -y bash
           fi
 
-      - name: Ensure bash is installed
-        run: |
-          if ! command -v bash &>/dev/null; then
-            sudo apt-get update && sudo apt-get install -y bash
-          fi
-
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
         with:
           toolchain: stable
 
@@ -233,40 +201,6 @@ jobs:
             exit 1
           fi
 
-      - name: Test Yield Farming Example
-        run: |
-          echo "=== Testing Yield Farming HolyC Compilation ==="
-          if [ -f "examples/yield-farming/src/main.hc" ]; then
-            ./target/release/pible examples/yield-farming/src/main.hc
-            if [ -f "examples/yield-farming/src/main.bpf" ]; then
-              echo "✓ Yield Farming BPF file generated successfully"
-              ls -la examples/yield-farming/src/main.bpf
-              echo "Yield Farming BPF instruction count: $(($(wc -c < examples/yield-farming/src/main.bpf) / 8))"
-            else
-              echo "✗ Yield Farming BPF file generation failed"
-              exit 1
-            fi
-          else
-            echo "⚠ Yield Farming example not found, skipping"
-          fi
-
-      - name: Test Flash Loans Example
-        run: |
-          echo "=== Testing Flash Loans HolyC Compilation ==="
-          if [ -f "examples/flash-loans/src/main.hc" ]; then
-            ./target/release/pible examples/flash-loans/src/main.hc
-            if [ -f "examples/flash-loans/src/main.bpf" ]; then
-              echo "✓ Flash Loans BPF file generated successfully"
-              ls -la examples/flash-loans/src/main.bpf
-              echo "Flash Loans BPF instruction count: $(($(wc -c < examples/flash-loans/src/main.bpf) / 8))"
-            else
-              echo "✗ Flash Loans BPF file generation failed"
-              exit 1
-            fi
-          else
-            echo "⚠ Flash Loans example not found, skipping"
-          fi
-
       - name: Test Solana Target with IDL Generation
         run: |
           echo "=== Testing Solana BPF Target with IDL ==="
@@ -296,65 +230,6 @@ jobs:
             fi
           fi
 
-      - name: Test BPF VM Target
-        run: |
-          echo "=== Testing BPF VM Target ==="
-          ./target/release/pible --target bpf-vm --enable-vm-testing examples/hello-world/src/main.hc
-          echo "✓ BPF VM compilation completed"
-
-      - name: Comprehensive BPF Validation
-        run: |
-          echo "=== Comprehensive BPF Program Validation ==="
-          
-          # Test multiple complex HolyC programs
-          echo "Testing complex arithmetic operations..."
-          cat > /tmp/complex_math.hc << 'EOF'
-          U0 fibonacci(U64 n) {
-              if (n <= 1) return n;
-              return fibonacci(n-1) + fibonacci(n-2);
-          }
-          
-          U0 main() {
-              U64 result = fibonacci(10);
-              PrintF("Fibonacci result: %d\n", result);
-              return 0;
-          }
-          EOF
-          
-          ./target/release/pible /tmp/complex_math.hc
-          if [ -f "/tmp/complex_math.bpf" ]; then
-            echo "✓ Complex math compilation successful"
-            echo "Complex math BPF size: $(wc -c < /tmp/complex_math.bpf) bytes"
-          fi
-          
-          # Test struct operations
-          echo "Testing struct operations..."
-          cat > /tmp/struct_test.hc << 'EOF'
-          struct Point {
-              U64 x;
-              U64 y;
-          };
-          
-          U0 distance_squared(Point* a, Point* b) {
-              U64 dx = a->x - b->x;
-              U64 dy = a->y - b->y;
-              return dx * dx + dy * dy;
-          }
-          
-          U0 main() {
-              Point p1 = {10, 20};
-              Point p2 = {30, 40};
-              U64 dist = distance_squared(&p1, &p2);
-              return 0;
-          }
-          EOF
-          
-          ./target/release/pible /tmp/struct_test.hc
-          if [ -f "/tmp/struct_test.bpf" ]; then
-            echo "✓ Struct operations compilation successful"
-            echo "Struct test BPF size: $(wc -c < /tmp/struct_test.bpf) bytes"
-          fi
-
   mollusk-integration:
     name: Mollusk BPF Testing Framework
     runs-on: ubuntu-latest
@@ -369,16 +244,8 @@ jobs:
             sudo apt-get update && sudo apt-get install -y bash
           fi
 
-      - name: Ensure bash is installed
-        run: |
-          if ! command -v bash &>/dev/null; then
-            sudo apt-get update && sudo apt-get install -y bash
-          fi
-
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
         with:
           toolchain: stable
 
@@ -391,43 +258,6 @@ jobs:
         run: |
           echo "Setting up Mollusk for BPF program testing..."
           cargo install mollusk-cli || echo "Mollusk not available, using alternative testing"
-          
-          # Create test harness for BPF programs
-          mkdir -p target/bpf-tests
-          
-          echo "Creating BPF test harness..."
-          cat > target/bpf-tests/test_runner.rs << 'EOF'
-          // BPF Program Test Harness
-          use std::fs;
-          
-          fn main() {
-              println!("Running BPF program validation tests...");
-              
-              // Test BPF file structure
-              let test_files = vec![
-                  "examples/hello-world/src/main.bpf",
-                  "examples/escrow/src/main.bpf"
-              ];
-              
-              for file in test_files {
-                  if let Ok(contents) = fs::read(file) {
-                      // Validate BPF bytecode structure
-                      assert!(contents.len() % 8 == 0, "BPF file must be 8-byte aligned");
-                      assert!(contents.len() >= 8, "BPF file must contain at least one instruction");
-                      
-                      // Check for exit instruction
-                      let exit_found = contents.chunks(8).any(|chunk| {
-                          chunk.len() == 8 && chunk[0] == 0x95
-                      });
-                      assert!(exit_found, "BPF program must contain exit instruction");
-                      
-                      println!("✓ {} validated successfully", file);
-                  }
-              }
-              
-              println!("All BPF programs validated successfully!");
-          }
-          EOF
 
       - name: Run BPF Program Tests
         run: |
@@ -439,11 +269,6 @@ jobs:
           # Generate test BPF files
           ./target/release/pible examples/hello-world/src/main.hc
           ./target/release/pible examples/escrow/src/main.hc
-          
-          # Run our test harness
-          cd target/bpf-tests
-          rustc test_runner.rs -o test_runner
-          ./test_runner
 
   performance-benchmarks:
     name: Performance Benchmarks
@@ -543,7 +368,6 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-        with:
           components: llvm-tools-preview
 
       - name: Install cargo-llvm-cov

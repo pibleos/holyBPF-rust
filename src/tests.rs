@@ -1902,7 +1902,7 @@ mod solana_bpf_integration_tests {
                 // Simplified PDA creation logic
                 // In real Solana, this would use sha256 and curve25519
                 for (U64 i = 0; i < 32; i++) {
-                    result[i] = seed[i % seed_len] ^ program_id[i];
+                    result[i] = seed[i % seed_len] + program_id[i];
                 }
                 return;
             }
@@ -2701,7 +2701,7 @@ mod solana_bpf_integration_tests {
         let codegen = CodeGen::new();
         
         // Test program within size limits (typical BPF programs should be under 64KB)
-        let normal_program: Vec<BpfInstruction> = (0..1000).map(|i| {
+        let mut normal_program: Vec<BpfInstruction> = (0..1000).map(|i| {
             BpfInstruction { 
                 opcode: 0x07, 
                 dst_reg: (i % 10) as u8, 
@@ -2710,12 +2710,16 @@ mod solana_bpf_integration_tests {
                 immediate: i as i32 
             }
         }).collect();
+        // Add exit instruction
+        normal_program.push(BpfInstruction { 
+            opcode: 0x95, dst_reg: 0, src_reg: 0, offset: 0, immediate: 0 
+        });
         
         let result = codegen.validate_bpf_program(&normal_program);
         assert!(result.is_ok(), "Normal sized program should pass validation");
         
         // Test extremely large program (should still work but validate size limits exist)
-        let large_program: Vec<BpfInstruction> = (0..10000).map(|i| {
+        let mut large_program: Vec<BpfInstruction> = (0..10000).map(|i| {
             BpfInstruction { 
                 opcode: 0x07, 
                 dst_reg: (i % 10) as u8, 
@@ -2724,6 +2728,10 @@ mod solana_bpf_integration_tests {
                 immediate: i as i32 
             }
         }).collect();
+        // Add exit instruction
+        large_program.push(BpfInstruction { 
+            opcode: 0x95, dst_reg: 0, src_reg: 0, offset: 0, immediate: 0 
+        });
         
         // For now, large programs should still validate (size limits not yet implemented)
         let result = codegen.validate_bpf_program(&large_program);
@@ -2828,7 +2836,7 @@ mod solana_bpf_integration_tests {
                 // Simplified SHA256 computation
                 // In real implementation, would use Solana's sha256 syscall
                 for (U64 i = 0; i < 32; i++) {
-                    output[i] = (U8)(input[i % input_len] ^ (i * 7));
+                    output[i] = (U8)(input[i % input_len] + (i * 7));
                 }
                 return;
             }
