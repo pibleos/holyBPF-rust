@@ -1,0 +1,8 @@
+/home/runner/work/holyBPF-rust/holyBPF-rust/target/debug/deps/solana_config_program-0e65df1a72ce5073.d: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/lib.rs /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/config_instruction.rs /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/config_processor.rs /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/date_instruction.rs
+
+/home/runner/work/holyBPF-rust/holyBPF-rust/target/debug/deps/libsolana_config_program-0e65df1a72ce5073.rmeta: /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/lib.rs /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/config_instruction.rs /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/config_processor.rs /home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/date_instruction.rs
+
+/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/lib.rs:
+/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/config_instruction.rs:
+/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/config_processor.rs:
+/home/runner/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-config-program-2.0.25/src/date_instruction.rs:

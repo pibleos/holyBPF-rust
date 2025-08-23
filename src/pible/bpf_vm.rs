@@ -1,0 +1,88 @@
+use thiserror::Error;
+use crate::pible::codegen::BpfInstruction;
+
+#[derive(Error, Debug)]
+pub enum VmError {
+    #[error("Invalid instruction: {0}")]
+    InvalidInstruction(String),
+    #[error("Stack overflow")]
+    StackOverflow,
+    #[error("Division by zero")]
+    DivisionByZero,
+    #[error("Program exit with code: {0}")]
+    ProgramExit(i32),
+}
+
+#[derive(Debug)]
+pub struct VmResult {
+    pub exit_code: i32,
+    pub compute_units: u64,
+}
+
+pub struct BpfVm {
+    registers: [i64; 11], // R0-R10
+    program: Vec<BpfInstruction>,
+    pc: usize,
+    compute_units: u64,
+}
+
+impl BpfVm {
+    pub fn new(instructions: &[BpfInstruction]) -> Self {
+        Self {
+            registers: [0; 11],
+            program: instructions.to_vec(),
+            pc: 0,
+            compute_units: 0,
+        }
+    }
+
+    pub fn execute(&mut self) -> Result<VmResult, VmError> {
+        while self.pc < self.program.len() {
+            self.compute_units += 1;
+            
+            // Simple execution limit for testing
+            if self.compute_units > 10000 {
+                break;
+            }
+
+            let instruction = &self.program[self.pc];
+            
+            match instruction.opcode {
+                0x95 => {
+                    // BPF_EXIT
+                    return Ok(VmResult {
+                        exit_code: self.registers[0] as i32,
+                        compute_units: self.compute_units,
+                    });
+                },
+                0x85 => {
+                    // BPF_CALL
+                    self.handle_call(instruction.immediate)?;
+                },
+                _ => {
+                    // For now, just skip unknown instructions
+                }
+            }
+            
+            self.pc += 1;
+        }
+
+        Ok(VmResult {
+            exit_code: self.registers[0] as i32,
+            compute_units: self.compute_units,
+        })
+    }
+
+    fn handle_call(&mut self, func_id: i32) -> Result<(), VmError> {
+        match func_id {
+            6 => {
+                // BPF_FUNC_trace_printk - simulate printing
+                println!("VM: trace_printk called");
+            },
+            _ => {
+                // Unknown function call
+            }
+        }
+        Ok(())
+    }
+}
