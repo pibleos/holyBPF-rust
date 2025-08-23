@@ -27,8 +27,10 @@ pub fn build(b: *std.Build) void {
             const run_holyc = b2.addRunArtifact(compiler_exe);
             run_holyc.addArg(source_file);
 
-            // The HolyC compiler generates a .bpf file next to the source
-            const bpf_file = b2.fmt("{s}.bpf", .{source_file});
+            // The HolyC compiler generates a .bpf file with the same basename as the source
+            const source_dirname = std.fs.path.dirname(source_file) orelse ".";
+            const source_basename = std.fs.path.stem(source_file);
+            const bpf_file = b2.fmt("{s}/{s}.bpf", .{ source_dirname, source_basename });
             
             // Install the generated BPF file as an artifact
             const install_bpf = b2.addInstallFile(.{ .cwd_relative = bpf_file }, b2.fmt("bin/{s}.bpf", .{name}));
