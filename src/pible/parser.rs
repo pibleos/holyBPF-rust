@@ -1,40 +1,64 @@
+//! # Parser Module
+//!
+//! HolyC syntax analysis and AST construction.
+
 use crate::pible::lexer::{Token, TokenType};
 use thiserror::Error;
 
+/// Parsing error types.
 #[derive(Error, Debug)]
 #[allow(dead_code)]
 pub enum ParseError {
+    /// Unexpected token encountered during parsing.
     #[error("Unexpected token: {0:?} at line {1}")]
     UnexpectedToken(TokenType, usize),
+    /// Expected a specific token but found another.
     #[error("Expected token: {expected:?}, found: {found:?} at line {line}")]
     ExpectedToken {
+        /// Expected token type
         expected: TokenType,
+        /// Actually found token type
         found: TokenType,
+        /// Line number where error occurred
         line: usize,
     },
+    /// Unexpected end of file during parsing.
     #[error("Unexpected end of file")]
     UnexpectedEof,
 }
 
+/// AST node types.
 #[derive(Debug, Clone, PartialEq)]
 pub enum NodeType {
+    /// Root program node
     Program,
+    /// Function declaration
     FunctionDecl,
+    /// Code block
     Block,
+    /// Statement
     Statement,
+    /// Expression
     Expression,
+    /// Identifier
     Identifier,
+    /// Literal value
     Literal,
 }
 
+/// AST node representation.
 #[derive(Debug, Clone)]
 pub struct Node {
+    /// Type of this node
     pub node_type: NodeType,
+    /// Optional value for literals and identifiers
     pub value: Option<String>,
+    /// Child nodes
     pub children: Vec<Node>,
 }
 
 impl Node {
+    /// Creates a new AST node.
     pub fn new(node_type: NodeType) -> Self {
         Self {
             node_type,
@@ -43,6 +67,7 @@ impl Node {
         }
     }
 
+    /// Creates a new AST node with a value.
     pub fn with_value(node_type: NodeType, value: String) -> Self {
         Self {
             node_type,
@@ -51,21 +76,25 @@ impl Node {
         }
     }
 
+    /// Adds a child node.
     pub fn add_child(&mut self, child: Node) {
         self.children.push(child);
     }
 }
 
+/// HolyC parser for AST construction.
 pub struct Parser<'a> {
     tokens: Vec<Token<'a>>,
     current: usize,
 }
 
 impl<'a> Parser<'a> {
+    /// Creates a new parser with tokens.
     pub fn new(tokens: Vec<Token<'a>>) -> Self {
         Self { tokens, current: 0 }
     }
 
+    /// Parses tokens into an AST.
     pub fn parse(&mut self) -> Result<Node, ParseError> {
         let mut program = Node::new(NodeType::Program);
 

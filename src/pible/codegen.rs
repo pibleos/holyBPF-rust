@@ -1,28 +1,59 @@
+//! # Code Generation Module
+//!
+//! BPF code generation from Abstract Syntax Trees.
+//!
+//! This module transforms parsed HolyC ASTs into executable BPF bytecode with support
+//! for multiple target platforms including Linux eBPF and Solana BPF.
+
 use crate::pible::parser::{Node, NodeType};
 use thiserror::Error;
 
+/// Code generation error types.
+///
+/// Represents errors that can occur during BPF instruction generation.
 #[derive(Error, Debug)]
 #[allow(dead_code)]
 pub enum CodeGenError {
+    /// AST node type is not supported for code generation.
     #[error("Unsupported node type: {0:?}")]
     UnsupportedNodeType(NodeType),
+    /// Function referenced but not found in scope.
     #[error("Function not found: {0}")]
     FunctionNotFound(String),
+    /// Invalid BPF instruction generated.
     #[error("Invalid instruction: {0}")]
     InvalidInstruction(String),
 }
 
+/// BPF instruction representation.
+///
+/// Represents a single BPF instruction with all fields required
+/// for execution in BPF virtual machines.
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct BpfInstruction {
+    /// BPF opcode specifying the operation
     pub opcode: u8,
+    /// Destination register (0-10)
     pub dst_reg: u8,
+    /// Source register (0-10)
     pub src_reg: u8,
+    /// Instruction offset for jumps
     pub offset: i16,
+    /// Immediate value operand
     pub immediate: i32,
 }
 
 impl BpfInstruction {
+    /// Creates a new BPF instruction.
+    ///
+    /// # Arguments
+    ///
+    /// * `opcode` - BPF operation code
+    /// * `dst_reg` - Destination register (0-10)
+    /// * `src_reg` - Source register (0-10)
+    /// * `offset` - Jump offset for branch instructions
+    /// * `immediate` - Immediate value operand
     pub fn new(opcode: u8, dst_reg: u8, src_reg: u8, offset: i16, immediate: i32) -> Self {
         Self {
             opcode,
@@ -33,6 +64,9 @@ impl BpfInstruction {
         }
     }
 
+    /// Converts the instruction to little-endian byte array.
+    ///
+    /// Returns an 8-byte array in BPF instruction format for execution.
     pub fn as_bytes(self) -> [u8; 8] {
         let mut bytes = [0u8; 8];
 
@@ -87,12 +121,16 @@ mod bpf_opcodes {
     pub const BPF_X: u8 = 0x08; // register
 }
 
+/// BPF code generator.
+///
+/// Transforms HolyC Abstract Syntax Trees into BPF instruction sequences.
 pub struct CodeGen {
     instructions: Vec<BpfInstruction>,
     current_reg: u8,
 }
 
 impl CodeGen {
+    /// Creates a new code generator instance.
     pub fn new() -> Self {
         Self {
             instructions: Vec::new(),
@@ -100,6 +138,15 @@ impl CodeGen {
         }
     }
 
+    /// Generates BPF instructions from an AST.
+    ///
+    /// # Arguments
+    ///
+    /// * `ast` - Root node of the Abstract Syntax Tree
+    ///
+    /// # Returns
+    ///
+    /// Returns a vector of BPF instructions or a code generation error.
     pub fn generate(&mut self, ast: &Node) -> Result<Vec<BpfInstruction>, CodeGenError> {
         self.visit_node(ast)?;
 
@@ -281,6 +328,7 @@ impl CodeGen {
         self.emit_instruction(bpf_opcodes::BPF_JMP | bpf_opcodes::BPF_EXIT, 0, 0, 0, 0);
     }
 
+    /// Validates BPF instructions for correctness.
     pub fn validate_instructions(&self, instructions: &[BpfInstruction]) -> bool {
         // Basic validation - check for invalid opcodes
         for instruction in instructions {
@@ -301,6 +349,7 @@ impl CodeGen {
         true
     }
 
+    /// Validates a complete BPF program.
     #[allow(dead_code)]
     pub fn validate_bpf_program(
         &self,

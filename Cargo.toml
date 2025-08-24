@@ -9,6 +9,13 @@ repository = "https://github.com/pibleos/holyBPF-rust"
 readme = "README.md"
 keywords = ["holyc", "bpf", "compiler", "solana", "blockchain"]
 categories = ["compilers", "development-tools"]
+documentation = "https://docs.rs/pible"
+homepage = "https://github.com/pibleos/holyBPF-rust"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+targets = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
 
 [[bin]]
 name = "pible"

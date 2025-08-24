@@ -1,35 +1,50 @@
+//! # BPF Virtual Machine Module
+//!
+//! Built-in BPF virtual machine for testing and emulation.
+
 use crate::pible::codegen::BpfInstruction;
 use thiserror::Error;
 
+/// BPF Virtual Machine execution errors.
 #[derive(Error, Debug)]
 #[allow(dead_code)]
 pub enum VmError {
+    /// Invalid BPF instruction encountered.
     #[error("Invalid instruction: {0}")]
     InvalidInstruction(String),
+    /// VM stack overflow.
     #[error("Stack overflow")]
     StackOverflow,
+    /// Division by zero attempted.
     #[error("Division by zero")]
     DivisionByZero,
+    /// Program exited with code.
     #[error("Program exit with code: {0}")]
     ProgramExit(i32),
 }
 
+/// VM execution result.
 #[derive(Debug)]
 pub struct VmResult {
+    /// Program exit code
     pub exit_code: i32,
+    /// Compute units consumed
     pub compute_units: u64,
 }
 
+/// BPF Virtual Machine for testing.
 pub struct BpfVm {
     registers: [i64; 11], // R0-R10
     program: Vec<BpfInstruction>,
     pc: usize,
     compute_units: u64,
     #[allow(dead_code)]
+    /// Public memory for testing
     pub memory: Vec<u8>, // Public memory for testing
 }
 
 impl BpfVm {
+    /// Creates a new BPF VM with the given instructions.
     pub fn new(instructions: &[BpfInstruction]) -> Self {
         Self {
             registers: [0; 11],
@@ -41,6 +56,7 @@ impl BpfVm {
     }
 
     // Public accessors and mutators for testing
+    /// Sets a register value for testing.
     #[allow(dead_code)]
     pub fn set_register(&mut self, reg: usize, value: i64) {
         if reg < 11 {
@@ -48,6 +64,7 @@ impl BpfVm {
         }
     }
 
+    /// Gets a register value for testing.
     #[allow(dead_code)]
     pub fn get_register(&self, reg: usize) -> i64 {
         if reg < 11 {
@@ -57,16 +74,19 @@ impl BpfVm {
         }
     }
 
+    /// Gets the current program counter.
     #[allow(dead_code)]
     pub fn get_pc(&self) -> usize {
         self.pc
     }
 
+    /// Sets the program counter.
     #[allow(dead_code)]
     pub fn set_pc(&mut self, pc: usize) {
         self.pc = pc;
     }
 
+    /// Executes a single BPF instruction.
     #[allow(dead_code)]
     pub fn execute_instruction(&mut self, instruction: &BpfInstruction) -> Result<(), VmError> {
         match instruction.opcode {
@@ -366,6 +386,9 @@ impl BpfVm {
         }
     }
 
+    /// Executes the entire BPF program.
+    ///
+    /// Runs all instructions until completion or error.
     pub fn execute(&mut self) -> Result<VmResult, VmError> {
         while self.pc < self.program.len() {
             self.compute_units += 1;

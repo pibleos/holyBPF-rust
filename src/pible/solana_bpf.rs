@@ -1,15 +1,23 @@
+//! # Solana BPF Module  
+//!
+//! Solana-specific BPF program generation and IDL support.
+
 use crate::pible::codegen::{BpfInstruction, CodeGen};
 use thiserror::Error;
 
+/// Solana-specific errors.
 #[derive(Error, Debug)]
 #[allow(dead_code)]
 pub enum SolanaError {
+    /// IDL generation failed.
     #[error("IDL generation failed: {0}")]
     IdlGenerationFailed(String),
+    /// Invalid Solana program.
     #[error("Invalid Solana program: {0}")]
     InvalidProgram(String),
 }
 
+/// Solana BPF program generator.
 #[allow(dead_code)]
 pub struct SolanaBpf {
     codegen: Vec<BpfInstruction>,
@@ -17,12 +25,14 @@ pub struct SolanaBpf {
 
 #[allow(dead_code)]
 impl SolanaBpf {
+    /// Creates a new Solana BPF generator.
     pub fn new(_codegen: &mut CodeGen) -> Self {
         Self {
             codegen: Vec::new(),
         }
     }
 
+    /// Generates a Solana program entrypoint.
     pub fn generate_entrypoint(&mut self, name: &str) -> Result<(), SolanaError> {
         // Generate real Solana BPF program entrypoint
         // 1. Load program accounts from instruction data
@@ -47,6 +57,7 @@ impl SolanaBpf {
         Ok(())
     }
 
+    /// Validates a Solana BPF program.
     pub fn validate_solana_program(&self, instructions: &[BpfInstruction]) -> bool {
         // Real Solana BPF validation
         if instructions.is_empty() {
@@ -119,6 +130,7 @@ impl SolanaBpf {
         self.codegen.push(instruction);
     }
 
+    /// Gets the generated instructions.
     pub fn get_instructions(&self) -> &[BpfInstruction] {
         &self.codegen
     }
