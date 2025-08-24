@@ -72,18 +72,18 @@ This document tracks the current status, metrics, and health of the Pible projec
 ### Build Tools Status
 | Tool | Status | Last Updated | Purpose |
 |------|--------|-------------|---------|
-| build.zig | ✅ Working | Current | Main build configuration |
+| Cargo.toml | ✅ Working | Current | Main build configuration |
 | build_validator.sh | ✅ Working | Current | Build validation |
 | build_analyzer.sh | ✅ Working | Current | Static analysis |
 | recursive_build_fixer.sh | ✅ Working | Current | Automated fixes |
 
 ### Supported Platforms
-| Platform | Zig Version | Status | Notes |
-|----------|-------------|--------|-------|
-| Linux x86_64 | 0.16.0+ | ✅ Fully Supported | Primary development platform |
-| macOS x86_64 | 0.16.0+ | 🟡 Untested | Should work |
-| macOS ARM64 | 0.16.0+ | 🟡 Untested | Should work |
-| Windows | 0.16.0+ | 🟡 Untested | Needs validation |
+| Platform | Rust Version | Status | Notes |
+|----------|--------------|--------|-------|
+| Linux x86_64 | 1.78+ | ✅ Fully Supported | Primary development platform |
+| macOS x86_64 | 1.78+ | 🟡 Untested | Should work |
+| macOS ARM64 | 1.78+ | 🟡 Untested | Should work |
+| Windows | 1.78+ | 🟡 Untested | Needs validation |
 
 ## 📚 Documentation Status
 
