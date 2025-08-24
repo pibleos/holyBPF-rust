@@ -28,9 +28,7 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
     <p>Advanced DeFi protocols and financial applications.</p>
     <div class="tutorial-links">
       <a href="{{ '/docs/examples/tutorials/amm' | relative_url }}" class="tutorial-link">AMM →</a>
-      <a href="{{ '/docs/examples/tutorials/lending' | relative_url }}" class="tutorial-link">Lending Protocol →</a>
       <a href="{{ '/docs/examples/tutorials/yield-farming' | relative_url }}" class="tutorial-link">Yield Farming →</a>
-      <a href="{{ '/docs/examples/tutorials/flash-loans' | relative_url }}" class="tutorial-link">Flash Loans →</a>
     </div>
   </div>
 </div>
@@ -41,22 +39,12 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
     <p>Decentralized governance and organizational tools.</p>
     <div class="tutorial-links">
       <a href="{{ '/docs/examples/tutorials/dao-governance' | relative_url }}" class="tutorial-link">DAO Governance →</a>
-      <a href="{{ '/docs/examples/tutorials/governance-token' | relative_url }}" class="tutorial-link">Governance Token →</a>
-      <a href="{{ '/docs/examples/tutorials/privacy-voting' | relative_url }}" class="tutorial-link">Privacy Voting →</a>
+      <a href="{{ '/docs/examples/tutorials/yield-farming' | relative_url }}" class="tutorial-link">Yield Farming →</a>
     </div>
   </div>
 </div>
 
-<div class="content-grid">
-  <div class="feature-card">
-    <h3>🎮 Gaming & NFTs</h3>
-    <p>Gaming protocols and NFT marketplace implementations.</p>
-    <div class="tutorial-links">
-      <a href="{{ '/docs/examples/tutorials/gaming-protocol' | relative_url }}" class="tutorial-link">Gaming Protocol →</a>
-      <a href="{{ '/docs/examples/tutorials/nft-marketplace' | relative_url }}" class="tutorial-link">NFT Marketplace →</a>
-    </div>
-  </div>
-</div>
+
 
 ## Tutorial Format
 
