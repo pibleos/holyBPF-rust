@@ -32,6 +32,16 @@ Comprehensive project examples showcasing advanced HolyC implementations:
 - **[Flash Loans]({{ '/examples/flash-loans/' | relative_url }})** - Uncollateralized lending protocol
 - **[AMM]({{ '/examples/amm/' | relative_url }})** - Automated market maker
 - **[Lending]({{ '/examples/lending/' | relative_url }})** - Peer-to-peer lending platform
+- **[Synthetic Assets]({{ '/examples/synthetic-assets/' | relative_url }})** - Create and manage synthetic assets with oracle pricing
+- **[Liquidity Mining]({{ '/examples/liquidity-mining/' | relative_url }})** - Advanced reward distribution with boost multipliers
+- **[CDP Protocol]({{ '/examples/cdp-protocol/' | relative_url }})** - Collateralized debt positions with liquidation auctions
+- **[Vesting Schedules]({{ '/examples/vesting-schedules/' | relative_url }})** - Token vesting with linear, milestone, and cliff releases
+- **[Governance Token]({{ '/examples/governance-token/' | relative_url }})** - Comprehensive governance with voting and delegation
+- **[Fixed-Rate Lending]({{ '/examples/fixed-rate-lending/' | relative_url }})** - Predictable interest rate lending protocol
+- **[Margin Trading]({{ '/examples/margin-trading/' | relative_url }})** - Leveraged trading with sophisticated risk management
+- **[Interest Rate Swaps]({{ '/examples/interest-rate-swaps/' | relative_url }})** - Fixed-for-floating rate exchange contracts
+- **[Liquidity Bootstrapping]({{ '/examples/liquidity-bootstrapping/' | relative_url }})** - Fair token distribution with dynamic pricing
+- **[Risk Management]({{ '/examples/risk-management/' | relative_url }})** - Portfolio risk assessment and monitoring system
 
 ### SocialFi Projects
 - **[Creator Economy]({{ '/examples/creator-economy/' | relative_url }})** - Social token platform for creators
