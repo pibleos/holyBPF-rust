@@ -24,11 +24,49 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
 
 <div class="content-grid">
   <div class="feature-card">
-    <h3>💰 DeFi Examples</h3>
-    <p>Advanced DeFi protocols and financial applications.</p>
+    <h3>💰 Core DeFi Protocols</h3>
+    <p>Essential DeFi building blocks and financial primitives.</p>
     <div class="tutorial-links">
       <a href="{{ '/docs/examples/tutorials/amm' | relative_url }}" class="tutorial-link">AMM →</a>
+      <a href="{{ '/docs/examples/tutorials/flash-loans' | relative_url }}" class="tutorial-link">Flash Loans →</a>
+      <a href="{{ '/docs/examples/tutorials/lending' | relative_url }}" class="tutorial-link">Lending Protocol →</a>
       <a href="{{ '/docs/examples/tutorials/yield-farming' | relative_url }}" class="tutorial-link">Yield Farming →</a>
+    </div>
+  </div>
+</div>
+
+<div class="content-grid">
+  <div class="feature-card">
+    <h3>🤖 AI & Machine Learning</h3>
+    <p>Intelligent systems and autonomous agents on blockchain.</p>
+    <div class="tutorial-links">
+      <a href="{{ '/docs/examples/tutorials/ai-agents' | relative_url }}" class="tutorial-link">AI Trading Agents →</a>
+      <a href="{{ '/docs/examples/tutorials/ml-model-registry' | relative_url }}" class="tutorial-link">ML Model Registry →</a>
+      <span class="tutorial-link coming-soon">Prediction Markets (Coming Soon)</span>
+    </div>
+  </div>
+</div>
+
+<div class="content-grid">
+  <div class="feature-card">
+    <h3>🖼️ NFT & Digital Assets</h3>
+    <p>Non-fungible tokens, marketplaces, and digital ownership.</p>
+    <div class="tutorial-links">
+      <a href="{{ '/docs/examples/tutorials/nft-marketplace' | relative_url }}" class="tutorial-link">NFT Marketplace →</a>
+      <span class="tutorial-link coming-soon">Gaming Protocol (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Creator Economy (Coming Soon)</span>
+    </div>
+  </div>
+</div>
+
+<div class="content-grid">
+  <div class="feature-card">
+    <h3>🌉 Infrastructure & Scaling</h3>
+    <p>Cross-chain bridges, storage, and infrastructure protocols.</p>
+    <div class="tutorial-links">
+      <a href="{{ '/docs/examples/tutorials/cross-chain-bridge' | relative_url }}" class="tutorial-link">Cross-Chain Bridge →</a>
+      <span class="tutorial-link coming-soon">Decentralized Storage (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Identity Verification (Coming Soon)</span>
     </div>
   </div>
 </div>
@@ -39,7 +77,33 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
     <p>Decentralized governance and organizational tools.</p>
     <div class="tutorial-links">
       <a href="{{ '/docs/examples/tutorials/dao-governance' | relative_url }}" class="tutorial-link">DAO Governance →</a>
-      <a href="{{ '/docs/examples/tutorials/yield-farming' | relative_url }}" class="tutorial-link">Yield Farming →</a>
+      <span class="tutorial-link coming-soon">Reputation System (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Privacy Voting (Coming Soon)</span>
+    </div>
+  </div>
+</div>
+
+<div class="content-grid">
+  <div class="feature-card">
+    <h3>💼 Advanced DeFi</h3>
+    <p>Sophisticated financial instruments and trading systems.</p>
+    <div class="tutorial-links">
+      <span class="tutorial-link coming-soon">Perpetual DEX (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Options Protocol (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Synthetic Assets (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Insurance Pool (Coming Soon)</span>
+    </div>
+  </div>
+</div>
+
+<div class="content-grid">
+  <div class="feature-card">
+    <h3>🎮 Gaming & Social</h3>
+    <p>Gaming protocols, social graphs, and community platforms.</p>
+    <div class="tutorial-links">
+      <span class="tutorial-link coming-soon">Gaming Protocol (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Social Graph (Coming Soon)</span>
+      <span class="tutorial-link coming-soon">Creator Economy (Coming Soon)</span>
     </div>
   </div>
 </div>
@@ -48,13 +112,13 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
 
 ## Learning Path
 
-Follow our recommended learning progression:
+Follow our recommended learning progression from beginner to expert:
 
 <div class="learning-path">
   <div class="path-step">
     <div class="step-number">1</div>
     <div class="step-content">
-      <h4>Start Here</h4>
+      <h4>🎯 Foundation</h4>
       <p><a href="{{ '/docs/examples/tutorials/hello-world' | relative_url }}">Hello World</a> - Learn the basics</p>
       <span class="difficulty">Beginner • 15 min</span>
     </div>
@@ -62,7 +126,7 @@ Follow our recommended learning progression:
   <div class="path-step">
     <div class="step-number">2</div>
     <div class="step-content">
-      <h4>Build Contracts</h4>
+      <h4>🤝 Smart Contracts</h4>
       <p><a href="{{ '/docs/examples/tutorials/escrow' | relative_url }}">Escrow</a> - Multi-party agreements</p>
       <span class="difficulty">Beginner • 25 min</span>
     </div>
@@ -70,7 +134,7 @@ Follow our recommended learning progression:
   <div class="path-step">
     <div class="step-number">3</div>
     <div class="step-content">
-      <h4>Token Systems</h4>
+      <h4>🪙 Token Systems</h4>
       <p><a href="{{ '/docs/examples/tutorials/solana-token' | relative_url }}">Token Program</a> - SPL integration</p>
       <span class="difficulty">Intermediate • 35 min</span>
     </div>
@@ -78,7 +142,7 @@ Follow our recommended learning progression:
   <div class="path-step">
     <div class="step-number">4</div>
     <div class="step-content">
-      <h4>DeFi Protocols</h4>
+      <h4>💱 DeFi Core</h4>
       <p><a href="{{ '/docs/examples/tutorials/amm' | relative_url }}">AMM</a> - Automated market making</p>
       <span class="difficulty">Advanced • 45 min</span>
     </div>
@@ -86,20 +150,109 @@ Follow our recommended learning progression:
   <div class="path-step">
     <div class="step-number">5</div>
     <div class="step-content">
-      <h4>Governance</h4>
-      <p><a href="{{ '/docs/examples/tutorials/dao-governance' | relative_url }}">DAO</a> - Decentralized organizations</p>
+      <h4>⚡ Flash Finance</h4>
+      <p><a href="{{ '/docs/examples/tutorials/flash-loans' | relative_url }}">Flash Loans</a> - Uncollateralized lending</p>
       <span class="difficulty">Advanced • 50 min</span>
     </div>
   </div>
   <div class="path-step">
     <div class="step-number">6</div>
     <div class="step-content">
-      <h4>Advanced DeFi</h4>
-      <p><a href="{{ '/docs/examples/tutorials/yield-farming' | relative_url }}">Yield Farming</a> - Liquidity mining</p>
+      <h4>🏦 Lending Protocols</h4>
+      <p><a href="{{ '/docs/examples/tutorials/lending' | relative_url }}">Lending</a> - Collateralized borrowing</p>
+      <span class="difficulty">Expert • 55 min</span>
+    </div>
+  </div>
+  <div class="path-step">
+    <div class="step-number">7</div>
+    <div class="step-content">
+      <h4>🤖 AI Systems</h4>
+      <p><a href="{{ '/docs/examples/tutorials/ai-agents' | relative_url }}">AI Agents</a> - Autonomous trading</p>
       <span class="difficulty">Expert • 60 min</span>
     </div>
   </div>
+  <div class="path-step">
+    <div class="step-number">8</div>
+    <div class="step-content">
+      <h4>🖼️ Digital Assets</h4>
+      <p><a href="{{ '/docs/examples/tutorials/nft-marketplace' | relative_url }}">NFT Marketplace</a> - Digital ownership</p>
+      <span class="difficulty">Expert • 65 min</span>
+    </div>
+  </div>
 </div>
+
+## Complete Tutorial Catalog
+
+Explore all available tutorials organized by category and difficulty:
+
+### 🎯 Foundation (Beginner)
+- **[Hello World]({{ '/docs/examples/tutorials/hello-world' | relative_url }})** - Basic program structure and compilation
+- **[Escrow Contract]({{ '/docs/examples/tutorials/escrow' | relative_url }})** - Multi-party smart contracts
+- **[Token Program]({{ '/docs/examples/tutorials/solana-token' | relative_url }})** - SPL token integration
+
+### 💰 Core DeFi (Intermediate to Advanced)
+- **[AMM]({{ '/docs/examples/tutorials/amm' | relative_url }})** - Automated market maker with TWAP oracles
+- **[Flash Loans]({{ '/docs/examples/tutorials/flash-loans' | relative_url }})** - Uncollateralized lending with atomic execution
+- **[Lending Protocol]({{ '/docs/examples/tutorials/lending' | relative_url }})** - Collateralized borrowing and liquidations
+- **[Yield Farming]({{ '/docs/examples/tutorials/yield-farming' | relative_url }})** - Liquidity mining and rewards
+
+### 🤖 AI & Machine Learning (Expert)
+- **[AI Trading Agents]({{ '/docs/examples/tutorials/ai-agents' | relative_url }})** - Autonomous trading with reinforcement learning
+- **[ML Model Registry]({{ '/docs/examples/tutorials/ml-model-registry' | relative_url }})** - Decentralized model sharing and monetization
+
+### 🖼️ NFT & Digital Assets (Advanced)
+- **[NFT Marketplace]({{ '/docs/examples/tutorials/nft-marketplace' | relative_url }})** - Comprehensive trading platform with auctions
+
+### 🌉 Infrastructure (Advanced)
+- **[Cross-Chain Bridge]({{ '/docs/examples/tutorials/cross-chain-bridge' | relative_url }})** - Multi-blockchain asset transfers
+
+### 🏛️ Governance (Advanced)
+- **[DAO Governance]({{ '/docs/examples/tutorials/dao-governance' | relative_url }})** - Decentralized decision making
+
+### 🚧 Coming Soon
+
+**Advanced DeFi Protocols:**
+- Perpetual DEX - Derivatives trading platform
+- Options Protocol - Decentralized options market
+- Synthetic Assets - Asset synthesis and derivatives
+- Insurance Pool - Protocol insurance mechanisms
+- Margin Trading - Leveraged trading with automated risk management
+- Interest Rate Swaps - Fixed/variable rate exchanges
+- Fixed Rate Lending - Predictable borrowing costs
+- Liquidity Bootstrapping - Fair token launches
+- Liquidity Mining - Incentivized liquidity provision
+- Staking Rewards - Validator reward distribution
+- Vesting Schedules - Token release mechanisms
+
+**Infrastructure & Scaling:**
+- Decentralized Storage - Distributed file storage
+- Identity Verification - Decentralized identity solutions
+- Payment Streaming - Real-time payment flows
+- Supply Chain Tracking - Transparent logistics
+- Risk Management - Advanced risk modeling
+
+**NFT & Gaming:**
+- Gaming Protocol - Game asset management
+- Creator Economy - Content creator monetization
+- Real Estate Tokenization - Property asset tokens
+
+**Governance & Social:**
+- Reputation System - Trust and credibility metrics
+- Social Graph - Decentralized social networks
+- Privacy Voting - Anonymous governance voting
+
+**Specialized Finance:**
+- CDP Protocol - Collateralized debt positions
+- Prediction Markets - Decentralized forecasting
+- Governance Token - Utility and governance tokens
+
+All tutorials include:
+- 📊 **Mermaid Diagrams** - Visual architecture explanations
+- 🖼️ **Infographics** - Concept illustrations
+- 📝 **Step-by-step Code** - Detailed implementation walkthroughs
+- 🧪 **Testing Scenarios** - Comprehensive test suites
+- 🔒 **Security Analysis** - Risk assessment and mitigation
+- 🎯 **Real-world Examples** - Practical usage patterns
 
 ## Tutorial Format
 
