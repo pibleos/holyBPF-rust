@@ -153,7 +153,7 @@ jobs:
       - name: Install Solana CLI
         run: |
           echo "Installing Solana CLI $SOLANA_VERSION"
-          sh -c "$(curl -sSfL https://release.solana.com/$SOLANA_VERSION/install)"
+          curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
@@ -251,7 +251,7 @@ jobs:
 
       - name: Install Solana CLI
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/$SOLANA_VERSION/install)"
+          curl --proto '=https' --tlsv1.2 -sSfL https://solana-install.solana.workers.dev | bash
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
       - name: Setup Mollusk Testing Framework
