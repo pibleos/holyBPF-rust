@@ -65,8 +65,8 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
     <p>Cross-chain bridges, storage, and infrastructure protocols.</p>
     <div class="tutorial-links">
       <a href="{{ '/docs/examples/tutorials/cross-chain-bridge' | relative_url }}" class="tutorial-link">Cross-Chain Bridge →</a>
-      <span class="tutorial-link coming-soon">Decentralized Storage (Coming Soon)</span>
-      <span class="tutorial-link coming-soon">Identity Verification (Coming Soon)</span>
+      <a href="{{ '/docs/examples/tutorials/decentralized-storage' | relative_url }}" class="tutorial-link">Decentralized Storage →</a>
+      <a href="{{ '/docs/examples/tutorials/identity-verification' | relative_url }}" class="tutorial-link">Identity Verification →</a>
     </div>
   </div>
 </div>
@@ -88,10 +88,10 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
     <h3>💼 Advanced DeFi</h3>
     <p>Sophisticated financial instruments and trading systems.</p>
     <div class="tutorial-links">
+      <a href="{{ '/docs/examples/tutorials/cdp-protocol' | relative_url }}" class="tutorial-link">CDP Protocol →</a>
+      <a href="{{ '/docs/examples/tutorials/staking-rewards' | relative_url }}" class="tutorial-link">Staking Rewards →</a>
       <span class="tutorial-link coming-soon">Perpetual DEX (Coming Soon)</span>
       <span class="tutorial-link coming-soon">Options Protocol (Coming Soon)</span>
-      <span class="tutorial-link coming-soon">Synthetic Assets (Coming Soon)</span>
-      <span class="tutorial-link coming-soon">Insurance Pool (Coming Soon)</span>
     </div>
   </div>
 </div>
@@ -101,9 +101,9 @@ Comprehensive step-by-step tutorials for all HolyBPF examples. Each tutorial pro
     <h3>🎮 Gaming & Social</h3>
     <p>Gaming protocols, social graphs, and community platforms.</p>
     <div class="tutorial-links">
-      <span class="tutorial-link coming-soon">Gaming Protocol (Coming Soon)</span>
-      <span class="tutorial-link coming-soon">Social Graph (Coming Soon)</span>
-      <span class="tutorial-link coming-soon">Creator Economy (Coming Soon)</span>
+      <a href="{{ '/docs/examples/tutorials/gaming-protocol' | relative_url }}" class="tutorial-link">Gaming Protocol →</a>
+      <a href="{{ '/docs/examples/tutorials/social-graph' | relative_url }}" class="tutorial-link">Social Graph →</a>
+      <a href="{{ '/docs/examples/tutorials/creator-economy' | relative_url }}" class="tutorial-link">Creator Economy →</a>
     </div>
   </div>
 </div>
@@ -209,6 +209,21 @@ Explore all available tutorials organized by category and difficulty:
 ### 🏛️ Governance (Advanced)
 - **[DAO Governance]({{ '/docs/examples/tutorials/dao-governance' | relative_url }})** - Decentralized decision making
 
+### 💼 Advanced DeFi Protocols
+- **[CDP Protocol]({{ '/docs/examples/tutorials/cdp-protocol' | relative_url }})** - Collateralized debt positions with liquidation auctions
+- **[Staking Rewards]({{ '/docs/examples/tutorials/staking-rewards' | relative_url }})** - Validator reward distribution and delegation
+
+### 🌉 Infrastructure & Scaling
+- **[Decentralized Storage]({{ '/docs/examples/tutorials/decentralized-storage' | relative_url }})** - Distributed file storage with encryption
+- **[Identity Verification]({{ '/docs/examples/tutorials/identity-verification' | relative_url }})** - Self-sovereign identity with zero-knowledge proofs
+
+### 🎮 Gaming & Creator Economy
+- **[Gaming Protocol]({{ '/docs/examples/tutorials/gaming-protocol' | relative_url }})** - Play-to-earn mechanics and NFT assets
+- **[Creator Economy]({{ '/docs/examples/tutorials/creator-economy' | relative_url }})** - Content creator monetization with subscriptions
+
+### 🏛️ Social & Governance
+- **[Social Graph]({{ '/docs/examples/tutorials/social-graph' | relative_url }})** - Decentralized social networks with privacy controls
+
 ### 🚧 Coming Soon
 
 **Advanced DeFi Protocols:**
@@ -221,28 +236,21 @@ Explore all available tutorials organized by category and difficulty:
 - Fixed Rate Lending - Predictable borrowing costs
 - Liquidity Bootstrapping - Fair token launches
 - Liquidity Mining - Incentivized liquidity provision
-- Staking Rewards - Validator reward distribution
 - Vesting Schedules - Token release mechanisms
 
 **Infrastructure & Scaling:**
-- Decentralized Storage - Distributed file storage
-- Identity Verification - Decentralized identity solutions
 - Payment Streaming - Real-time payment flows
 - Supply Chain Tracking - Transparent logistics
 - Risk Management - Advanced risk modeling
 
 **NFT & Gaming:**
-- Gaming Protocol - Game asset management
-- Creator Economy - Content creator monetization
 - Real Estate Tokenization - Property asset tokens
 
 **Governance & Social:**
 - Reputation System - Trust and credibility metrics
-- Social Graph - Decentralized social networks
 - Privacy Voting - Anonymous governance voting
 
 **Specialized Finance:**
-- CDP Protocol - Collateralized debt positions
 - Prediction Markets - Decentralized forecasting
 - Governance Token - Utility and governance tokens
 
