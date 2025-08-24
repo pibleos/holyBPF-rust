@@ -707,4 +707,22 @@ blockquote {
   .site-main {
     padding-top: 0;
   }
+  
+  /* Coming Soon Tutorial Styling */
+  .tutorial-link.coming-soon {
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--color-tertiary);
+    position: relative;
+  }
+  
+  .tutorial-link.coming-soon:hover {
+    color: var(--color-tertiary);
+    text-decoration: none;
+  }
+  
+  .tutorial-link.coming-soon::after {
+    content: " 🚧";
+    margin-left: 0.5rem;
+  }
 }
