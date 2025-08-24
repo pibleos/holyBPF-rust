@@ -49,6 +49,21 @@ Comprehensive project examples showcasing advanced HolyC implementations:
 - **[Privacy Voting]({{ '/examples/privacy-voting/' | relative_url }})** - Zero-knowledge proof based voting
 - **[Decentralized Storage]({{ '/examples/decentralized-storage/' | relative_url }})** - IPFS-integrated distributed storage
 
+### Gaming & Entertainment
+- **[Gaming Protocol]({{ '/examples/gaming-protocol/' | relative_url }})** - Tournament system with leaderboards and rewards
+
+### Real Estate & Assets
+- **[Real Estate Tokenization]({{ '/examples/real-estate-tokenization/' | relative_url }})** - Property fractional ownership platform
+
+### Supply Chain & Logistics
+- **[Supply Chain Tracking]({{ '/examples/supply-chain-tracking/' | relative_url }})** - End-to-end product verification system
+
+### Identity & Privacy
+- **[Identity Verification]({{ '/examples/identity-verification/' | relative_url }})** - Decentralized KYC/identity management
+
+### Payments & Finance
+- **[Payment Streaming]({{ '/examples/payment-streaming/' | relative_url }})** - Real-time streaming payments and subscriptions
+
 ### Basic Examples
 - **[Hello World]({{ '/examples/hello-world/' | relative_url }})** - Simple introduction to HolyC BPF programs
 - **[Escrow]({{ '/examples/escrow/' | relative_url }})** - Basic escrow smart contract
