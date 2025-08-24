@@ -7,10 +7,10 @@ description: Comprehensive guide for developing Solana programs using HolyC
 <div class="hero-section">
   <div class="hero-content">
     <h1 class="hero-title">HolyBPF Documentation</h1>
-    <p class="hero-subtitle">Comprehensive guide for developing Solana programs using HolyC</p>
+    <p class="hero-subtitle">Comprehensive guide for developing Solana programs using HolyC with enhanced markdown rendering and interactive diagrams</p>
     <div class="hero-cta">
       <a href="{{ '/getting-started/quick-start/' | relative_url }}" class="btn btn-primary">Get Started</a>
-      <a href="{{ '/api/stdlib/' | relative_url }}" class="btn btn-secondary">API Reference</a>
+      <a href="{{ '/test-markdown/' | relative_url }}" class="btn btn-secondary">View Features</a>
     </div>
   </div>
 </div>
@@ -18,13 +18,19 @@ description: Comprehensive guide for developing Solana programs using HolyC
 <div class="content-grid">
   <div class="feature-card">
     <h3>🚀 Quick Start</h3>
-    <p>Get up and running with HolyC on Solana in minutes. Learn the basics and deploy your first program.</p>
+    <p>Get up and running with HolyC on Solana in minutes. Learn the basics and deploy your first program with our enhanced tutorials.</p>
     <a href="{{ '/getting-started/quick-start/' | relative_url }}" class="card-link">Start Building →</a>
   </div>
 
   <div class="feature-card">
+    <h3>📊 Interactive Diagrams</h3>
+    <p>Explore architecture diagrams and flowcharts with full mermaid.js support for visual learning.</p>
+    <a href="{{ '/docs/examples/tutorials/flash-loans/' | relative_url }}" class="card-link">View Diagrams →</a>
+  </div>
+
+  <div class="feature-card">
     <h3>💰 DeFi Programs</h3>
-    <p>Build sophisticated DeFi applications including AMMs, lending protocols, and prediction markets.</p>
+    <p>Build sophisticated DeFi applications including AMMs, lending protocols, and prediction markets with comprehensive tutorials.</p>
     <a href="{{ '/programs/amm/' | relative_url }}" class="card-link">Explore Programs →</a>
   </div>
 

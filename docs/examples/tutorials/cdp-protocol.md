@@ -2,6 +2,18 @@
 layout: doc
 title: CDP Protocol Tutorial
 description: Build a comprehensive Collateralized Debt Position protocol with liquidation auctions
+difficulty: expert
+time_estimate: 60 minutes
+tutorial_number: Tutorial 7 of 8
+breadcrumb:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Tutorials
+    url: /docs/examples/tutorials/
+  - title: CDP Protocol
+    url: /docs/examples/tutorials/cdp-protocol
 ---
 
 # CDP Protocol Tutorial

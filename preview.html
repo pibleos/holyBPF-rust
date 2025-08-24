@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HolyBPF Documentation - Preview</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="blueprint-grid"></div>
+    
+    <header class="site-header">
+        <nav class="nav-container">
+            <div class="nav-brand">
+                <a href="/" class="brand-link">
+                    <span class="brand-text">HolyBPF Docs</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="/getting-started/" class="nav-link">Getting Started</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/examples/" class="nav-link">Examples</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/api/" class="nav-link">API Reference</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    
+    <main class="site-main">
+        <article class="doc-content">
+            <div class="doc-header">
+                <nav class="breadcrumb" aria-label="Breadcrumb">
+                    <a href="/" class="breadcrumb-link">Home</a>
+                    <span class="breadcrumb-separator">→</span>
+                    <a href="/examples/" class="breadcrumb-link">Examples</a>
+                    <span class="breadcrumb-separator">→</span>
+                    <span class="breadcrumb-current">Test Page</span>
+                </nav>
+                
+                <div class="tutorial-meta">
+                    <span class="difficulty-badge difficulty-beginner">Beginner</span>
+                    <span class="time-estimate">⏱️ 10 minutes</span>
+                    <span class="tutorial-number">Preview Demo</span>
+                </div>
+            </div>
+            
+            <div class="doc-content-wrapper">
+                <h1>Enhanced Markdown & Mermaid Preview</h1>
+                
+                <p>This preview demonstrates the enhanced markdown rendering and mermaid diagram support for the HolyBPF documentation website.</p>
+                
+                <h2>Code Examples</h2>
+                
+                <p>Here's some <code>inline code</code> and a larger code block:</p>
+                
+                <pre><code class="language-rust">// HolyC to Rust interop example
+pub fn hello_world() -> Result<(), ProgramError> {
+    msg!("Hello, World from HolyBPF!");
+    Ok(())
+}</code></pre>
+                
+                <h2>Architecture Diagram</h2>
+                
+                <div class="mermaid">
+graph TB
+    A[HolyC Source Code] --> B[Lexical Analysis]
+    B --> C[Syntax Parsing]
+    C --> D[AST Generation]
+    D --> E[BPF Code Generation]
+    E --> F[Solana BPF Program]
+    
+    subgraph "Compilation Pipeline"
+        B
+        C
+        D
+        E
+    end
+                </div>
+                
+                <h2>Features Table</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Markdown Rendering</strong></td>
+                            <td>✅ Complete</td>
+                            <td>High</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mermaid Diagrams</strong></td>
+                            <td>✅ Complete</td>
+                            <td>High</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code Highlighting</strong></td>
+                            <td>✅ Complete</td>
+                            <td>Medium</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h2>Alert Example</h2>
+                
+                <div class="alert alert-info">
+                    <strong>Info:</strong> This preview shows the enhanced documentation design with professional styling.
+                </div>
+                
+                <h2>Task List</h2>
+                
+                <ul class="task-list">
+                    <li class="task-list-item">
+                        <input type="checkbox" checked disabled> Enhanced markdown rendering
+                    </li>
+                    <li class="task-list-item">
+                        <input type="checkbox" checked disabled> Mermaid diagram support
+                    </li>
+                    <li class="task-list-item">
+                        <input type="checkbox" disabled> Additional improvements
+                    </li>
+                </ul>
+                
+                <blockquote>
+                    <p>This enhanced documentation system provides a professional, clean, and highly readable experience for developers learning HolyBPF.</p>
+                </blockquote>
+            </div>
+        </article>
+    </main>
+    
+    <!-- Mermaid.js -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#2563eb',
+                primaryTextColor: '#1f2937',
+                primaryBorderColor: '#e5e7eb',
+                lineColor: '#6b7280',
+                secondaryColor: '#f3f4f6',
+                tertiaryColor: '#f9fafb',
+                background: '#ffffff',
+                fontFamily: 'Inter, system-ui, sans-serif'
+            }
+        });
+    </script>
+    
+    <!-- Main JavaScript -->
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
