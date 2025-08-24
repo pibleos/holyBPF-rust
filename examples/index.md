@@ -12,6 +12,11 @@ Production-ready code examples and snippets demonstrating real-world HolyC patte
 
 <div class="content-grid">
   <div class="feature-card">
+    <h3>📚 Step-by-Step Tutorials</h3>
+    <p>Complete tutorials with code walkthroughs, setup instructions, and practical results.</p>
+    <a href="{{ '/docs/examples/tutorials/' | relative_url }}" class="card-link">View Tutorials →</a>
+  </div>
+  <div class="feature-card">
     <h3>💡 Code Snippets</h3>
     <p>Practical examples and reusable code patterns for common development tasks.</p>
     <a href="{{ '/examples/snippets/' | relative_url }}" class="card-link">Browse Examples →</a>
@@ -118,10 +123,14 @@ All examples follow production standards:
 
 ## Getting Started
 
-Browse the **[Code Snippets]({{ '/examples/snippets/' | relative_url }})** to find practical examples you can adapt for your projects.
+Start your HolyBPF journey with our comprehensive learning resources:
+
+1. **[Step-by-Step Tutorials]({{ '/docs/examples/tutorials/' | relative_url }})** - Complete guided tutorials for each example
+2. **[Code Snippets]({{ '/examples/snippets/' | relative_url }})** - Practical examples and reusable patterns
 
 Each example includes:
-- Complete source code
-- Usage instructions
-- Security considerations
-- Performance notes
+- Complete source code with detailed explanations
+- Step-by-step setup and compilation instructions
+- Expected results and troubleshooting guidance
+- Security considerations and best practices
+- Performance notes and optimization tips
