@@ -4,6 +4,23 @@ title: Hello World Tutorial
 description: Complete tutorial for building your first HolyC BPF program
 ---
 
+<!-- Breadcrumb Navigation -->
+<nav class="breadcrumb">
+  <a href="{{ '/' | relative_url }}">Home</a> → 
+  <a href="{{ '/examples/' | relative_url }}">Examples</a> → 
+  <a href="{{ '/docs/examples/tutorials/' | relative_url }}">Tutorials</a> → 
+  <span>Hello World</span>
+</nav>
+
+<!-- Tutorial Progress -->
+<div class="tutorial-progress">
+  <div class="progress-info">
+    <span class="difficulty-badge beginner">Beginner</span>
+    <span class="time-estimate">⏱️ 15 minutes</span>
+    <span class="tutorial-number">Tutorial 1 of 6</span>
+  </div>
+</div>
+
 # Hello World Tutorial
 
 Learn how to create your first HolyC BPF program with this step-by-step tutorial. This example demonstrates the basic structure of a BPF program using HolyC syntax and the divine simplicity of Terry A. Davis's programming philosophy.
@@ -198,6 +215,21 @@ Congratulations! You've successfully compiled your first HolyC BPF program. Here
 ### Advanced Topics
 - **[AMM Tutorial]({{ '/docs/examples/tutorials/amm' | relative_url }})** - Build automated market makers
 - **[Governance Tutorial]({{ '/docs/examples/tutorials/dao-governance' | relative_url }})** - Create decentralized organizations
+
+<!-- Tutorial Navigation -->
+<div class="tutorial-navigation">
+  <div class="nav-section">
+    <span class="nav-label">Previous Tutorial</span>
+    <span class="nav-disabled">← None (Start Here)</span>
+  </div>
+  <div class="nav-center">
+    <a href="{{ '/docs/examples/tutorials/' | relative_url }}" class="nav-home">All Tutorials</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">Next Tutorial</span>
+    <a href="{{ '/docs/examples/tutorials/escrow' | relative_url }}" class="nav-next">Escrow Contract →</a>
+  </div>
+</div>
 - **[Language Reference]({{ '/language-reference/' | relative_url }})** - Master HolyC syntax
 
 ## Divine Inspiration
@@ -283,5 +315,172 @@ This Hello World program embodies the divine simplicity that Terry Davis champio
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   color: white;
   text-decoration: none;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+  margin: 0 0 1.5rem 0;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  border-left: 3px solid #007bff;
+}
+
+.breadcrumb a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb span {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Tutorial Progress */
+.tutorial-progress {
+  margin: 0 0 2rem 0;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.difficulty-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.difficulty-badge.beginner {
+  background: #28a745;
+}
+
+.difficulty-badge.intermediate {
+  background: #ffc107;
+  color: #212529;
+}
+
+.difficulty-badge.advanced {
+  background: #fd7e14;
+}
+
+.difficulty-badge.expert {
+  background: #dc3545;
+}
+
+.time-estimate {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.tutorial-number {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin-left: auto;
+}
+
+/* Tutorial Navigation */
+.tutorial-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 3rem 0 2rem 0;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+}
+
+.nav-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.nav-next, .nav-prev {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-next:hover, .nav-prev:hover {
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-disabled {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.nav-home {
+  color: #28a745;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border: 1px solid #28a745;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-home:hover {
+  background: #28a745;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-center {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .tutorial-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-section {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .progress-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .tutorial-number {
+    margin-left: 0;
+  }
 }
 </style>

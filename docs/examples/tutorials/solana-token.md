@@ -4,6 +4,29 @@ title: Token Program Tutorial
 description: Build a comprehensive token management system in HolyC
 ---
 
+<!-- Breadcrumb Navigation -->
+<nav class="breadcrumb">
+  <a href="{{ '/' | relative_url }}">Home</a> → 
+  <a href="{{ '/examples/' | relative_url }}">Examples</a> → 
+  <a href="{{ '/docs/examples/tutorials/' | relative_url }}">Tutorials</a> → 
+  <span>Token Program</span>
+</nav>
+
+<!-- Tutorial Progress -->
+<div class="tutorial-progress">
+  <div class="progress-info">
+    <span class="difficulty-badge intermediate">Intermediate</span>
+    <span class="time-estimate">⏱️ 35 minutes</span>
+    <span class="tutorial-number">Tutorial 3 of 6</span>
+  </div>
+  <div class="progress-tracker">
+    <div class="progress-bar">
+      <div class="progress-fill" data-progress="0"></div>
+    </div>
+    <span class="progress-text">0% Complete</span>
+  </div>
+</div>
+
 # Token Program Tutorial
 
 Learn how to build a comprehensive token management system using HolyC BPF. This tutorial covers token creation, minting, transfers, and Solana program integration patterns.
@@ -628,6 +651,21 @@ Token systems embody divine economic principles - scarce, transferable, and prog
 
 **Token mastery achieved!** You now understand token economics and can build production-ready token management systems.
 
+<!-- Tutorial Navigation -->
+<div class="tutorial-navigation">
+  <div class="nav-section">
+    <span class="nav-label">Previous Tutorial</span>
+    <a href="{{ '/docs/examples/tutorials/escrow' | relative_url }}" class="nav-prev">← Escrow Contract</a>
+  </div>
+  <div class="nav-center">
+    <a href="{{ '/docs/examples/tutorials/' | relative_url }}" class="nav-home">All Tutorials</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-label">Next Tutorial</span>
+    <a href="{{ '/docs/examples/tutorials/amm' | relative_url }}" class="nav-next">AMM Tutorial →</a>
+  </div>
+</div>
+
 <style>
 .code-section {
   margin: 1.5rem 0;
@@ -690,5 +728,156 @@ Token systems embody divine economic principles - scarce, transferable, and prog
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   color: white;
   text-decoration: none;
+}
+
+/* Progress Tracking */
+.progress-tracker {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #28a745;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  min-width: 100px;
+  text-align: right;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+  margin: 0 0 1.5rem 0;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  border-left: 3px solid #007bff;
+}
+
+.breadcrumb a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb span {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Tutorial Navigation */
+.tutorial-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 3rem 0 2rem 0;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+}
+
+.nav-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.nav-next, .nav-prev {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-next:hover, .nav-prev:hover {
+  background: #007bff;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-next:focus, .nav-prev:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.nav-home {
+  color: #28a745;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border: 1px solid #28a745;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.nav-home:hover {
+  background: #28a745;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-home:focus {
+  outline: 2px solid #28a745;
+  outline-offset: 2px;
+}
+
+.nav-center {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .tutorial-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-section {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .progress-tracker {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .progress-text {
+    text-align: center;
+    min-width: auto;
+  }
 }
 </style>

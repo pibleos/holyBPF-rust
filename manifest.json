@@ -1,0 +1,41 @@
+{
+  "name": "HolyBPF Tutorials",
+  "short_name": "HolyBPF",
+  "description": "Comprehensive tutorials for HolyC BPF programming",
+  "start_url": "/docs/examples/tutorials/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#007bff",
+  "orientation": "portrait-primary",
+  "categories": ["education", "developer", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/screenshot-wide.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "HolyBPF Tutorial Dashboard"
+    },
+    {
+      "src": "/assets/screenshot-mobile.jpg", 
+      "sizes": "414x896",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Mobile Tutorial View"
+    }
+  ],
+  "features": [
+    "Cross-platform compatibility",
+    "Offline tutorial access",
+    "Progressive web app",
+    "Mobile-optimized learning"
+  ]
+}

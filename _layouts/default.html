@@ -17,6 +17,13 @@
     <!-- SEO and Meta -->
     {% seo %}
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ '/manifest.json' | relative_url }}">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="HolyBPF Tutorials">
+    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ '/assets/favicon.ico' | relative_url }}">
 </head>
@@ -114,5 +121,79 @@
     
     <!-- JavaScript -->
     <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('{{ '/sw.js' | relative_url }}')
+                    .then(function(registration) {
+                        console.log('HolyBPF: Service Worker registered');
+                    })
+                    .catch(function(error) {
+                        console.log('HolyBPF: Service Worker registration failed');
+                    });
+            });
+        }
+    </script>
+    
+    <!-- Progress tracking for tutorials -->
+    <script>
+        // Tutorial progress tracking
+        function updateProgress(percentage) {
+            const progressFill = document.querySelector('.progress-fill');
+            const progressText = document.querySelector('.progress-text');
+            
+            if (progressFill && progressText) {
+                progressFill.style.width = percentage + '%';
+                progressText.textContent = Math.round(percentage) + '% Complete';
+                
+                // Save progress to localStorage
+                const currentPage = window.location.pathname;
+                localStorage.setItem('tutorial-progress-' + currentPage, percentage);
+            }
+        }
+        
+        // Auto-track reading progress based on scroll
+        function trackReadingProgress() {
+            const content = document.querySelector('.page-content') || document.querySelector('.doc-content');
+            if (!content) return;
+            
+            let ticking = false;
+            
+            function updateProgressOnScroll() {
+                const scrollTop = window.pageYOffset;
+                const docHeight = content.offsetHeight;
+                const winHeight = window.innerHeight;
+                const scrollPercent = scrollTop / (docHeight - winHeight);
+                const scrollPercentRounded = Math.round(scrollPercent * 100);
+                
+                if (scrollPercentRounded >= 0 && scrollPercentRounded <= 100) {
+                    updateProgress(scrollPercentRounded);
+                }
+                
+                ticking = false;
+            }
+            
+            function requestTick() {
+                if (!ticking) {
+                    requestAnimationFrame(updateProgressOnScroll);
+                    ticking = true;
+                }
+            }
+            
+            window.addEventListener('scroll', requestTick);
+            
+            // Load saved progress
+            const currentPage = window.location.pathname;
+            const savedProgress = localStorage.getItem('tutorial-progress-' + currentPage);
+            if (savedProgress) {
+                updateProgress(parseInt(savedProgress));
+            }
+        }
+        
+        // Initialize progress tracking
+        document.addEventListener('DOMContentLoaded', trackReadingProgress);
+    </script>
 </body>
 </html>
