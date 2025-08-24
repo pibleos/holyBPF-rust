@@ -1,6 +1,6 @@
 # Build Validation Tools
 
-This directory contains automated tools to validate and fix the HolyBPF-zig build system.
+This directory contains automated tools to validate and fix the HolyBPF-rust build system.
 
 ## Tools Overview
 
@@ -13,7 +13,7 @@ Basic build validation script that attempts to build the repository and analyzes
 ```
 
 **Features:**
-- Checks prerequisites (Zig installation, required files)
+- Checks prerequisites (Rust installation, required files)
 - Attempts clean build with verbose output
 - Runs tests if build succeeds
 - Builds example programs
@@ -31,9 +31,9 @@ Static analysis tool that examines build configuration files for potential issue
 
 **Features:**
 - Validates project structure
-- Checks file references in build.zig
-- Analyzes build.zig for Zig version compatibility
-- Validates build.zig.zon syntax
+- Checks file references in Cargo.toml
+- Analyzes Cargo.toml for Rust version compatibility
+- Validates Cargo.lock syntax
 - Suggests dependency requirements
 - Reports overall health status
 
@@ -46,39 +46,39 @@ Advanced tool that automatically attempts to fix build issues through multiple i
 ```
 
 **Features:**
-- Automatic Zig installation detection
+- Automatic Rust installation detection
 - Iterative build-fix-retry loop (max 5 iterations)
 - Automated fixes for common issues:
-  - .root_source_file → .root_src conversion
-  - b.path() → LazyPath syntax conversion
-  - String → enum literal conversion in .zon files
-  - Missing fingerprint/dependencies sections
+  - Cargo.toml dependency version mismatches
+  - Missing feature flags configuration
+  - Invalid Rust edition specifications  
+  - Missing development dependencies
 - Comprehensive final report
 - Test execution after successful builds
 
 ## Common Issues and Fixes
 
-### Issue 1: Zig Version Compatibility
-**Error:** `no field named 'root_source_file'`
-**Fix:** Update build.zig to use `.root_src` instead of `.root_source_file`
+### Issue 1: Rust Version Compatibility
+**Error:** `error[E0658]: use of unstable library feature`
+**Fix:** Update to stable Rust 1.78+ or add required feature flags
 
-### Issue 2: Deprecated API Usage
-**Error:** `b.path() not found`
-**Fix:** Use `.{ .cwd_relative = "path" }` instead of `b.path("path")`
+### Issue 2: Missing Dependencies
+**Error:** `use of undeclared crate or module`
+**Fix:** Add missing dependencies to `[dependencies]` section in Cargo.toml
 
-### Issue 3: build.zig.zon Format
-**Error:** `expected enum literal`
-**Fix:** Use `.name = .holyc_bpf` instead of `.name = "holyc_bpf"`
+### Issue 3: Cargo.toml Format
+**Error:** `expected string, found integer`
+**Fix:** Use correct TOML syntax for version specifications
 
-### Issue 4: Missing Zig Installation
-**Error:** `zig: command not found`
-**Fix:** Install Zig 0.15.1+ from https://ziglang.org/download/0.15.1/
+### Issue 4: Missing Rust Installation
+**Error:** `cargo: command not found`
+**Fix:** Install Rust 1.78+ from https://rustup.rs/
 
 ## Prerequisites
 
-- Zig 0.15.1 or later
+- Rust 1.78 or later
 - Linux/Unix environment with bash
-- Internet access for Zig installation (if needed)
+- Internet access for crate dependencies (if needed)
 - Standard Unix tools: wget, tar, timeout
 
 ## Directory Structure
@@ -102,12 +102,12 @@ build_logs/              # Created by validation tools
 ### Healthy Build System
 ```
 ✅ BUILD SYSTEM APPEARS HEALTHY
-Main issue is likely missing Zig 0.15.1+ installation
+Main issue is likely missing Rust 1.78+ installation
 
 Next steps:
-1. Install Zig 0.15.1 from https://ziglang.org/download/0.15.1/
-2. Run: zig build
-3. Run: zig build test
+1. Install Rust 1.78+ from https://rustup.rs/
+2. Run: cargo build --release
+3. Run: cargo test
 ```
 
 ### Successful Build
@@ -115,24 +115,25 @@ Next steps:
 🎉 SUCCESS: Both build and tests passed!
 
 Project is ready for development:
-- Compiler binary: ./zig-out/bin/pible
-- Run tests: zig build test
-- Build examples: zig build hello-world
+- Compiler binary: ./target/release/pible
+- Run tests: cargo test
+- Build examples: cargo build --release
 ```
 
 ## Troubleshooting
 
 If validation tools fail:
 
-1. **Check Zig Installation:**
+1. **Check Rust Installation:**
    ```bash
-   zig version  # Should show 0.15.1 or later
+   rustc --version  # Should show 1.78 or later
+   cargo --version  # Should show corresponding version
    ```
 
 2. **Verify Project Structure:**
    ```bash
-   ls src/Pible/Main.zig  # Should exist
-   ls build.zig           # Should exist
+   ls src/main.rs      # Should exist
+   ls Cargo.toml       # Should exist
    ```
 
 3. **Review Logs:**
@@ -142,7 +143,7 @@ If validation tools fail:
 
 4. **Manual Build:**
    ```bash
-   zig build --verbose  # See detailed build output
+   cargo build --verbose  # See detailed build output
    ```
 
 ## Integration with CI/CD

@@ -31,19 +31,19 @@ Pible continues Terry's mission by bringing HolyC to BPF runtimes. This compiler
 
 ```bash
 # Clone the divine repository
-git clone https://github.com/pix404/holyBPF-zig
+git clone https://github.com/pibleos/holyBPF-rust
 
-# Build with Zig's blessing
-cargo build
+# Build with Rust's blessing
+cargo build --release
 
 # Compile your first HolyC program
-./zig-out/bin/pible examples/hello-world/src/main.hc
+./target/release/pible examples/hello-world/src/main.hc
 
 # Compile for Solana with IDL generation
-./zig-out/bin/pible --target solana-bpf --generate-idl examples/solana-token/src/main.hc
+./target/release/pible --target solana-bpf --generate-idl examples/solana-token/src/main.hc
 
 # Test with BPF VM emulation
-./zig-out/bin/pible --target bpf-vm --enable-vm-testing examples/hello-world/src/main.hc
+./target/release/pible --target bpf-vm --enable-vm-testing examples/hello-world/src/main.hc
 ```
 
 ## 🎯 Multiple Targets
@@ -52,17 +52,17 @@ Pible supports three divine compilation targets:
 
 ### Linux BPF (Default)
 ```bash
-./zig-out/bin/pible program.hc
+./target/release/pible program.hc
 ```
 
 ### Solana BPF
 ```bash
-./zig-out/bin/pible --target solana-bpf --generate-idl program.hc
+./target/release/pible --target solana-bpf --generate-idl program.hc
 ```
 
 ### BPF VM Emulation
 ```bash
-./zig-out/bin/pible --target bpf-vm --enable-vm-testing program.hc
+./target/release/pible --target bpf-vm --enable-vm-testing program.hc
 ```
 
 ## 📖 Holy Examples

@@ -4,25 +4,27 @@ This guide will get you up and running with HolyC Solana development using the P
 
 ## Prerequisites
 
-### Install Zig Programming Language
+### Install Rust Programming Language
 
-Pible requires Zig 0.16.x or later for compilation:
+Pible requires Rust 1.78 or later for compilation:
 
 ```bash
-# Download latest Zig
-wget https://ziglang.org/builds/zig-linux-x86_64-0.16.0-dev.1594c8055.tar.xz
-tar -xf zig-linux-x86_64-0.16.0-dev.1594c8055.tar.xz
-export PATH=$PWD/zig-linux-x86_64-0.16.0-dev.1594c8055:$PATH
+# Install rustup (if not already)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Activate environment (if needed)
+source $HOME/.cargo/env
 
 # Verify installation
-zig version
+rustc --version
+cargo --version
 ```
 
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/pibleos/holyBPF-zig
-cd holyBPF-zig
+git clone https://github.com/pibleos/holyBPF-rust
+cd holyBPF-rust
 ```
 
 ## Build the Compiler
@@ -30,11 +32,11 @@ cd holyBPF-zig
 Compile the Pible compiler from source:
 
 ```bash
-# Build the compiler (may take 2-5 minutes on first run)
-zig build
+# Build the compiler (may take 30 seconds on first run)
+cargo build --release
 
 # Verify compiler is built
-ls zig-out/bin/pible
+ls target/release/pible
 ```
 
 ## Your First HolyC Program
@@ -58,7 +60,7 @@ Compile and test:
 
 ```bash
 # Compile to BPF bytecode
-./zig-out/bin/pible hello.hc
+./target/release/pible hello.hc
 
 # Verify output
 ls hello.hc.bpf
@@ -185,10 +187,10 @@ U8* encode_base58(U8* data) {
 
 ```bash
 # Compile with Solana target
-./zig-out/bin/pible --target solana-bpf token.hc
+./target/release/pible --target solana-bpf token.hc
 
 # Generate IDL
-./zig-out/bin/pible --target solana-bpf --generate-idl token.hc
+./target/release/pible --target solana-bpf --generate-idl token.hc
 ```
 
 ## DeFi Program Examples
@@ -197,20 +199,20 @@ U8* encode_base58(U8* data) {
 
 ```bash
 # Build the AMM example
-zig build amm
+cargo build --release
 
-# Check output
-ls zig-out/bin/amm.bpf
+# Compile AMM example
+./target/release/pible examples/amm/src/main.hc
 ```
 
 ### Lending Protocol
 
 ```bash
 # Build the lending example
-zig build lending
+cargo build --release
 
-# Check output
-ls zig-out/bin/lending.bpf
+# Compile lending example
+./target/release/pible examples/lending/src/main.hc
 ```
 
 ## Development Workflow
@@ -234,17 +236,17 @@ export U0 entrypoint(U8* input, U64 input_len) {
 
 ```bash
 # Compile
-./zig-out/bin/pible program.hc
+./target/release/pible program.hc
 
 # Test with BPF VM (if available)
-./zig-out/bin/pible --target bpf-vm --enable-vm-testing program.hc
+./target/release/pible --target bpf-vm --enable-vm-testing program.hc
 ```
 
 ### 3. Deploy to Solana
 
 ```bash
 # Generate deployment-ready files
-./zig-out/bin/pible --target solana-bpf --generate-idl program.hc
+./target/release/pible --target solana-bpf --generate-idl program.hc
 
 # Use Solana CLI for deployment (if available)
 solana program deploy program.hc.bpf
@@ -331,7 +333,7 @@ Continue with detailed guides:
 
 ### Join the Community
 
-- GitHub: https://github.com/pibleos/holyBPF-zig
+- GitHub: https://github.com/pibleos/holyBPF-rust
 - Issues: Report bugs and request features
 - Discussions: Share your projects and get help
 
@@ -339,9 +341,9 @@ Continue with detailed guides:
 
 ### Common Issues
 
-**"zig: command not found"**
-- Install Zig as shown in prerequisites
-- Ensure Zig is in your PATH
+**"cargo: command not found"**
+- Install Rust as shown in prerequisites
+- Ensure Rust is in your PATH
 
 **"Build failed with fetch errors"**
 - Check internet connection
@@ -365,6 +367,6 @@ If you encounter issues:
 4. Open an issue on GitHub with:
    - Your HolyC code
    - Complete error output
-   - System information (OS, Zig version)
+   - System information (OS, Rust version)
 
 Happy coding with HolyC on Solana!

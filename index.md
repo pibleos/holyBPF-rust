@@ -53,6 +53,73 @@ description: Comprehensive guide for developing Solana programs using HolyC
   </div>
 </div>
 
+<div class="project-showcase">
+  <h2>Project Examples</h2>
+  <p>Explore diverse HolyC implementations across DeFi, SocialFi, and AI domains on Solana</p>
+  
+  <div class="content-grid">
+    <div class="feature-card defi-card">
+      <h3>🔄 Perpetual DEX</h3>
+      <p>Advanced perpetual futures trading platform with oracle integration and liquidation mechanisms.</p>
+      <a href="{{ '/examples/perpetual-dex/' | relative_url }}" class="card-link">Trade Futures →</a>
+    </div>
+
+    <div class="feature-card defi-card">
+      <h3>⚡ Options Protocol</h3>
+      <p>European-style options trading with automated market making and delta hedging strategies.</p>
+      <a href="{{ '/examples/options-protocol/' | relative_url }}" class="card-link">Trade Options →</a>
+    </div>
+
+    <div class="feature-card defi-card">
+      <h3>🛡️ Insurance Pool</h3>
+      <p>Decentralized insurance covering smart contract risks with dynamic premium calculations.</p>
+      <a href="{{ '/examples/insurance-pool/' | relative_url }}" class="card-link">Get Coverage →</a>
+    </div>
+
+    <div class="feature-card defi-card">
+      <h3>💎 Staking Rewards</h3>
+      <p>Flexible staking platform with compounding rewards and governance token distribution.</p>
+      <a href="{{ '/examples/staking-rewards/' | relative_url }}" class="card-link">Stake Tokens →</a>
+    </div>
+
+    <div class="feature-card socialfi-card">
+      <h3>🎨 Creator Economy</h3>
+      <p>Social token platform enabling creators to tokenize content and engage with fans through NFTs.</p>
+      <a href="{{ '/examples/creator-economy/' | relative_url }}" class="card-link">Create Content →</a>
+    </div>
+
+    <div class="feature-card socialfi-card">
+      <h3>🔗 Social Graph</h3>
+      <p>Decentralized social network with privacy-preserving connections and content sharing.</p>
+      <a href="{{ '/examples/social-graph/' | relative_url }}" class="card-link">Build Network →</a>
+    </div>
+
+    <div class="feature-card socialfi-card">
+      <h3>⭐ Reputation System</h3>
+      <p>Cross-platform reputation scoring with verifiable credentials and trust metrics.</p>
+      <a href="{{ '/examples/reputation-system/' | relative_url }}" class="card-link">Build Trust →</a>
+    </div>
+
+    <div class="feature-card ai-card">
+      <h3>📊 Prediction Markets</h3>
+      <p>AI-enhanced prediction markets with machine learning price discovery and outcome validation.</p>
+      <a href="{{ '/examples/prediction-markets/' | relative_url }}" class="card-link">Make Predictions →</a>
+    </div>
+
+    <div class="feature-card ai-card">
+      <h3>🤖 AI Agents</h3>
+      <p>Autonomous trading agents with reinforcement learning and strategy optimization.</p>
+      <a href="{{ '/examples/ai-agents/' | relative_url }}" class="card-link">Deploy Agents →</a>
+    </div>
+
+    <div class="feature-card ai-card">
+      <h3>🧠 ML Model Registry</h3>
+      <p>Decentralized marketplace for machine learning models with performance verification.</p>
+      <a href="{{ '/examples/ml-model-registry/' | relative_url }}" class="card-link">Share Models →</a>
+    </div>
+  </div>
+</div>
+
 <div class="highlights-section">
   <h2>Why HolyBPF?</h2>
   <div class="highlights-grid">

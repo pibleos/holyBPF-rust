@@ -5,10 +5,16 @@ This is a simple Hello World program written in HolyC that compiles to BPF bytec
 ## Building
 
 ```bash
-zig build
+cargo build --release
 ```
 
-This will create a BPF ELF file in the `zig-out/bin` directory.
+This will create the Pible compiler in the `target/release` directory.
+
+Then compile the HolyC program:
+
+```bash
+./target/release/pible src/main.hc
+```
 
 ## Program Structure
 
@@ -24,10 +30,10 @@ You can test the program using the BPF CLI tools:
 
 ```bash
 # Verify the BPF program
-bpf-cli verify zig-out/bin/hello_world
+bpf-cli verify src/main.hc.bpf
 
 # Run the program
-bpf-cli run zig-out/bin/hello_world
+bpf-cli run src/main.hc.bpf
 ```
 
 ## Output

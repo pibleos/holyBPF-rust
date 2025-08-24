@@ -45,14 +45,14 @@ This project honors Terry A. Davis's memory and follows these principles:
 
 4. **Build and test**
    ```bash
-   zig build
-   zig build test
-   zig build hello-world  # Test example compilation
+   cargo build --release
+   cargo build --release test
+   cargo build --release hello-world  # Test example compilation
    ```
 
 5. **Verify everything works**
    ```bash
-   ./zig-out/bin/pible examples/hello-world/src/main.hc
+   ./target/release/pible examples/hello-world/src/main.hc
    file examples/hello-world/src/main.bpf  # Should show binary data
    ```
 
@@ -203,13 +203,13 @@ tests/
 ### Running Tests
 ```bash
 # Run all tests
-zig build test
+cargo build --release test
 
 # Run specific test file
 zig test src/Pible/Tests.zig
 
 # Run with verbose output
-zig build test --verbose
+cargo build --release test --verbose
 ```
 
 ### Test Categories
@@ -257,9 +257,9 @@ Understanding our labeling system:
 ## 📋 Pull Request Process
 
 ### Before Submitting
-- [ ] Code builds successfully (`zig build`)
-- [ ] All tests pass (`zig build test`)
-- [ ] Examples still work (`zig build hello-world`)
+- [ ] Code builds successfully (`cargo build --release`)
+- [ ] All tests pass (`cargo build --release test`)
+- [ ] Examples still work (`cargo build --release hello-world`)
 - [ ] Documentation updated if needed
 - [ ] Code follows style guidelines
 - [ ] Commit messages are clear
