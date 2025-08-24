@@ -7,20 +7,20 @@ This document provides a comprehensive overview of the Pible compiler's technica
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   HolyC Source  │    │      Lexer      │    │     Tokens      │
-│      (.hc)      │───▶│   (Lexer.zig)   │───▶│   (TokenType)   │
+│      (.hc)      │───▶│   (lexer.rs)    │───▶│   (TokenType)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                                         │
                                                         ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   BPF Bytecode  │    │    Code Gen     │    │       AST       │
-│     (.bpf)      │◀───│ (CodeGen.zig)   │◀───│  (Parser.zig)   │
+│     (.bpf)      │◀───│ (codegen.rs)    │◀───│  (parser.rs)    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │
                                 ▼
                        ┌─────────────────┐
                        │  Target-Specific │
                        │   (SolanaBpf,    │
-                       │    BpfVm.zig)    │
+                       │    bpf_vm.rs)    │
                        └─────────────────┘
 ```
 
@@ -30,10 +30,10 @@ This document provides a comprehensive overview of the Pible compiler's technica
 
 | Module | File | Responsibility |
 |--------|------|----------------|
-| **Main** | `src/Pible/Main.zig` | CLI interface, argument parsing, compilation orchestration |
-| **Compiler** | `src/Pible/Compiler.zig` | Main compilation pipeline coordination |
-| **Lexer** | `src/Pible/Lexer.zig` | Tokenization of HolyC source code |
-| **Parser** | `src/Pible/Parser.zig` | AST construction from token stream |
+| **Main** | `src/main.rs` | CLI interface, argument parsing, compilation orchestration |
+| **Compiler** | `src/pible/compiler.rs` | Main compilation pipeline coordination |
+| **Lexer** | `src/pible/lexer.rs` | Tokenization of HolyC source code |
+| **Parser** | `src/pible/parser.rs` | AST construction from token stream |
 | **CodeGen** | `src/Pible/CodeGen.zig` | BPF instruction generation from AST |
 | **SolanaBpf** | `src/Pible/SolanaBpf.zig` | Solana-specific BPF features and IDL generation |
 | **BpfVm** | `src/Pible/BpfVm.zig` | BPF virtual machine emulation for testing |

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# HolyBPF-zig Build Validator Script
-# This script attempts to build the repository and analyze build errors
+# HolyBPF-rust Build Validator Script
+# Validates the build system and runs comprehensive tests
 
 set -e
 
-echo "=== HolyBPF-zig Build Validator ==="
+echo "=== HolyBPF-rust Build Validator ==="
 echo "Timestamp: $(date)"
 echo ""
 
@@ -14,193 +14,184 @@ log() {
     echo "[$(date '+%H:%M:%S')] $1"
 }
 
-# Function to analyze build output for issues
-analyze_build_output() {
-    local output_file="$1"
-    local phase="$2"
+# Function to check prerequisites
+check_prerequisites() {
+    log "Checking prerequisites..."
     
-    log "Analyzing $phase output for errors..."
-    
-    # Check for common error patterns
-    if grep -q "error:" "$output_file"; then
-        log "❌ Found errors in $phase:"
-        grep "error:" "$output_file" | head -10
-        echo ""
-        return 1
+    # Check if we're in the right directory
+    if [[ ! -f "Cargo.toml" ]]; then
+        log "❌ Error: Cargo.toml not found. Are you in the project root?"
+        exit 1
     fi
     
-    if grep -q "warning:" "$output_file"; then
-        log "⚠️  Found warnings in $phase:"
-        grep "warning:" "$output_file" | head -5
-        echo ""
+    # Check Rust installation
+    if ! command -v cargo &> /dev/null; then
+        log "❌ Error: Cargo not found. Please install Rust toolchain."
+        log "   Install via: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        exit 1
     fi
     
-    log "✅ No critical errors found in $phase"
-    return 0
-}
-
-# Function to suggest fixes based on error patterns
-suggest_fixes() {
-    local output_file="$1"
-    local phase="$2"
+    # Check Rust version
+    RUST_VERSION=$(rustc --version 2>/dev/null || echo "unknown")
+    log "ℹ️  Using Rust: $RUST_VERSION"
     
-    log "Generating fix suggestions for $phase errors..."
+    # Check for required source files
+    local required_files=(
+        "src/main.rs"
+        "src/pible/mod.rs"
+        "src/tests.rs"
+    )
     
-    # Check for Zig version compatibility issues
-    if grep -q "no field named" "$output_file"; then
-        log "🔧 Fix suggestion: Zig API compatibility issue detected"
-        log "   - Update build.zig to use correct field names for your Zig version"
-        log "   - Check Zig documentation for API changes"
-    fi
-    
-    # Check for missing dependencies
-    if grep -q "dependency.*not found" "$output_file"; then
-        log "🔧 Fix suggestion: Missing dependency detected"
-        log "   - Check build.zig.zon for correct dependency URLs and hashes"
-        log "   - Ensure network access for dependency fetching"
-    fi
-    
-    # Check for syntax errors
-    if grep -q "expected.*literal" "$output_file"; then
-        log "🔧 Fix suggestion: Syntax error in .zon file"
-        log "   - Check build.zig.zon syntax for enum literals"
-        log "   - Ensure proper field naming conventions"
-    fi
-    
-    # Check for file not found errors
-    if grep -q "FileNotFound\|No such file" "$output_file"; then
-        log "🔧 Fix suggestion: Missing source files"
-        log "   - Verify all source files exist in expected locations"
-        log "   - Check file paths in build.zig"
-    fi
-}
-
-# Check prerequisites
-log "Checking prerequisites..."
-
-# Check if we're in the right directory
-if [ ! -f "build.zig" ]; then
-    log "❌ Error: build.zig not found. Are you in the project root?"
-    exit 1
-fi
-
-# Check for Zig installation
-if ! command -v zig &> /dev/null; then
-    log "❌ Error: Zig not found in PATH"
-    log "🔧 Fix suggestion: Install Zig 0.15.1 or later"
-    log "   - Download from: https://ziglang.org/download/"
-    log "   - Add to PATH or use package manager"
-    exit 1
-fi
-
-# Check Zig version
-ZIG_VERSION=$(zig version 2>/dev/null || echo "unknown")
-log "Found Zig version: $ZIG_VERSION"
-
-# Create output directory for logs
-mkdir -p build_logs
-
-# Phase 1: Clean build
-log "Phase 1: Cleaning previous build artifacts..."
-rm -rf zig-cache zig-out build_logs/*.log 2>/dev/null || true
-log "✅ Cleaned build artifacts"
-
-# Phase 2: Attempt build
-log "Phase 2: Attempting build..."
-BUILD_OUTPUT="build_logs/build.log"
-BUILD_SUCCESS=false
-
-if zig build --verbose 2>&1 | tee "$BUILD_OUTPUT"; then
-    log "✅ Build completed successfully"
-    BUILD_SUCCESS=true
-else
-    log "❌ Build failed"
-    BUILD_SUCCESS=false
-fi
-
-# Analyze build output
-if ! analyze_build_output "$BUILD_OUTPUT" "build"; then
-    suggest_fixes "$BUILD_OUTPUT" "build"
-fi
-
-# Phase 3: If build succeeded, try tests
-if [ "$BUILD_SUCCESS" = true ]; then
-    log "Phase 3: Running tests..."
-    TEST_OUTPUT="build_logs/test.log"
-    TEST_SUCCESS=false
-    
-    if timeout 600 zig build test 2>&1 | tee "$TEST_OUTPUT"; then
-        log "✅ Tests completed successfully"
-        TEST_SUCCESS=true
-    else
-        log "❌ Tests failed or timed out"
-        TEST_SUCCESS=false
-    fi
-    
-    # Analyze test output
-    if ! analyze_build_output "$TEST_OUTPUT" "test"; then
-        suggest_fixes "$TEST_OUTPUT" "test"
-    fi
-else
-    log "⏭️  Skipping tests due to build failure"
-fi
-
-# Phase 4: If build succeeded, try examples
-if [ "$BUILD_SUCCESS" = true ]; then
-    log "Phase 4: Building examples..."
-    EXAMPLES_OUTPUT="build_logs/examples.log"
-    
-    for example in hello-world escrow solana-token; do
-        log "Building example: $example"
-        if zig build "$example" 2>&1 | tee -a "$EXAMPLES_OUTPUT"; then
-            log "✅ Example $example built successfully"
-        else
-            log "❌ Example $example failed to build"
+    for file in "${required_files[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            log "❌ Error: Required file not found: $file"
+            exit 1
         fi
     done
     
-    # Analyze examples output
-    if ! analyze_build_output "$EXAMPLES_OUTPUT" "examples"; then
-        suggest_fixes "$EXAMPLES_OUTPUT" "examples"
+    log "✅ Prerequisites check passed"
+}
+
+# Function to validate build
+validate_build() {
+    log "Validating cargo build..."
+    
+    # Create build output log
+    local BUILD_OUTPUT="build_validation_output.log"
+    
+    if cargo build --verbose 2>&1 | tee "$BUILD_OUTPUT"; then
+        log "✅ Build validation passed"
+        
+        # Check for warnings
+        if grep -q "warning:" "$BUILD_OUTPUT"; then
+            log "⚠️  Build completed with warnings - check $BUILD_OUTPUT for details"
+        fi
+        
+        return 0
+    else
+        log "❌ Build validation failed"
+        log "   Common fixes:"
+        log "   - Check dependency versions in Cargo.toml"
+        log "   - Ensure all required source files exist"
+        log "   - Run 'cargo clean' and try again"
+        return 1
     fi
-else
-    log "⏭️  Skipping examples due to build failure"
-fi
+}
 
-# Phase 5: Summary and recommendations
-log "Phase 5: Build validation summary"
-echo ""
-echo "=== BUILD VALIDATION SUMMARY ==="
-echo "Build Success: $BUILD_SUCCESS"
-if [ "$BUILD_SUCCESS" = true ]; then
-    echo "Test Success: $TEST_SUCCESS"
-fi
-echo ""
+# Function to validate tests
+validate_tests() {
+    log "Validating cargo test..."
+    
+    local TEST_OUTPUT="test_validation_output.log"
+    
+    if timeout 600 cargo test 2>&1 | tee "$TEST_OUTPUT"; then
+        local test_count=$(grep -o "test result: ok\. [0-9]* passed" "$TEST_OUTPUT" | grep -o "[0-9]*" || echo "0")
+        log "✅ Test validation passed - $test_count tests passed"
+        return 0
+    else
+        log "❌ Test validation failed"
+        log "   Check $TEST_OUTPUT for details"
+        return 1
+    fi
+}
 
-# Generate actionable recommendations
-log "Generating actionable recommendations..."
+# Function to validate examples
+validate_examples() {
+    log "Validating example compilation..."
+    
+    local EXAMPLES_OUTPUT="examples_validation_output.log"
+    local examples_passed=0
+    local examples_failed=0
+    
+    local examples=(
+        "examples/hello-world/src/main.hc"
+        "examples/escrow/src/main.hc"
+    )
+    
+    for example in "${examples[@]}"; do
+        if [[ -f "$example" ]]; then
+            log "Testing compilation of $example..."
+            if cargo run --bin pible "$example" 2>&1 | tee -a "$EXAMPLES_OUTPUT"; then
+                log "✅ Example compiled successfully: $example"
+                ((examples_passed++))
+            else
+                log "❌ Example compilation failed: $example"
+                ((examples_failed++))
+            fi
+        else
+            log "⚠️  Example file not found: $example"
+            ((examples_failed++))
+        fi
+    done
+    
+    log "Examples validation complete: $examples_passed passed, $examples_failed failed"
+    
+    if [[ $examples_failed -eq 0 ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
-if [ "$BUILD_SUCCESS" = false ]; then
-    echo "PRIORITY 1: Fix build errors"
-    echo "- Review build_logs/build.log for specific errors"
-    echo "- Apply suggested fixes above"
-    echo "- Re-run this script to verify fixes"
-fi
+# Function to run clippy lints
+validate_clippy() {
+    log "Running clippy lints..."
+    
+    if cargo clippy --all-targets --all-features -- -D warnings 2>&1; then
+        log "✅ Clippy validation passed"
+        return 0
+    else
+        log "❌ Clippy validation failed"
+        log "   Fix linting issues and try again"
+        return 1
+    fi
+}
 
-if [ "$BUILD_SUCCESS" = true ] && [ "$TEST_SUCCESS" = false ]; then
-    echo "PRIORITY 2: Fix test failures"  
-    echo "- Review build_logs/test.log for failing tests"
-    echo "- Focus on test-specific issues"
-fi
+# Function to check formatting
+validate_formatting() {
+    log "Checking code formatting..."
+    
+    if cargo fmt --check 2>&1; then
+        log "✅ Code formatting is correct"
+        return 0
+    else
+        log "❌ Code formatting issues found"
+        log "   Run 'cargo fmt' to fix formatting"
+        return 1
+    fi
+}
 
-echo ""
-echo "All build logs saved in build_logs/ directory"
-echo "To re-run validation: ./build_validator.sh"
-echo ""
+# Main validation function
+main() {
+    log "Starting comprehensive build validation..."
+    
+    local total_failures=0
+    
+    # Run all validations
+    check_prerequisites || exit 1
+    validate_build || ((total_failures++))
+    validate_tests || ((total_failures++))
+    validate_examples || ((total_failures++))
+    validate_clippy || ((total_failures++))
+    validate_formatting || ((total_failures++))
+    
+    echo ""
+    echo "=== Validation Summary ==="
+    
+    if [[ $total_failures -eq 0 ]]; then
+        log "🎉 All validations passed successfully!"
+        echo ""
+        echo "Next steps:"
+        echo "- Run tests: cargo test"
+        echo "- Build examples: cargo run --bin pible examples/hello-world/src/main.hc"
+        echo "- Start development: cargo run --help"
+    else
+        log "❌ $total_failures validations failed"
+        echo ""
+        echo "Please fix the issues above and run the validator again."
+        exit 1
+    fi
+}
 
-# Exit with appropriate code
-if [ "$BUILD_SUCCESS" = true ]; then
-    exit 0
-else
-    exit 1
-fi
+# Run main function
+main "$@"

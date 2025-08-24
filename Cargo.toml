@@ -1,0 +1,48 @@
+[package]
+name = "pible"
+version = "0.1.0"
+edition = "2021"
+description = "HolyC to BPF Compiler - In Memory of Terry A. Davis"
+authors = ["Pible Contributors"]
+license = "MIT"
+repository = "https://github.com/pibleos/holyBPF-rust"
+readme = "README.md"
+keywords = ["holyc", "bpf", "compiler", "solana", "blockchain"]
+categories = ["compilers", "development-tools"]
+
+[[bin]]
+name = "pible"
+path = "src/main.rs"
+
+[dependencies]
+# Core dependencies
+clap = { version = "4.0", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+anyhow = "1.0"
+
+# BPF and blockchain related (optional, can be enabled as needed)
+# solana-program = { version = "2.0", optional = true }
+# solana-sdk = { version = "2.0", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["full"] }
+tempfile = "3.0"
+assert_cmd = "2.0"
+predicates = "3.0"
+
+# Solana BPF testing tools (commented out until needed)
+# mollusk-svm = "0.1"
+
+[features]
+default = ["solana-bpf"]
+solana-bpf = []
+linux-bpf = []
+vm-testing = []
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
