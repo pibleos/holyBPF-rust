@@ -2,6 +2,18 @@
 layout: doc
 title: Flash Loans Tutorial
 description: Build uncollateralized lending with atomic transaction guarantees and dynamic fee structures
+difficulty: advanced
+time_estimate: 45 minutes
+tutorial_number: Tutorial 5 of 8
+breadcrumb:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Tutorials
+    url: /docs/examples/tutorials/
+  - title: Flash Loans
+    url: /docs/examples/tutorials/flash-loans
 ---
 
 # Flash Loans Tutorial

@@ -242,6 +242,27 @@ blockquote {
   text-decoration: none;
 }
 
+.brand-link {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.brand-link:hover {
+  color: var(--color-secondary);
+  text-decoration: none;
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: inherit;
+}
+
 .brand-icon {
   margin-right: var(--spacing-sm);
   font-size: 1.5rem;
