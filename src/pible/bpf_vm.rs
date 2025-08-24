@@ -96,8 +96,7 @@ impl BpfVm {
             0x07 => {
                 // BPF_ALU64 | BPF_ADD | BPF_K (add immediate)
                 if instruction.dst_reg < 11 {
-                    self.registers[instruction.dst_reg as usize] +=
-                        instruction.immediate as i64;
+                    self.registers[instruction.dst_reg as usize] += instruction.immediate as i64;
                 }
                 Ok(())
             }
@@ -160,7 +159,7 @@ impl BpfVm {
             0x6f => {
                 // BPF_ALU64 | BPF_LSH | BPF_X (left shift)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    self.registers[instruction.dst_reg as usize] <<= 
+                    self.registers[instruction.dst_reg as usize] <<=
                         self.registers[instruction.src_reg as usize];
                 }
                 Ok(())
@@ -177,7 +176,7 @@ impl BpfVm {
             0xc7 => {
                 // BPF_ALU64 | BPF_ARSH | BPF_X (arithmetic right shift)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    self.registers[instruction.dst_reg as usize] >>= 
+                    self.registers[instruction.dst_reg as usize] >>=
                         self.registers[instruction.src_reg as usize];
                 }
                 Ok(())
@@ -187,69 +186,83 @@ impl BpfVm {
                 if instruction.dst_reg < 11 {
                     let value = self.registers[instruction.dst_reg as usize];
                     let shift_amount = instruction.immediate as u32;
-                    
+
                     // For 32-bit arithmetic right shift in BPF context
                     let val_32 = value as u32 as i32; // Treat as signed 32-bit
                     let result_32 = val_32 >> shift_amount;
-                    self.registers[instruction.dst_reg as usize] = result_32 as u32 as i64; // Zero-extend to 64-bit
+                    self.registers[instruction.dst_reg as usize] = result_32 as u32 as i64;
+                    // Zero-extend to 64-bit
                 }
                 Ok(())
             }
             0x1d => {
                 // BPF_JMP | BPF_JEQ | BPF_X (jump if equal)
-                if instruction.dst_reg < 11 && instruction.src_reg < 11
-                    && self.registers[instruction.dst_reg as usize] == self.registers[instruction.src_reg as usize] {
-                        // In single instruction execution, we update pc to simulate the jump
-                        self.pc = instruction.offset as usize;
-                    }
+                if instruction.dst_reg < 11
+                    && instruction.src_reg < 11
+                    && self.registers[instruction.dst_reg as usize]
+                        == self.registers[instruction.src_reg as usize]
+                {
+                    // In single instruction execution, we update pc to simulate the jump
+                    self.pc = instruction.offset as usize;
+                }
                 Ok(())
             }
             0x2d => {
                 // BPF_JMP | BPF_JGT | BPF_X (jump if greater than)
-                if instruction.dst_reg < 11 && instruction.src_reg < 11
-                    && self.registers[instruction.dst_reg as usize] > self.registers[instruction.src_reg as usize] {
-                        // In single instruction execution, we update pc to simulate the jump
-                        self.pc = instruction.offset as usize;
-                    }
+                if instruction.dst_reg < 11
+                    && instruction.src_reg < 11
+                    && self.registers[instruction.dst_reg as usize]
+                        > self.registers[instruction.src_reg as usize]
+                {
+                    // In single instruction execution, we update pc to simulate the jump
+                    self.pc = instruction.offset as usize;
+                }
                 Ok(())
             }
             0xad => {
                 // BPF_JMP | BPF_JLT | BPF_X (jump if less than)
-                if instruction.dst_reg < 11 && instruction.src_reg < 11
-                    && self.registers[instruction.dst_reg as usize] < self.registers[instruction.src_reg as usize] {
-                        // In single instruction execution, we update pc to simulate the jump
-                        self.pc = instruction.offset as usize;
-                    }
+                if instruction.dst_reg < 11
+                    && instruction.src_reg < 11
+                    && self.registers[instruction.dst_reg as usize]
+                        < self.registers[instruction.src_reg as usize]
+                {
+                    // In single instruction execution, we update pc to simulate the jump
+                    self.pc = instruction.offset as usize;
+                }
                 Ok(())
             }
             0x15 => {
                 // BPF_JMP | BPF_JEQ | BPF_K (jump if equal to immediate)
                 if instruction.dst_reg < 11
-                    && self.registers[instruction.dst_reg as usize] == instruction.immediate as i64 {
-                        self.pc = instruction.offset as usize;
-                    }
+                    && self.registers[instruction.dst_reg as usize] == instruction.immediate as i64
+                {
+                    self.pc = instruction.offset as usize;
+                }
                 Ok(())
             }
             0x25 => {
                 // BPF_JMP | BPF_JGT | BPF_K (jump if greater than immediate)
                 if instruction.dst_reg < 11
-                    && self.registers[instruction.dst_reg as usize] > instruction.immediate as i64 {
-                        self.pc = instruction.offset as usize;
-                    }
+                    && self.registers[instruction.dst_reg as usize] > instruction.immediate as i64
+                {
+                    self.pc = instruction.offset as usize;
+                }
                 Ok(())
             }
             0xa5 => {
                 // BPF_JMP | BPF_JLT | BPF_K (jump if less than immediate)
                 if instruction.dst_reg < 11
-                    && self.registers[instruction.dst_reg as usize] < instruction.immediate as i64 {
-                        self.pc = instruction.offset as usize;
-                    }
+                    && self.registers[instruction.dst_reg as usize] < instruction.immediate as i64
+                {
+                    self.pc = instruction.offset as usize;
+                }
                 Ok(())
             }
             0x61 => {
                 // BPF_LDX | BPF_MEM | BPF_W (load word from memory)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    let addr = (self.registers[instruction.src_reg as usize] + instruction.offset as i64) as usize;
+                    let addr = (self.registers[instruction.src_reg as usize]
+                        + instruction.offset as i64) as usize;
                     if addr + 4 <= self.memory.len() {
                         // Load 32-bit little-endian word from memory
                         let value = u32::from_le_bytes([
@@ -268,13 +281,11 @@ impl BpfVm {
             0x69 => {
                 // BPF_LDX | BPF_MEM | BPF_H (load halfword from memory)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    let addr = (self.registers[instruction.src_reg as usize] + instruction.offset as i64) as usize;
+                    let addr = (self.registers[instruction.src_reg as usize]
+                        + instruction.offset as i64) as usize;
                     if addr + 2 <= self.memory.len() {
                         // Load 16-bit little-endian halfword from memory
-                        let value = u16::from_le_bytes([
-                            self.memory[addr],
-                            self.memory[addr + 1],
-                        ]);
+                        let value = u16::from_le_bytes([self.memory[addr], self.memory[addr + 1]]);
                         self.registers[instruction.dst_reg as usize] = value as i64;
                     } else {
                         self.registers[instruction.dst_reg as usize] = 0x1234; // Fallback for out of bounds
@@ -285,7 +296,8 @@ impl BpfVm {
             0x71 => {
                 // BPF_LDX | BPF_MEM | BPF_B (load byte from memory)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    let addr = (self.registers[instruction.src_reg as usize] + instruction.offset as i64) as usize;
+                    let addr = (self.registers[instruction.src_reg as usize]
+                        + instruction.offset as i64) as usize;
                     if addr < self.memory.len() {
                         self.registers[instruction.dst_reg as usize] = self.memory[addr] as i64;
                     } else {
@@ -297,7 +309,8 @@ impl BpfVm {
             0x63 => {
                 // BPF_STX | BPF_MEM | BPF_W (store word to memory)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    let addr = (self.registers[instruction.dst_reg as usize] + instruction.offset as i64) as usize;
+                    let addr = (self.registers[instruction.dst_reg as usize]
+                        + instruction.offset as i64) as usize;
                     if addr + 4 <= self.memory.len() {
                         let value = self.registers[instruction.src_reg as usize] as u32;
                         let bytes = value.to_le_bytes();
@@ -309,7 +322,8 @@ impl BpfVm {
             0x6b => {
                 // BPF_STX | BPF_MEM | BPF_H (store halfword to memory)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    let addr = (self.registers[instruction.dst_reg as usize] + instruction.offset as i64) as usize;
+                    let addr = (self.registers[instruction.dst_reg as usize]
+                        + instruction.offset as i64) as usize;
                     if addr + 2 <= self.memory.len() {
                         let value = self.registers[instruction.src_reg as usize] as u16;
                         let bytes = value.to_le_bytes();
@@ -321,7 +335,8 @@ impl BpfVm {
             0x62 => {
                 // BPF_ST | BPF_MEM | BPF_W (store immediate word to memory)
                 if instruction.dst_reg < 11 {
-                    let addr = (self.registers[instruction.dst_reg as usize] + instruction.offset as i64) as usize;
+                    let addr = (self.registers[instruction.dst_reg as usize]
+                        + instruction.offset as i64) as usize;
                     if addr + 4 <= self.memory.len() {
                         let value = instruction.immediate as u32;
                         let bytes = value.to_le_bytes();
@@ -333,7 +348,8 @@ impl BpfVm {
             0x73 => {
                 // BPF_STX | BPF_MEM | BPF_B (store byte to memory)
                 if instruction.dst_reg < 11 && instruction.src_reg < 11 {
-                    let addr = (self.registers[instruction.dst_reg as usize] + instruction.offset as i64) as usize;
+                    let addr = (self.registers[instruction.dst_reg as usize]
+                        + instruction.offset as i64) as usize;
                     if addr < self.memory.len() {
                         self.memory[addr] = self.registers[instruction.src_reg as usize] as u8;
                     }
@@ -342,7 +358,10 @@ impl BpfVm {
             }
             _ => {
                 // Unknown instruction
-                Err(VmError::InvalidInstruction(format!("Unknown opcode: 0x{:02x}", instruction.opcode)))
+                Err(VmError::InvalidInstruction(format!(
+                    "Unknown opcode: 0x{:02x}",
+                    instruction.opcode
+                )))
             }
         }
     }

@@ -302,12 +302,15 @@ impl CodeGen {
     }
 
     #[allow(dead_code)]
-    pub fn validate_bpf_program(&self, instructions: &[BpfInstruction]) -> Result<(), CodeGenError> {
+    pub fn validate_bpf_program(
+        &self,
+        instructions: &[BpfInstruction],
+    ) -> Result<(), CodeGenError> {
         // Validate register usage (R0-R10 are valid)
         for instr in instructions {
             if instr.dst_reg > 10 || instr.src_reg > 10 {
                 return Err(CodeGenError::InvalidInstruction(
-                    "Invalid register: registers must be R0-R10".to_string()
+                    "Invalid register: registers must be R0-R10".to_string(),
                 ));
             }
         }
@@ -318,12 +321,14 @@ impl CodeGen {
             // Validate jump targets
             for (i, instr) in instructions.iter().enumerate() {
                 // Check if it's a jump instruction (opcodes 0x05, 0x15, 0x1d, 0x25, 0x2d, etc.)
-                if (instr.opcode & 0x07) == 0x05 && instr.opcode != 0x95 { // Jump class, but not exit
+                if (instr.opcode & 0x07) == 0x05 && instr.opcode != 0x95 {
+                    // Jump class, but not exit
                     let target = i as i32 + 1 + instr.offset as i32;
                     if target < 0 || target >= instructions.len() as i32 {
-                        return Err(CodeGenError::InvalidInstruction(
-                            format!("Invalid jump target: {} out of bounds", target)
-                        ));
+                        return Err(CodeGenError::InvalidInstruction(format!(
+                            "Invalid jump target: {} out of bounds",
+                            target
+                        )));
                     }
                 }
             }
@@ -331,7 +336,7 @@ impl CodeGen {
             // Check for exit instruction only for multi-instruction programs
             if !instructions.iter().any(|instr| instr.opcode == 0x95) {
                 return Err(CodeGenError::InvalidInstruction(
-                    "Program must contain an exit instruction".to_string()
+                    "Program must contain an exit instruction".to_string(),
                 ));
             }
         }

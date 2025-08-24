@@ -1520,7 +1520,7 @@ mod solana_bpf_integration_tests {
     #[test]
     fn test_solana_bpf_arithmetic_instructions() {
         let mut vm = BpfVm::new(&[]);
-        
+
         // Test ADD64 instruction
         vm.set_register(1, 100);
         vm.set_register(2, 50);
@@ -1564,7 +1564,7 @@ mod solana_bpf_integration_tests {
     #[test]
     fn test_solana_bpf_bitwise_operations() {
         let mut vm = BpfVm::new(&[]);
-        
+
         // Test AND64 instruction
         vm.set_register(1, 0xFF00FF00);
         vm.set_register(2, 0x00FF00FF);
@@ -1608,7 +1608,7 @@ mod solana_bpf_integration_tests {
     #[test]
     fn test_solana_bpf_shift_operations() {
         let mut vm = BpfVm::new(&[]);
-        
+
         // Test left shift
         vm.set_register(1, 0x12345678);
         vm.set_register(0, 4); // Set shift amount in register 0
@@ -1651,13 +1651,13 @@ mod solana_bpf_integration_tests {
     fn test_solana_bpf_memory_load_operations() {
         let mut vm = BpfVm::new(&[]);
         vm.memory.resize(1024, 0);
-        
+
         // Setup test data in memory
         vm.memory[100] = 0x78;
         vm.memory[101] = 0x56;
         vm.memory[102] = 0x34;
         vm.memory[103] = 0x12;
-        
+
         // Test LDX word (32-bit) load
         vm.set_register(1, 100); // Base address
         let ldx_w_instr = BpfInstruction {
@@ -1697,7 +1697,7 @@ mod solana_bpf_integration_tests {
     fn test_solana_bpf_memory_store_operations() {
         let mut vm = BpfVm::new(&[]);
         vm.memory.resize(1024, 0);
-        
+
         // Test STX word (32-bit) store
         vm.set_register(1, 200); // Base address
         vm.set_register(2, 0x87654321);
@@ -1746,7 +1746,7 @@ mod solana_bpf_integration_tests {
     #[test]
     fn test_solana_bpf_conditional_jumps() {
         let mut vm = BpfVm::new(&[]);
-        
+
         // Test JEQ (jump if equal)
         vm.set_register(1, 42);
         vm.set_register(2, 42);
@@ -1792,7 +1792,7 @@ mod solana_bpf_integration_tests {
     #[test]
     fn test_solana_bpf_immediate_conditional_jumps() {
         let mut vm = BpfVm::new(&[]);
-        
+
         // Test JEQI (jump if equal to immediate)
         vm.set_register(1, 100);
         let jeqi_instr = BpfInstruction {
@@ -1853,7 +1853,10 @@ mod solana_bpf_integration_tests {
         };
 
         let result = compiler.compile(holyc_code, &options);
-        assert!(result.is_ok(), "Solana entrypoint compilation should succeed");
+        assert!(
+            result.is_ok(),
+            "Solana entrypoint compilation should succeed"
+        );
     }
 
     #[test]
@@ -2581,158 +2584,440 @@ mod solana_bpf_integration_tests {
 
     // Continue with more comprehensive test sections...
     // Adding 50+ more tests to reach the 10x target of 250+ total Solana BPF tests
-    
+
     // SECTION 11: Advanced BPF Instruction Validation
     #[test]
     fn test_solana_bpf_instruction_validation_comprehensive() {
         let codegen = CodeGen::new();
-        
+
         // Test various BPF instruction formats
         let instructions = vec![
             // ALU64 operations
-            BpfInstruction { opcode: 0x07, dst_reg: 1, src_reg: 0, offset: 0, immediate: 100 },  // ADD64 immediate
-            BpfInstruction { opcode: 0x0f, dst_reg: 1, src_reg: 2, offset: 0, immediate: 0 },    // ADD64 register
-            BpfInstruction { opcode: 0x17, dst_reg: 1, src_reg: 0, offset: 0, immediate: 50 },   // SUB64 immediate
-            BpfInstruction { opcode: 0x1f, dst_reg: 1, src_reg: 2, offset: 0, immediate: 0 },    // SUB64 register
-            BpfInstruction { opcode: 0x27, dst_reg: 1, src_reg: 0, offset: 0, immediate: 3 },    // MUL64 immediate
-            BpfInstruction { opcode: 0x2f, dst_reg: 1, src_reg: 2, offset: 0, immediate: 0 },    // MUL64 register
-            
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 100,
+            }, // ADD64 immediate
+            BpfInstruction {
+                opcode: 0x0f,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 0,
+                immediate: 0,
+            }, // ADD64 register
+            BpfInstruction {
+                opcode: 0x17,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 50,
+            }, // SUB64 immediate
+            BpfInstruction {
+                opcode: 0x1f,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 0,
+                immediate: 0,
+            }, // SUB64 register
+            BpfInstruction {
+                opcode: 0x27,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 3,
+            }, // MUL64 immediate
+            BpfInstruction {
+                opcode: 0x2f,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 0,
+                immediate: 0,
+            }, // MUL64 register
             // Memory operations
-            BpfInstruction { opcode: 0x18, dst_reg: 1, src_reg: 0, offset: 0, immediate: 0x12345678 }, // LD immediate
-            BpfInstruction { opcode: 0x61, dst_reg: 2, src_reg: 1, offset: 0, immediate: 0 },     // LDXW
-            BpfInstruction { opcode: 0x69, dst_reg: 3, src_reg: 1, offset: 2, immediate: 0 },     // LDXH
-            BpfInstruction { opcode: 0x71, dst_reg: 4, src_reg: 1, offset: 4, immediate: 0 },     // LDXB
-            
+            BpfInstruction {
+                opcode: 0x18,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 0x12345678,
+            }, // LD immediate
+            BpfInstruction {
+                opcode: 0x61,
+                dst_reg: 2,
+                src_reg: 1,
+                offset: 0,
+                immediate: 0,
+            }, // LDXW
+            BpfInstruction {
+                opcode: 0x69,
+                dst_reg: 3,
+                src_reg: 1,
+                offset: 2,
+                immediate: 0,
+            }, // LDXH
+            BpfInstruction {
+                opcode: 0x71,
+                dst_reg: 4,
+                src_reg: 1,
+                offset: 4,
+                immediate: 0,
+            }, // LDXB
             // Store operations
-            BpfInstruction { opcode: 0x62, dst_reg: 10, src_reg: 0, offset: 0, immediate: 0xABCD }, // ST immediate
-            BpfInstruction { opcode: 0x63, dst_reg: 10, src_reg: 1, offset: 4, immediate: 0 },     // STXW
-            BpfInstruction { opcode: 0x6b, dst_reg: 10, src_reg: 2, offset: 8, immediate: 0 },     // STXH
-            BpfInstruction { opcode: 0x73, dst_reg: 10, src_reg: 3, offset: 12, immediate: 0 },    // STXB
-            
+            BpfInstruction {
+                opcode: 0x62,
+                dst_reg: 10,
+                src_reg: 0,
+                offset: 0,
+                immediate: 0xABCD,
+            }, // ST immediate
+            BpfInstruction {
+                opcode: 0x63,
+                dst_reg: 10,
+                src_reg: 1,
+                offset: 4,
+                immediate: 0,
+            }, // STXW
+            BpfInstruction {
+                opcode: 0x6b,
+                dst_reg: 10,
+                src_reg: 2,
+                offset: 8,
+                immediate: 0,
+            }, // STXH
+            BpfInstruction {
+                opcode: 0x73,
+                dst_reg: 10,
+                src_reg: 3,
+                offset: 12,
+                immediate: 0,
+            }, // STXB
             // Conditional jumps
-            BpfInstruction { opcode: 0x15, dst_reg: 1, src_reg: 0, offset: 5, immediate: 42 },     // JEQ immediate
-            BpfInstruction { opcode: 0x1d, dst_reg: 1, src_reg: 2, offset: 3, immediate: 0 },      // JEQ register
-            BpfInstruction { opcode: 0x25, dst_reg: 1, src_reg: 0, offset: 2, immediate: 100 },    // JGT immediate
-            BpfInstruction { opcode: 0x2d, dst_reg: 1, src_reg: 2, offset: 1, immediate: 0 },      // JGT register
-            
+            BpfInstruction {
+                opcode: 0x15,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 5,
+                immediate: 42,
+            }, // JEQ immediate
+            BpfInstruction {
+                opcode: 0x1d,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 3,
+                immediate: 0,
+            }, // JEQ register
+            BpfInstruction {
+                opcode: 0x25,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 2,
+                immediate: 100,
+            }, // JGT immediate
+            BpfInstruction {
+                opcode: 0x2d,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 1,
+                immediate: 0,
+            }, // JGT register
             // Bitwise operations
-            BpfInstruction { opcode: 0x47, dst_reg: 1, src_reg: 0, offset: 0, immediate: 0xFF },   // OR immediate
-            BpfInstruction { opcode: 0x4f, dst_reg: 1, src_reg: 2, offset: 0, immediate: 0 },      // OR register
-            BpfInstruction { opcode: 0x57, dst_reg: 1, src_reg: 0, offset: 0, immediate: 0xF0 },   // AND immediate
-            BpfInstruction { opcode: 0x5f, dst_reg: 1, src_reg: 2, offset: 0, immediate: 0 },      // AND register
-            
+            BpfInstruction {
+                opcode: 0x47,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 0xFF,
+            }, // OR immediate
+            BpfInstruction {
+                opcode: 0x4f,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 0,
+                immediate: 0,
+            }, // OR register
+            BpfInstruction {
+                opcode: 0x57,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 0xF0,
+            }, // AND immediate
+            BpfInstruction {
+                opcode: 0x5f,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 0,
+                immediate: 0,
+            }, // AND register
             // Shift operations
-            BpfInstruction { opcode: 0x67, dst_reg: 1, src_reg: 0, offset: 0, immediate: 4 },      // LSH immediate
-            BpfInstruction { opcode: 0x6f, dst_reg: 1, src_reg: 2, offset: 0, immediate: 0 },      // LSH register
-            BpfInstruction { opcode: 0x77, dst_reg: 1, src_reg: 0, offset: 0, immediate: 8 },      // RSH immediate
-            BpfInstruction { opcode: 0x7f, dst_reg: 1, src_reg: 2, offset: 0, immediate: 0 },      // RSH register
-            
+            BpfInstruction {
+                opcode: 0x67,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 4,
+            }, // LSH immediate
+            BpfInstruction {
+                opcode: 0x6f,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 0,
+                immediate: 0,
+            }, // LSH register
+            BpfInstruction {
+                opcode: 0x77,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 8,
+            }, // RSH immediate
+            BpfInstruction {
+                opcode: 0x7f,
+                dst_reg: 1,
+                src_reg: 2,
+                offset: 0,
+                immediate: 0,
+            }, // RSH register
             // Exit
-            BpfInstruction { opcode: 0x95, dst_reg: 0, src_reg: 0, offset: 0, immediate: 0 },      // EXIT
+            BpfInstruction {
+                opcode: 0x95,
+                dst_reg: 0,
+                src_reg: 0,
+                offset: 0,
+                immediate: 0,
+            }, // EXIT
         ];
-        
+
         // Validate each instruction
         for (i, instr) in instructions.iter().enumerate() {
             let validation_result = codegen.validate_bpf_program(&[*instr]);
-            assert!(validation_result.is_ok(), "Instruction {} should be valid: {:?}", i, instr);
+            assert!(
+                validation_result.is_ok(),
+                "Instruction {} should be valid: {:?}",
+                i,
+                instr
+            );
         }
     }
 
     #[test]
     fn test_solana_bpf_register_bounds_checking() {
         let codegen = CodeGen::new();
-        
+
         // Test valid register usage (R0-R10)
         let valid_instructions = vec![
-            BpfInstruction { opcode: 0x07, dst_reg: 0, src_reg: 0, offset: 0, immediate: 1 },
-            BpfInstruction { opcode: 0x07, dst_reg: 5, src_reg: 0, offset: 0, immediate: 1 },
-            BpfInstruction { opcode: 0x07, dst_reg: 10, src_reg: 0, offset: 0, immediate: 1 },
-            BpfInstruction { opcode: 0x0f, dst_reg: 1, src_reg: 9, offset: 0, immediate: 0 },
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 0,
+                src_reg: 0,
+                offset: 0,
+                immediate: 1,
+            },
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 5,
+                src_reg: 0,
+                offset: 0,
+                immediate: 1,
+            },
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 10,
+                src_reg: 0,
+                offset: 0,
+                immediate: 1,
+            },
+            BpfInstruction {
+                opcode: 0x0f,
+                dst_reg: 1,
+                src_reg: 9,
+                offset: 0,
+                immediate: 0,
+            },
         ];
-        
+
         for instr in valid_instructions {
             let result = codegen.validate_bpf_program(&[instr]);
-            assert!(result.is_ok(), "Valid register instruction should pass: {:?}", instr);
+            assert!(
+                result.is_ok(),
+                "Valid register instruction should pass: {:?}",
+                instr
+            );
         }
-        
+
         // Test invalid register usage (> R10)
         let invalid_instructions = vec![
-            BpfInstruction { opcode: 0x07, dst_reg: 11, src_reg: 0, offset: 0, immediate: 1 },
-            BpfInstruction { opcode: 0x07, dst_reg: 15, src_reg: 0, offset: 0, immediate: 1 },
-            BpfInstruction { opcode: 0x0f, dst_reg: 1, src_reg: 12, offset: 0, immediate: 0 },
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 11,
+                src_reg: 0,
+                offset: 0,
+                immediate: 1,
+            },
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 15,
+                src_reg: 0,
+                offset: 0,
+                immediate: 1,
+            },
+            BpfInstruction {
+                opcode: 0x0f,
+                dst_reg: 1,
+                src_reg: 12,
+                offset: 0,
+                immediate: 0,
+            },
         ];
-        
+
         for instr in invalid_instructions {
             let result = codegen.validate_bpf_program(&[instr]);
-            assert!(result.is_err(), "Invalid register instruction should fail: {:?}", instr);
+            assert!(
+                result.is_err(),
+                "Invalid register instruction should fail: {:?}",
+                instr
+            );
         }
     }
 
     #[test]
     fn test_solana_bpf_jump_target_validation() {
         let codegen = CodeGen::new();
-        
+
         // Create a program with valid jump targets
         let valid_program = vec![
-            BpfInstruction { opcode: 0x18, dst_reg: 1, src_reg: 0, offset: 0, immediate: 42 },     // instruction 0
-            BpfInstruction { opcode: 0x15, dst_reg: 1, src_reg: 0, offset: 2, immediate: 42 },     // instruction 1, jump +2 (to instruction 4)
-            BpfInstruction { opcode: 0x07, dst_reg: 1, src_reg: 0, offset: 0, immediate: 10 },     // instruction 2
-            BpfInstruction { opcode: 0x05, dst_reg: 0, src_reg: 0, offset: 1, immediate: 0 },      // instruction 3, jump +1 (to instruction 5)
-            BpfInstruction { opcode: 0x07, dst_reg: 1, src_reg: 0, offset: 0, immediate: 20 },     // instruction 4
-            BpfInstruction { opcode: 0x95, dst_reg: 0, src_reg: 0, offset: 0, immediate: 0 },      // instruction 5, exit
+            BpfInstruction {
+                opcode: 0x18,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 42,
+            }, // instruction 0
+            BpfInstruction {
+                opcode: 0x15,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 2,
+                immediate: 42,
+            }, // instruction 1, jump +2 (to instruction 4)
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 10,
+            }, // instruction 2
+            BpfInstruction {
+                opcode: 0x05,
+                dst_reg: 0,
+                src_reg: 0,
+                offset: 1,
+                immediate: 0,
+            }, // instruction 3, jump +1 (to instruction 5)
+            BpfInstruction {
+                opcode: 0x07,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 20,
+            }, // instruction 4
+            BpfInstruction {
+                opcode: 0x95,
+                dst_reg: 0,
+                src_reg: 0,
+                offset: 0,
+                immediate: 0,
+            }, // instruction 5, exit
         ];
-        
+
         let result = codegen.validate_bpf_program(&valid_program);
-        assert!(result.is_ok(), "Program with valid jump targets should pass");
-        
+        assert!(
+            result.is_ok(),
+            "Program with valid jump targets should pass"
+        );
+
         // Create a program with invalid jump targets
         let invalid_program = vec![
-            BpfInstruction { opcode: 0x18, dst_reg: 1, src_reg: 0, offset: 0, immediate: 42 },     // instruction 0
-            BpfInstruction { opcode: 0x15, dst_reg: 1, src_reg: 0, offset: 10, immediate: 42 },    // instruction 1, jump +10 (out of bounds)
-            BpfInstruction { opcode: 0x95, dst_reg: 0, src_reg: 0, offset: 0, immediate: 0 },      // instruction 2, exit
+            BpfInstruction {
+                opcode: 0x18,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 0,
+                immediate: 42,
+            }, // instruction 0
+            BpfInstruction {
+                opcode: 0x15,
+                dst_reg: 1,
+                src_reg: 0,
+                offset: 10,
+                immediate: 42,
+            }, // instruction 1, jump +10 (out of bounds)
+            BpfInstruction {
+                opcode: 0x95,
+                dst_reg: 0,
+                src_reg: 0,
+                offset: 0,
+                immediate: 0,
+            }, // instruction 2, exit
         ];
-        
+
         let result = codegen.validate_bpf_program(&invalid_program);
-        assert!(result.is_err(), "Program with invalid jump targets should fail");
+        assert!(
+            result.is_err(),
+            "Program with invalid jump targets should fail"
+        );
     }
 
     #[test]
     fn test_solana_bpf_program_size_limits() {
         let codegen = CodeGen::new();
-        
+
         // Test program within size limits (typical BPF programs should be under 64KB)
-        let mut normal_program: Vec<BpfInstruction> = (0..1000).map(|i| {
-            BpfInstruction { 
-                opcode: 0x07, 
-                dst_reg: (i % 10) as u8, 
-                src_reg: 0, 
-                offset: 0, 
-                immediate: i 
-            }
-        }).collect();
+        let mut normal_program: Vec<BpfInstruction> = (0..1000)
+            .map(|i| BpfInstruction {
+                opcode: 0x07,
+                dst_reg: (i % 10) as u8,
+                src_reg: 0,
+                offset: 0,
+                immediate: i,
+            })
+            .collect();
         // Add exit instruction
-        normal_program.push(BpfInstruction { 
-            opcode: 0x95, dst_reg: 0, src_reg: 0, offset: 0, immediate: 0 
+        normal_program.push(BpfInstruction {
+            opcode: 0x95,
+            dst_reg: 0,
+            src_reg: 0,
+            offset: 0,
+            immediate: 0,
         });
-        
+
         let result = codegen.validate_bpf_program(&normal_program);
-        assert!(result.is_ok(), "Normal sized program should pass validation");
-        
+        assert!(
+            result.is_ok(),
+            "Normal sized program should pass validation"
+        );
+
         // Test extremely large program (should still work but validate size limits exist)
-        let mut large_program: Vec<BpfInstruction> = (0..10000).map(|i| {
-            BpfInstruction { 
-                opcode: 0x07, 
-                dst_reg: (i % 10) as u8, 
-                src_reg: 0, 
-                offset: 0, 
-                immediate: i 
-            }
-        }).collect();
+        let mut large_program: Vec<BpfInstruction> = (0..10000)
+            .map(|i| BpfInstruction {
+                opcode: 0x07,
+                dst_reg: (i % 10) as u8,
+                src_reg: 0,
+                offset: 0,
+                immediate: i,
+            })
+            .collect();
         // Add exit instruction
-        large_program.push(BpfInstruction { 
-            opcode: 0x95, dst_reg: 0, src_reg: 0, offset: 0, immediate: 0 
+        large_program.push(BpfInstruction {
+            opcode: 0x95,
+            dst_reg: 0,
+            src_reg: 0,
+            offset: 0,
+            immediate: 0,
         });
-        
+
         // For now, large programs should still validate (size limits not yet implemented)
         let result = codegen.validate_bpf_program(&large_program);
         assert!(result.is_ok(), "Large program validation should complete");
