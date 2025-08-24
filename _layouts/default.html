@@ -122,6 +122,85 @@
     <!-- JavaScript -->
     <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
     
+    <!-- Mermaid.js for diagram rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <script>
+        // Initialize Mermaid with custom theme
+        function initializeMermaid() {
+            if (typeof mermaid !== 'undefined') {
+                mermaid.initialize({
+                    startOnLoad: true,
+                    theme: 'base',
+                    themeVariables: {
+                        primaryColor: '#2563eb',
+                        primaryTextColor: '#1f2937',
+                        primaryBorderColor: '#e5e7eb',
+                        lineColor: '#6b7280',
+                        secondaryColor: '#f3f4f6',
+                        tertiaryColor: '#f9fafb',
+                        background: '#ffffff',
+                        fontFamily: 'Inter, system-ui, sans-serif'
+                    },
+                    gitgraph: {
+                        theme: 'base'
+                    },
+                    flowchart: {
+                        htmlLabels: true,
+                        curve: 'basis'
+                    },
+                    sequence: {
+                        diagramMarginX: 50,
+                        diagramMarginY: 10,
+                        actorMargin: 50,
+                        width: 150,
+                        height: 65,
+                        boxMargin: 10,
+                        boxTextMargin: 5,
+                        noteMargin: 10,
+                        messageMargin: 35
+                    }
+                });
+                
+                // Process mermaid code blocks
+                processMermaidCodeBlocks();
+            }
+        }
+        
+        // Convert mermaid code blocks to diagrams
+        function processMermaidCodeBlocks() {
+            const mermaidBlocks = document.querySelectorAll('pre code.language-mermaid, code.language-mermaid');
+            mermaidBlocks.forEach((block, index) => {
+                const mermaidCode = block.textContent;
+                const mermaidDiv = document.createElement('div');
+                mermaidDiv.className = 'mermaid-diagram';
+                mermaidDiv.setAttribute('data-processed', 'true');
+                mermaidDiv.textContent = mermaidCode;
+                
+                // Replace the code block with the mermaid div
+                if (block.parentElement.tagName === 'PRE') {
+                    block.parentElement.parentNode.replaceChild(mermaidDiv, block.parentElement);
+                } else {
+                    block.parentNode.replaceChild(mermaidDiv, block);
+                }
+            });
+            
+            // Re-initialize mermaid for new diagrams
+            if (typeof mermaid !== 'undefined') {
+                mermaid.init();
+            }
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if mermaid is loaded, if not try again after a delay
+            if (typeof mermaid !== 'undefined') {
+                initializeMermaid();
+            } else {
+                setTimeout(initializeMermaid, 1000);
+            }
+        });
+    </script>
+    
     <!-- PWA Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {

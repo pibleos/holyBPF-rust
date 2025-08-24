@@ -2,24 +2,19 @@
 layout: doc
 title: Hello World Tutorial
 description: Complete tutorial for building your first HolyC BPF program
+difficulty: beginner
+time_estimate: 15 minutes
+tutorial_number: Tutorial 1 of 6
+breadcrumb:
+  - title: Home
+    url: /
+  - title: Examples
+    url: /examples/
+  - title: Tutorials
+    url: /docs/examples/tutorials/
+  - title: Hello World
+    url: /docs/examples/tutorials/hello-world
 ---
-
-<!-- Breadcrumb Navigation -->
-<nav class="breadcrumb">
-  <a href="{{ '/' | relative_url }}">Home</a> → 
-  <a href="{{ '/examples/' | relative_url }}">Examples</a> → 
-  <a href="{{ '/docs/examples/tutorials/' | relative_url }}">Tutorials</a> → 
-  <span>Hello World</span>
-</nav>
-
-<!-- Tutorial Progress -->
-<div class="tutorial-progress">
-  <div class="progress-info">
-    <span class="difficulty-badge beginner">Beginner</span>
-    <span class="time-estimate">⏱️ 15 minutes</span>
-    <span class="tutorial-number">Tutorial 1 of 6</span>
-  </div>
-</div>
 
 # Hello World Tutorial
 

@@ -26,6 +26,13 @@ kramdown:
     css_class: 'highlight'
     span:
       line_numbers: false
+  auto_ids: true
+  toc_levels: "1..6"
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  hard_wrap: false
+  entity_output: as_char
+  parse_block_html: true
+  parse_span_html: true
 
 # Collections
 collections:

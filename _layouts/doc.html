@@ -2,22 +2,238 @@
 layout: default
 ---
 
+<div class="blueprint-grid"></div>
+
 <article class="doc-content">
-    {{ content }}
+    <div class="doc-header">
+        {% if page.breadcrumb %}
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            {% for crumb in page.breadcrumb %}
+                {% if forloop.last %}
+                    <span class="breadcrumb-current">{{ crumb.title }}</span>
+                {% else %}
+                    <a href="{{ crumb.url | relative_url }}" class="breadcrumb-link">{{ crumb.title }}</a>
+                    <span class="breadcrumb-separator">→</span>
+                {% endif %}
+            {% endfor %}
+        </nav>
+        {% endif %}
+        
+        {% if page.difficulty or page.time_estimate or page.tutorial_number %}
+        <div class="tutorial-meta">
+            {% if page.difficulty %}
+            <span class="difficulty-badge difficulty-{{ page.difficulty }}">{{ page.difficulty | capitalize }}</span>
+            {% endif %}
+            {% if page.time_estimate %}
+            <span class="time-estimate">⏱️ {{ page.time_estimate }}</span>
+            {% endif %}
+            {% if page.tutorial_number %}
+            <span class="tutorial-number">{{ page.tutorial_number }}</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="doc-content-wrapper">
+        {{ content }}
+    </div>
 </article>
 
 {% if page.prev_page or page.next_page %}
-<nav class="doc-navigation">
-    {% if page.prev_page %}
-    <a href="{{ page.prev_page.url | relative_url }}" class="nav-prev">
-        ← {{ page.prev_page.title }}
-    </a>
-    {% endif %}
-    
-    {% if page.next_page %}
-    <a href="{{ page.next_page.url | relative_url }}" class="nav-next">
-        {{ page.next_page.title }} →
-    </a>
-    {% endif %}
+<nav class="doc-navigation" aria-label="Document navigation">
+    <div class="nav-container">
+        {% if page.prev_page %}
+        <a href="{{ page.prev_page.url | relative_url }}" class="nav-prev">
+            <span class="nav-direction">← Previous</span>
+            <span class="nav-title">{{ page.prev_page.title }}</span>
+        </a>
+        {% else %}
+        <div></div>
+        {% endif %}
+        
+        {% if page.next_page %}
+        <a href="{{ page.next_page.url | relative_url }}" class="nav-next">
+            <span class="nav-direction">Next →</span>
+            <span class="nav-title">{{ page.next_page.title }}</span>
+        </a>
+        {% endif %}
+    </div>
 </nav>
 {% endif %}
+
+<style>
+/* Enhanced document layout styles */
+.doc-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    background: var(--color-white);
+    box-shadow: var(--shadow-medium);
+    border-radius: 8px;
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.doc-header {
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--color-lighter);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.875rem;
+    color: var(--color-tertiary);
+}
+
+.breadcrumb-link {
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+.breadcrumb-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    margin: 0 var(--spacing-sm);
+    color: var(--color-quaternary);
+}
+
+.breadcrumb-current {
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.tutorial-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+}
+
+.difficulty-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.difficulty-badge.difficulty-beginner {
+    background: #28a745;
+}
+
+.difficulty-badge.difficulty-intermediate {
+    background: #ffc107;
+    color: #212529;
+}
+
+.difficulty-badge.difficulty-advanced {
+    background: #fd7e14;
+}
+
+.difficulty-badge.difficulty-expert {
+    background: #dc3545;
+}
+
+.time-estimate {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.tutorial-number {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.doc-content-wrapper {
+    line-height: 1.7;
+}
+
+.doc-navigation {
+    max-width: 900px;
+    margin: var(--spacing-xl) auto;
+    padding: 0 var(--spacing-lg);
+}
+
+.nav-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+    background: var(--color-white);
+    border-radius: 8px;
+    box-shadow: var(--shadow-medium);
+}
+
+.nav-prev,
+.nav-next {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: var(--border-width) solid var(--color-light);
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.nav-next {
+    text-align: right;
+}
+
+.nav-prev:hover,
+.nav-next:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--color-secondary);
+}
+
+.nav-direction {
+    font-size: 0.875rem;
+    color: var(--color-tertiary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.nav-title {
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+    .doc-content {
+        margin: var(--spacing-md);
+        padding: var(--spacing-lg) var(--spacing-md);
+        border-radius: 0;
+    }
+    
+    .tutorial-meta {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .breadcrumb {
+        font-size: 0.8rem;
+    }
+    
+    .nav-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .nav-next {
+        text-align: left;
+    }
+}
+</style>

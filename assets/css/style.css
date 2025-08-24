@@ -725,4 +725,371 @@ blockquote {
     content: " 🚧";
     margin-left: 0.5rem;
   }
+
+/* ============================================================================
+   Enhanced Markdown Rendering Styles
+   ============================================================================ */
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-lg) 0;
+  background-color: var(--color-white);
+  border: var(--border-width) solid var(--color-light);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-subtle);
+}
+
+thead {
+  background-color: var(--color-lightest);
+}
+
+th, td {
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: var(--border-width) solid var(--color-lighter);
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+  color: var(--color-primary);
+  background-color: var(--color-lightest);
+}
+
+tbody tr:hover {
+  background-color: var(--color-lightest);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Lists */
+ul, ol {
+  margin: var(--spacing-md) 0;
+  padding-left: var(--spacing-xl);
+}
+
+li {
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.6;
+}
+
+/* Nested lists */
+ul ul, ol ol, ul ol, ol ul {
+  margin: var(--spacing-sm) 0;
+}
+
+/* Task lists (checkboxes) */
+.task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.task-list-item {
+  position: relative;
+  padding-left: var(--spacing-xl);
+}
+
+.task-list-item input[type="checkbox"] {
+  position: absolute;
+  left: 0;
+  top: 0.2rem;
+  margin: 0;
+}
+
+/* Enhanced Code Blocks */
+pre {
+  position: relative;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+  border: var(--border-width) solid var(--color-light);
+  border-radius: 8px;
+  margin: var(--spacing-lg) 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-subtle);
+}
+
+pre code {
+  display: block;
+  padding: var(--spacing-lg);
+  overflow-x: auto;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+}
+
+/* Basic syntax highlighting */
+.highlight .c,
+.highlight .cm,
+.highlight .c1 { color: #6a737d; font-style: italic; } /* Comments */
+
+.highlight .k,
+.highlight .kd,
+.highlight .kn,
+.highlight .kp,
+.highlight .kr,
+.highlight .kt { color: #d73a49; font-weight: 600; } /* Keywords */
+
+.highlight .s,
+.highlight .s1,
+.highlight .s2,
+.highlight .sb,
+.highlight .sc,
+.highlight .sd,
+.highlight .se,
+.highlight .sh,
+.highlight .si,
+.highlight .sx { color: #032f62; } /* Strings */
+
+.highlight .n,
+.highlight .na,
+.highlight .nb,
+.highlight .nc,
+.highlight .nd,
+.highlight .ne,
+.highlight .nf,
+.highlight .nl,
+.highlight .nn,
+.highlight .no,
+.highlight .nt,
+.highlight .nv,
+.highlight .nx,
+.highlight .py { color: #24292e; } /* Names */
+
+.highlight .m,
+.highlight .mb,
+.highlight .mf,
+.highlight .mh,
+.highlight .mi,
+.highlight .mo { color: #005cc5; } /* Numbers */
+
+.highlight .o,
+.highlight .ow { color: #d73a49; } /* Operators */
+
+.highlight .p { color: #24292e; } /* Punctuation */
+
+/* Code block language labels */
+pre[class*="language-"]::before {
+  content: attr(class);
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--color-secondary);
+  color: var(--color-white);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-bottom-left-radius: var(--border-radius);
+}
+
+/* Specific language labels */
+pre.language-rust::before { content: "Rust"; background: #ce422b; }
+pre.language-holyc::before { content: "HolyC"; background: #2563eb; }
+pre.language-bash::before { content: "Bash"; background: #4a5568; }
+pre.language-javascript::before { content: "JavaScript"; background: #f7df1e; color: #000; }
+pre.language-json::before { content: "JSON"; background: #000; }
+pre.language-yaml::before { content: "YAML"; background: #cb171e; }
+
+/* Inline code */
+p code, li code, td code {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: var(--color-secondary);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid var(--color-lighter);
+}
+
+/* Enhanced Blockquotes */
+blockquote {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  padding: var(--spacing-lg);
+  margin: var(--spacing-xl) 0;
+  position: relative;
+  font-style: normal;
+  color: var(--color-secondary);
+  box-shadow: var(--shadow-subtle);
+}
+
+blockquote::before {
+  content: '"';
+  position: absolute;
+  top: 0;
+  left: var(--spacing-lg);
+  font-size: 4rem;
+  color: var(--color-light);
+  line-height: 1;
+}
+
+blockquote p {
+  margin-bottom: var(--spacing-md);
+  position: relative;
+  z-index: 1;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* Horizontal Rules */
+hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-light), transparent);
+  margin: var(--spacing-2xl) 0;
+}
+
+/* ============================================================================
+   Mermaid Diagram Styles
+   ============================================================================ */
+.mermaid-diagram {
+  margin: var(--spacing-xl) 0;
+  padding: var(--spacing-lg);
+  background: var(--color-white);
+  border: var(--border-width) solid var(--color-light);
+  border-radius: 8px;
+  text-align: center;
+  overflow-x: auto;
+  box-shadow: var(--shadow-subtle);
+}
+
+.mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Mermaid diagram containers */
+.mermaid {
+  margin: var(--spacing-xl) 0;
+  padding: var(--spacing-lg);
+  background: var(--color-white);
+  border: var(--border-width) solid var(--color-light);
+  border-radius: 8px;
+  text-align: center;
+  overflow-x: auto;
+  box-shadow: var(--shadow-subtle);
+}
+
+/* ============================================================================
+   Document Content Enhancements
+   ============================================================================ */
+
+/* Content wrapper for better typography */
+.page-content,
+.doc-content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+/* Image enhancements */
+.page-content img,
+.doc-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  margin: var(--spacing-lg) 0;
+}
+
+/* Caption styling */
+.page-content figure,
+.doc-content figure {
+  margin: var(--spacing-xl) 0;
+  text-align: center;
+}
+
+.page-content figcaption,
+.doc-content figcaption {
+  margin-top: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+  font-style: italic;
+}
+
+/* Alert/Callout boxes */
+.alert {
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+  border-radius: var(--border-radius);
+  border-left: 4px solid;
+}
+
+.alert-info {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  color: #0d47a1;
+}
+
+.alert-warning {
+  background-color: #fff3e0;
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.alert-success {
+  background-color: #e8f5e8;
+  border-color: #4caf50;
+  color: #1b5e20;
+}
+
+.alert-danger {
+  background-color: #ffebee;
+  border-color: #f44336;
+  color: #b71c1c;
+}
+
+/* Badge/Tag styling */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.badge-secondary {
+  background-color: var(--color-light);
+  color: var(--color-secondary);
+}
+
+/* Responsive typography adjustments */
+@media (max-width: 768px) {
+  .page-content,
+  .doc-content {
+    padding: 0 var(--spacing-md);
+  }
+  
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.375rem; }
+  
+  pre {
+    padding: var(--spacing-md);
+    font-size: 0.8rem;
+  }
+  
+  table {
+    font-size: 0.875rem;
+  }
+  
+  th, td {
+    padding: var(--spacing-sm);
+  }
+}
 }
