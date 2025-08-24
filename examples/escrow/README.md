@@ -19,7 +19,11 @@ This is a divine escrow smart contract implementation in HolyC that compiles to 
 To compile the escrow program to BPF bytecode:
 
 ```bash
-zig build escrow
+# Build the compiler
+cargo build --release
+
+# Compile the escrow program
+./target/release/pible src/main.hc
 ```
 
 ## Usage
