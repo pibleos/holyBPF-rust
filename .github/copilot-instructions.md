@@ -56,7 +56,7 @@ Pible transforms HolyC programs into BPF (Berkeley Packet Filter) bytecode that 
 
 **Bootstrap and build the repository:**
 ```bash
-cd /path/to/holyBPF-zig
+cd /path/to/holyBPF-rust
 zig build                    # Typically completes in ~6 seconds. No dependency fetching required.
 ```
 

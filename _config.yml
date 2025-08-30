@@ -2,7 +2,7 @@
 title: "HolyBPF Documentation"
 description: "Comprehensive guide for developing Solana programs using HolyC"
 url: "https://pibleos.github.io"
-baseurl: "/holyBPF-zig"
+baseurl: "/holyBPF-rust"
 
 # GitHub Pages settings
 source: .

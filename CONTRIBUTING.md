@@ -29,18 +29,18 @@ This project honors Terry A. Davis's memory and follows these principles:
 
 1. **Fork the repository**
    ```bash
-   # Visit https://github.com/pibleos/holyBPF-zig and click "Fork"
+   # Visit https://github.com/pibleos/holyBPF-rust and click "Fork"
    ```
 
 2. **Clone your fork**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/holyBPF-zig.git
-   cd holyBPF-zig
+   git clone https://github.com/YOUR_USERNAME/holyBPF-rust.git
+   cd holyBPF-rust
    ```
 
 3. **Set up upstream remote**
    ```bash
-   git remote add upstream https://github.com/pibleos/holyBPF-zig.git
+   git remote add upstream https://github.com/pibleos/holyBPF-rust.git
    ```
 
 4. **Build and test**
@@ -86,7 +86,7 @@ This project honors Terry A. Davis's memory and follows these principles:
 ## 🔧 Development Workflow
 
 ### 1. Choose an Issue
-- Browse [GitHub Issues](https://github.com/pibleos/holyBPF-zig/issues)
+- Browse [GitHub Issues](https://github.com/pibleos/holyBPF-rust/issues)
 - Look for `good-first-issue`, `help-wanted`, or `documentation` labels
 - Comment on the issue to let others know you're working on it
 
@@ -224,7 +224,7 @@ cargo build --release test --verbose
 Understanding the codebase layout:
 
 ```
-holyBPF-zig/
+holyBPF-rust/
 ├── src/Pible/           # Core compiler implementation
 │   ├── Main.zig         # CLI entry point
 │   ├── Compiler.zig     # Main compilation orchestrator
